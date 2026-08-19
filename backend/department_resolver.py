@@ -10,10 +10,16 @@ class SmartDepartmentResolver:
     def _get_client(self):
         return classifier.client
 
-    def _search_web_context(self, query: str) -> str:
-        """Pulls lightweight web context using Wikipedia API to avoid Vercel binary crashes."""
+    def _search_web_context(self, query: str, is_tender: bool = False) -> str:
+        """Pulls lightweight web context. Enhanced for tenders and central records."""
         try:
-            search_url = f"https://en.wikipedia.org/w/api.php?action=opensearch&search={query}&limit=3&format=json"
+            # Inject strong keywords for tenders or central records
+            if is_tender:
+                query = f"{query} active tender portal eprocurement"
+            else:
+                query = f"{query} central public information officer CIC"
+                
+            search_url = f"https://en.wikipedia.org/w/api.php?action=opensearch&search={query}&limit=4&format=json"
             with httpx.Client(timeout=5.0) as client:
                 response = client.get(search_url)
                 data = response.json()
@@ -22,7 +28,7 @@ class SmartDepartmentResolver:
         except Exception as e:
             print(f"Context search failed: {e}")
         return "No live context available. Proceed using internal legal and civic knowledge."
-
+        
     def resolve(self, route: str, user_problem: str, location: str, extracted_facts: Dict[str, Any]) -> Dict[str, Any]:
         client = self._get_client()
         if not client:
