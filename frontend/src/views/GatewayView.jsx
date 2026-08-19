@@ -89,6 +89,7 @@ export default function GatewayView() {
             <Globe size={14} />
             <select value={language} onChange={(e) => setLanguage(e.target.value)} className="bg-transparent border-none outline-none cursor-pointer">
               <option value="English">English</option>
+              <option value="Hinglish">Hinglish (Hindi in English Script)</option>
               <option value="Hindi">हिंदी (Hindi)</option>
               <option value="Marathi">मराठी (Marathi)</option>
               <option value="Tamil">தமிழ் (Tamil)</option>
@@ -124,7 +125,10 @@ export default function GatewayView() {
                       className="input-field resize-none text-sm leading-relaxed flex-1"
                     />
                     <div className="flex flex-col gap-2">
-                      <AudioRecorder onTranscription={(t) => setText(prev => prev + " " + t)} />
+                      <AudioRecorder 
+                        language={language} 
+                        onTranscription={(t) => setText(prev => prev + (prev ? " " : "") + t)} 
+                      />
                     </div>
                   </div>
                   {localErr && (
