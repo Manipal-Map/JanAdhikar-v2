@@ -5,3 +5,4 @@ anthropic
 python-dotenv
 scikit-learn
 tabulate
+reportlab
