@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { Mic, Square, Loader2 } from 'lucide-react'
 import { transcribeAudio } from '../api'
 
-export default function AudioRecorder({ onTranscription }) {
+export default function AudioRecorder({ onTranscription, language = "English" }) {
   const [isRecording, setIsRecording] = useState(false)
   const [isTranscribing, setIsTranscribing] = useState(false)
   const mediaRecorderRef = useRef(null)
@@ -22,7 +22,8 @@ export default function AudioRecorder({ onTranscription }) {
         chunksRef.current = []
         setIsTranscribing(true)
         try {
-          const res = await transcribeAudio(audioBlob)
+          // Pass the language to API to enable auto-Hinglish translation
+          const res = await transcribeAudio(audioBlob, language)
           if (res.text) onTranscription(res.text)
         } catch (error) {
           console.error("Transcription failed", error)
