@@ -22,6 +22,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+class GeneratePDFRequest(BaseModel):
+    title: str
+    content: str
 
 class CaseInitResponse(BaseModel):
     case_id: str
@@ -254,6 +257,18 @@ async def generate_grievance(
     })
 
     return {"case_id": case_id, **pack}
+
+@app.post("/api/generate-pdf")
+def generate_generic_pdf_endpoint(payload: GeneratePDFRequest):
+    # Import the new generic pdf generator
+    from rti_pdf_generator import generate_generic_pdf
+    
+    pdf_bytes = generate_generic_pdf(payload.title, payload.content)
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=Document.pdf"}
+    )
 
 @app.get("/api/case/{case_id}")
 def get_case_state(case_id: str):
