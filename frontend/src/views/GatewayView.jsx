@@ -6,6 +6,30 @@ import { initCase, classifyCase, getCase } from '../api'
 import CaseIdBadge from '../components/CaseIdBadge'
 import AudioRecorder from '../components/AudioRecorder'
 
+const ROUTE_DESCRIPTIONS = {
+  RTI: {
+    title: 'Right to Information (RTI) Application',
+    badge: 'Statutory RTI Filing',
+    icon: FileSearch,
+    description: 'You are requesting official government records, tender documents, inspection reports, or file movements under the RTI Act, 2005.',
+    actionText: 'Confirm & Proceed to RTI',
+  },
+  'Rights/Grievance': {
+    title: 'Consumer / Administrative Grievance',
+    badge: 'Legal Dispute / Relief',
+    icon: Scale,
+    description: 'You are seeking dispute resolution, refunds, compensation, or action against service deficiency.',
+    actionText: 'Confirm & Generate Legal Notice',
+  },
+  Other: {
+    title: 'General or Out of Scope Query',
+    badge: 'Outside Platform Scope',
+    icon: HelpCircle,
+    description: 'This problem falls outside statutory RTI and administrative consumer grievance frameworks.',
+    actionText: 'View Guidance & Resources',
+  }
+}
+
 export default function GatewayView() {
   const [text, setText] = useState('')
   const [passkey, setPasskey] = useState('')
@@ -84,6 +108,16 @@ export default function GatewayView() {
     }
   }
 
+  const handleConfirmRoute = () => {
+    if (!classifyResult) return
+    if (classifyResult.route === 'RTI') setStage('RTI_GATHERING')
+    else if (classifyResult.route === 'Rights/Grievance') setStage('GRIEVANCE_GATHERING')
+    else setStage('OUT_OF_SCOPE')
+  }
+
+  const currentRouteMeta = classifyResult ? (ROUTE_DESCRIPTIONS[classifyResult.route] || ROUTE_DESCRIPTIONS.Other) : null
+  const RouteIcon = currentRouteMeta?.icon || FileSearch
+
   return (
     <div className="gradient-bg min-h-screen flex flex-col items-center justify-center p-4 relative">
       
@@ -104,7 +138,6 @@ export default function GatewayView() {
             >
               <div className="absolute top-0 left-0 w-full h-1.5 bg-court-maroon"></div>
               
-              {/* Top Local Badge */}
               <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-semibold mb-4 shadow-sm">
                 <KeyRound size={13} />
                 <span>Case Registered Locally</span>
@@ -117,7 +150,6 @@ export default function GatewayView() {
                 Save this 10-character code before we identify your route. You will need it to reopen your case anytime without an account.
               </p>
 
-              {/* Central Passkey Container Box */}
               <div className="bg-slate-50/70 border border-[#b8c2cc]/60 rounded-2xl p-6 shadow-inner mb-6">
                 <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">
                   YOUR PRIVATE ACCESS IDENTIFIER
@@ -146,7 +178,6 @@ export default function GatewayView() {
                 </div>
               </div>
 
-              {/* Zero-Account Privacy Footer Note */}
               <div className="bg-white border border-slate-200 rounded-2xl p-3.5 text-left flex items-start gap-3 shadow-sm mb-6">
                 <div className="mt-0.5 text-emerald-600 flex-shrink-0">
                   <Lock size={15} />
@@ -176,7 +207,40 @@ export default function GatewayView() {
       {/* ──────────────────────────────────── */}
 
       <AnimatePresence mode="wait">
-        {!resumeMode ? (
+        {stage === 'CLASSIFYING' ? (
+          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
+            <Loader2 size={40} className="animate-spin text-court-maroon mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-ashoka-navy">Analyzing your issue with Legal AI...</h2>
+          </motion.div>
+        ) : isClassified ? (
+          
+          /* --- ROUTE CONFIRMATION SCREEN --- */
+          <motion.div key="confirm-screen" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-card p-8 shadow-xl border border-slate-200 max-w-xl w-full">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-court-maroon/10 text-court-maroon flex items-center justify-center flex-shrink-0">
+                <RouteIcon size={24} />
+              </div>
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-court-maroon bg-court-maroon/10 px-2.5 py-0.5 rounded-full border border-court-maroon/20">{currentRouteMeta?.badge}</span>
+                <h2 className="text-xl font-extrabold text-ashoka-navy mt-1">{currentRouteMeta?.title}</h2>
+              </div>
+            </div>
+            <div className="bg-[#FAF8F5] p-5 rounded-xl border border-slate-200 mb-6 space-y-3">
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Why this route?</h4>
+                <p className="text-sm text-ashoka-navy mt-1 font-medium leading-relaxed">{classifyResult.reasoning}</p>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button onClick={handleConfirmRoute} className="btn-primary flex-1 justify-center py-3">
+                <CheckCircle2 size={16} />{currentRouteMeta?.actionText}
+              </button>
+              <button onClick={() => setStage('IDLE')} className="btn-ghost flex-initial justify-center py-3 border border-slate-200">
+                <RotateCcw size={15} /> Rephrase Problem
+              </button>
+            </div>
+          </motion.div>
+        ) : !resumeMode ? (
           
           /* --- MAIN INPUT SCREEN --- */
           <motion.div key="main" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-2xl text-center">
