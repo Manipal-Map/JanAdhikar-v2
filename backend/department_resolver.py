@@ -11,15 +11,14 @@ class SmartDepartmentResolver:
         return classifier.client
 
     def _search_web_context(self, query: str, is_tender: bool = False) -> str:
-        """Pulls lightweight web context. Enhanced for tenders and central records."""
+        """Pulls lightweight web context using Wikipedia API to avoid Vercel binary crashes. Enhanced for central records and tenders."""
         try:
-            # Inject strong keywords for tenders or central records
             if is_tender:
                 query = f"{query} active tender portal eprocurement"
             else:
                 query = f"{query} central public information officer CIC"
                 
-            search_url = f"https://en.wikipedia.org/w/api.php?action=opensearch&search={query}&limit=4&format=json"
+            search_url = f"https://en.wikipedia.org/w/api.php?action=opensearch&search={query}&limit=3&format=json"
             with httpx.Client(timeout=5.0) as client:
                 response = client.get(search_url)
                 data = response.json()
@@ -28,26 +27,27 @@ class SmartDepartmentResolver:
         except Exception as e:
             print(f"Context search failed: {e}")
         return "No live context available. Proceed using internal legal and civic knowledge."
-        
+
     def resolve(self, route: str, user_problem: str, location: str, extracted_facts: Dict[str, Any]) -> Dict[str, Any]:
         client = self._get_client()
         if not client:
             return self._fallback(location)
 
-        # 1. Fetch geographic/administrative context
         safe_location = location or "India"
+        is_tender = "tender" in user_problem.lower() or "contract" in user_problem.lower()
         search_query = f"{safe_location} municipal government or state administration"
-        web_context = self._search_web_context(search_query)
+        
+        web_context = self._search_web_context(search_query, is_tender)
 
-        # 2. Instruct the LLM to deduce the exact PIO and address
         system_prompt = """You are an expert Indian RTI Jurisdiction Resolver. 
-        Analyze the citizen's issue and location. Use your knowledge of the Indian bureaucratic system to find the EXACT Public Authority, PIO Designation, and physical Address.
+        Analyze the citizen's issue and location. Use your knowledge of the Indian bureaucratic system and the provided context to find the EXACT Public Authority, PIO Designation, and physical Address.
         
         Rules:
         1. If it's a city road/sanitation issue -> Route to the specific Municipal Corporation.
         2. If it's a state highway/infrastructure issue -> Route to State PWD.
-        3. Determine if the jurisdiction is Central, State, or Municipal.
-        4. NEVER invent a fake PIN code if you aren't certain; use [PIN] instead.
+        3. If it involves Central Records/Tenders -> Route to specific Ministry or CPSU.
+        4. Determine if the jurisdiction is Central, State, or Municipal.
+        5. NEVER invent a fake PIN code if you aren't certain; use [PIN] instead.
         
         Return ONLY valid JSON matching this exact schema:
         {
