@@ -2,13 +2,10 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Bot, User } from 'lucide-react'
 
-// ── Lightweight inline markdown renderer ─────────────────────────────────────
-// Handles: **bold**, *italic*, `code`, line-breaks
-function renderMarkdown(text) {
+function renderMarkdown(text, isUser) {
   if (!text) return null
   const lines = text.split('\n')
   return lines.map((line, li) => {
-    // Split by markdown tokens: **bold**, *italic*, `code`
     const parts = []
     const regex = /(\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`)/g
     let lastIdx = 0
@@ -18,15 +15,12 @@ function renderMarkdown(text) {
         parts.push(line.slice(lastIdx, match.index))
       }
       if (match[2]) {
-        // **bold**
-        parts.push(<strong key={match.index} className="font-bold text-white">{match[2]}</strong>)
+        parts.push(<strong key={match.index} className={`font-bold ${isUser ? 'text-white' : 'text-slate-900'}`}>{match[2]}</strong>)
       } else if (match[3]) {
-        // *italic*
         parts.push(<em key={match.index} className="italic">{match[3]}</em>)
       } else if (match[4]) {
-        // `code`
         parts.push(
-          <code key={match.index} className="px-1.5 py-0.5 bg-navy-900/60 rounded text-xs font-mono text-blue-300">
+          <code key={match.index} className={`px-1.5 py-0.5 rounded text-xs font-mono border ${isUser ? 'bg-blue-700 border-blue-500 text-blue-50' : 'bg-slate-100 border-slate-200 text-blue-700'}`}>
             {match[4]}
           </code>
         )
@@ -67,59 +61,39 @@ export default function ChatInterface({ messages = [], onSend, isLoading, placeh
 
   return (
     <div className="flex flex-col h-full">
-      {/* Message list */}
-      <div className="flex-1 overflow-y-auto space-y-3 px-1 py-2 min-h-0">
+      <div className="flex-1 overflow-y-auto space-y-4 px-2 py-3 min-h-0">
         <AnimatePresence initial={false}>
-          {messages.map((msg, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25 }}
-              className={`flex gap-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
-            >
-              {/* Avatar */}
-              <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  msg.role === 'user'
-                    ? 'bg-brand-blue/30 text-blue-400'
-                    : 'bg-navy-600 text-slate-400'
-                }`}
+          {messages.map((msg, i) => {
+            const isUser = msg.role === 'user';
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25 }}
+                className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}
               >
-                {msg.role === 'user' ? <User size={13} /> : <Bot size={13} />}
-              </div>
-
-              {/* Bubble */}
-              <div
-                className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                  msg.role === 'user'
-                    ? 'bg-brand-blue/20 text-white rounded-tr-sm border border-brand-blue/25'
-                    : 'bg-navy-700 text-slate-300 rounded-tl-sm border border-white/5'
-                }`}
-              >
-                {msg.role === 'assistant'
-                  ? renderMarkdown(msg.content)
-                  : msg.content}
-              </div>
-            </motion.div>
-          ))}
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm border ${isUser ? 'bg-blue-100 border-blue-200 text-blue-700' : 'bg-slate-100 border-slate-200 text-slate-600'}`}>
+                  {isUser ? <User size={15} /> : <Bot size={15} />}
+                </div>
+                <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm border ${isUser ? 'bg-blue-600 text-white rounded-tr-sm border-blue-700' : 'bg-white text-slate-700 rounded-tl-sm border-slate-200'}`}>
+                  {msg.role === 'assistant' ? renderMarkdown(msg.content, isUser) : msg.content}
+                </div>
+              </motion.div>
+            )
+          })}
         </AnimatePresence>
 
-        {/* Typing indicator */}
         {isLoading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex gap-2.5"
-          >
-            <div className="w-7 h-7 rounded-full bg-navy-600 flex items-center justify-center">
-              <Bot size={13} className="text-slate-400" />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3">
+            <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center shadow-sm">
+              <Bot size={15} className="text-slate-600" />
             </div>
-            <div className="px-4 py-3 bg-navy-700 rounded-2xl rounded-tl-sm border border-white/5">
-              <div className="flex gap-1">
-                <span className="typing-dot w-1.5 h-1.5 rounded-full bg-slate-500" />
-                <span className="typing-dot w-1.5 h-1.5 rounded-full bg-slate-500" />
-                <span className="typing-dot w-1.5 h-1.5 rounded-full bg-slate-500" />
+            <div className="px-5 py-4 bg-white border border-slate-200 rounded-2xl rounded-tl-sm shadow-sm">
+              <div className="flex gap-1.5">
+                <span className="typing-dot w-1.5 h-1.5 rounded-full bg-slate-400" />
+                <span className="typing-dot w-1.5 h-1.5 rounded-full bg-slate-400" />
+                <span className="typing-dot w-1.5 h-1.5 rounded-full bg-slate-400" />
               </div>
             </div>
           </motion.div>
@@ -127,8 +101,7 @@ export default function ChatInterface({ messages = [], onSend, isLoading, placeh
         <div ref={bottomRef} />
       </div>
 
-      {/* Input area */}
-      <div className="pt-3 border-t border-white/5">
+      <div className="pt-3 border-t border-slate-200 mt-2">
         <div className="flex gap-2">
           <textarea
             rows={2}
@@ -136,18 +109,18 @@ export default function ChatInterface({ messages = [], onSend, isLoading, placeh
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKey}
             placeholder={placeholder || 'Type your message…'}
-            className="input-field resize-none text-sm flex-1 py-2.5"
+            className="input-field resize-none text-sm flex-1 py-2.5 bg-slate-50"
             disabled={isLoading}
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
-            className="btn-primary self-end px-4 py-2.5"
+            className="btn-primary self-end px-4 py-3 shadow-md"
           >
-            <Send size={15} />
+            <Send size={16} />
           </button>
         </div>
-        <p className="text-xs text-slate-600 mt-1.5">Press Enter to send · Shift+Enter for new line</p>
+        <p className="text-xs text-slate-500 mt-2 text-right">Press Enter to send · Shift+Enter for new line</p>
       </div>
     </div>
   )
