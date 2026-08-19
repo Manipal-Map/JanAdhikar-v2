@@ -195,7 +195,7 @@ async def generate_grievance(
     form_data: str = Form(...),
     user_problem: str = Form(...),
     language: str = Form("English"),
-    proof_files: List[UploadFile] = File(None)
+    proof_files: List[UploadFile] = File(default=[])
 ):
     case = case_manager.get_case(case_id)
     if not case:
@@ -208,7 +208,8 @@ async def generate_grievance(
     if proof_files:
         for pf in proof_files:
             bytes_data = await pf.read()
-            files_data.append({"bytes": bytes_data, "mime_type": pf.content_type})
+            if bytes_data:
+                files_data.append({"bytes": bytes_data, "mime_type": pf.content_type})
 
     pack = grievance_resolver.analyze_proof_and_rights(
         user_problem=user_problem,
