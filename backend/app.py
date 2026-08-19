@@ -1,11 +1,15 @@
+import io
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 
 from .case_manager import case_manager
 from .classifier import classifier
 from .outcome_predictor import outcome_engine
+from .department_resolver import department_resolver
+from .rti_pdf_generator import generate_rti_pdf
 
 app = FastAPI(title="CivicRoute AI API", version="1.0")
 
@@ -34,7 +38,6 @@ class ClassifyResponse(BaseModel):
     reasoning: str
     form_schema: List[Dict[str, Any]]
 
-
 class ChatMessageRequest(BaseModel):
     case_id: str
     message: str
@@ -49,6 +52,10 @@ class RTIPredictRequest(BaseModel):
 
 class RTIImproveRequest(BaseModel):
     case_id: str
+
+class DepartmentResolveRequest(BaseModel):
+    case_id: str
+    location: Optional[str] = None
 
 # --- Endpoints ---
 
@@ -84,7 +91,6 @@ def classify_problem(payload: ClassifyRequest):
         reasoning=result["reasoning"],
         form_schema=result["form_schema"]
     )
-
 
 @app.post("/api/chat/continue")
 def chat_continue(payload: ChatMessageRequest):
@@ -184,6 +190,44 @@ def improve_rti(payload: RTIImproveRequest):
     })
 
     return {"case_id": payload.case_id, **improved_result}
+
+@app.post("/api/rti/resolve-department")
+def resolve_department(payload: DepartmentResolveRequest):
+    case = case_manager.get_case(payload.case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail="Case ID not found.")
+
+    user_problem = case.get("user_problem", "")
+    extracted_facts = {**case.get("form_data", {}), **case.get("extracted_facts", {})}
+    location = payload.location or extracted_facts.get("applicant_city") or extracted_facts.get("applicant_state", "")
+
+    dept_info = department_resolver.resolve("RTI", user_problem, location, extracted_facts)
+    case_manager.update_case(payload.case_id, {"department_info": dept_info})
+    return {"case_id": payload.case_id, **dept_info}
+
+@app.get("/api/rti/pdf/{case_id}")
+def download_rti_pdf(case_id: str):
+    case = case_manager.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail="Case ID not found.")
+
+    draft_text = case.get("improved_draft") or case.get("initial_draft", "")
+    dept_info = case.get("department_info") or {}
+    form_data = case.get("form_data", {})
+    applicant_details = {
+        "name": form_data.get("applicant_name", "[Applicant Name]"),
+        "address": form_data.get("applicant_address", ""),
+        "contact": form_data.get("applicant_contact", ""),
+        "place": form_data.get("applicant_city", ""),
+        "date": "",
+    }
+
+    pdf_bytes = generate_rti_pdf(applicant_details, dept_info, draft_text)
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={case_id}_RTI.pdf"}
+    )
 
 # --- Rights / Grievance Pipeline Endpoint ---
 
