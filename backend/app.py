@@ -12,7 +12,6 @@ from .department_resolver import department_resolver
 from .rti_pdf_generator import generate_rti_pdf
 
 app = FastAPI(title="CivicRoute AI API", version="1.0")
-app = FastAPI(title="CivicRoute AI API", version="1.0")
 
 app.add_middleware(
     CORSMiddleware,
