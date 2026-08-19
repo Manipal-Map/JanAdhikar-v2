@@ -21,6 +21,7 @@ export default function GatewayView() {
   const isProcessing = stage === 'INITIALIZING' || stage === 'CLASSIFYING' || showPasskeyScreen
   const isClassified = stage === 'CLASSIFIED_CONFIRM' && classifyResult
 
+  // STEP 1: Initialize case and show the Passkey mockup screen
   const handleStartCase = async () => {
     if (!text.trim() || isProcessing) return
     setLocalErr(null)
@@ -29,7 +30,7 @@ export default function GatewayView() {
       const { case_id } = await initCase()
       setCaseId(case_id)
       setUserProblem(text.trim())
-      // Show the dedicated Passkey screen matching your mockup
+      setStage('IDLE') // Reset processing stage so UI unlocks for the passkey screen
       setShowPasskeyScreen(true)
     } catch (err) {
       setLocalErr(err?.response?.data?.detail || err.message || 'Something went wrong.')
@@ -37,16 +38,19 @@ export default function GatewayView() {
     }
   }
 
+  // STEP 2: Triggered when user clicks "Continue to AI Classification"
   const handleProceedToAI = async () => {
     setShowPasskeyScreen(false)
+    setLocalErr(null)
     try {
       setStage('CLASSIFYING')
       const result = await classifyCase(caseId, text.trim(), language)
       setClassifyResult(result)
       setStage('CLASSIFIED_CONFIRM')
     } catch (err) {
-      setLocalErr(err?.response?.data?.detail || err.message || 'Something went wrong.')
+      setLocalErr(err?.response?.data?.detail || err.message || 'Something went wrong during classification.')
       setStage('IDLE')
+      setShowPasskeyScreen(true) // Return to passkey screen if it fails
     }
   }
 
@@ -72,9 +76,10 @@ export default function GatewayView() {
     setStage('INITIALIZING')
     try {
       const res = await getCase(passkey.trim().toUpperCase())
+      if (!res) throw new Error("Case not found.")
       hydrateState(res.case_id, res.data)
     } catch (err) {
-      setLocalErr('Invalid Case ID. Please check and try again.')
+      setLocalErr('Invalid Case ID or expired session. Please check and try again.')
       setStage('IDLE')
     }
   }
@@ -113,7 +118,7 @@ export default function GatewayView() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <button 
                   onClick={handleCopyId}
-                  className="w-full sm:w-auto flex-1 bg-court-maroon hover:bg-[#701A75] text-white font-semibold py-3 px-5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-sm"
+                  className="w-full sm:w-auto flex-1 bg-court-maroon hover:bg-[#701A75] text-white font-semibold py-3 px-5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-sm cursor-pointer"
                 >
                   {copied ? <Check size={16} className="text-emerald-300" /> : <Copy size={16} />}
                   {copied ? 'Copied!' : 'Copy Case ID'}
@@ -121,7 +126,7 @@ export default function GatewayView() {
 
                 <button 
                   onClick={handleDownloadTxt}
-                  className="w-full sm:w-auto flex-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-3 px-5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-sm"
+                  className="w-full sm:w-auto flex-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-3 px-5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-sm cursor-pointer"
                 >
                   <Download size={16} className="text-slate-500" />
                   <span>Download .txt Key</span>
@@ -142,12 +147,14 @@ export default function GatewayView() {
               </div>
             </div>
 
+            {localErr && <div className="p-3 bg-red-50 text-red-700 text-sm rounded-xl mb-4 text-left">{localErr}</div>}
+
             <button 
               onClick={handleProceedToAI} 
-              className="btn-primary w-full justify-center text-base py-3.5"
+              disabled={stage === 'CLASSIFYING'}
+              className="btn-primary w-full justify-center text-base py-3.5 cursor-pointer"
             >
-              <span>Continue to AI Classification</span>
-              <ArrowRight size={18} />
+              {stage === 'CLASSIFYING' ? <><Loader2 size={18} className="animate-spin" /> Analyzing Legal Route...</> : <><span>Continue to AI Classification</span><ArrowRight size={18} /></>}
             </button>
 
           </motion.div>
@@ -163,7 +170,7 @@ export default function GatewayView() {
                 rows={6}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                disabled={isProcessing}
+                disabled={stage === 'INITIALIZING'}
                 placeholder="e.g. My pension has not come for 3 months. My landlord refuses to return my deposit..."
                 className="w-full bg-transparent p-6 text-lg text-ashoka-navy placeholder-slate-400 focus:outline-none resize-none rounded-t-3xl"
               />
@@ -175,13 +182,13 @@ export default function GatewayView() {
 
             {localErr && <div className="p-3 bg-red-50 text-red-700 text-sm rounded-xl mb-4 text-left">{localErr}</div>}
 
-            <button onClick={handleStartCase} disabled={!text.trim() || isProcessing} className="btn-primary w-full justify-center text-lg py-4">
-              {isProcessing ? <Loader2 className="animate-spin" /> : <>Analyse my problem <ArrowRight size={20} /></>}
+            <button onClick={handleStartCase} disabled={!text.trim() || stage === 'INITIALIZING'} className="btn-primary w-full justify-center text-lg py-4 cursor-pointer">
+              {stage === 'INITIALIZING' ? <><Loader2 className="animate-spin" /> Generating Passkey...</> : <>Analyse my problem <ArrowRight size={20} /></>}
             </button>
 
             <div className="mt-8 flex items-center justify-between px-2">
-              <button onClick={() => setResumeMode(true)} className="text-court-maroon font-semibold text-sm hover:underline">Resume your case</button>
-              <button onClick={() => window.location.reload()} className="text-slate-500 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy"><RefreshCw size={14}/> Reset Demos</button>
+              <button onClick={() => setResumeMode(true)} className="text-court-maroon font-semibold text-sm hover:underline cursor-pointer">Resume your case</button>
+              <button onClick={() => window.location.reload()} className="text-slate-500 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy cursor-pointer"><RefreshCw size={14}/> Reset Demos</button>
             </div>
           </motion.div>
         ) : (
@@ -202,13 +209,15 @@ export default function GatewayView() {
               className="w-full text-center bg-slate-50 border border-slate-200 rounded-xl p-4 text-lg font-mono tracking-widest uppercase mb-6 placeholder:text-slate-300 focus:ring-2 focus:ring-court-maroon/20 focus:border-court-maroon"
             />
             
-            <button onClick={handleResume} disabled={!passkey.trim() || isProcessing} className="btn-primary w-full justify-center text-lg py-4 mb-8 shadow-lg">
-              {isProcessing ? <Loader2 className="animate-spin" /> : <>Open case <ArrowRight size={20} /></>}
+            {localErr && <div className="p-3 bg-red-50 text-red-700 text-sm rounded-xl mb-4 text-left">{localErr}</div>}
+
+            <button onClick={handleResume} disabled={!passkey.trim() || stage === 'INITIALIZING'} className="btn-primary w-full justify-center text-lg py-4 mb-8 shadow-lg cursor-pointer">
+              {stage === 'INITIALIZING' ? <Loader2 className="animate-spin" /> : <>Open case <ArrowRight size={20} /></>}
             </button>
             
             <div className="flex items-center justify-between border-t border-slate-100 pt-6">
-              <button onClick={() => setResumeMode(false)} className="text-court-maroon font-semibold text-sm hover:underline">Start a new case instead</button>
-              <button onClick={() => window.location.reload()} className="text-slate-500 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy"><RefreshCw size={14}/> Reset Demos</button>
+              <button onClick={() => setResumeMode(false)} className="text-court-maroon font-semibold text-sm hover:underline cursor-pointer">Start a new case instead</button>
+              <button onClick={() => window.location.reload()} className="text-slate-500 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy cursor-pointer"><RefreshCw size={14}/> Reset Demos</button>
             </div>
           </motion.div>
         )}
