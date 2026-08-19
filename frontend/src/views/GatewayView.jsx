@@ -12,16 +12,16 @@ export default function GatewayView() {
   const [resumeMode, setResumeMode] = useState(false)
   const [localErr, setLocalErr] = useState(null)
   
-  // Passkey Screen States
-  const [showPasskeyScreen, setShowPasskeyScreen] = useState(false)
+  // Modal State
+  const [showPasskeyModal, setShowPasskeyModal] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const { stage, setStage, caseId, setCaseId, classifyResult, setClassifyResult, setUserProblem, language, setLanguage, hydrateState } = useCaseStore()
 
-  const isProcessing = stage === 'INITIALIZING' || stage === 'CLASSIFYING' || showPasskeyScreen
+  const isProcessing = stage === 'INITIALIZING' || stage === 'CLASSIFYING' || showPasskeyModal
   const isClassified = stage === 'CLASSIFIED_CONFIRM' && classifyResult
 
-  // STEP 1: Initialize case and show the Passkey mockup screen
+  // STEP 1: Initialize case and trigger the pop-up modal
   const handleStartCase = async () => {
     if (!text.trim() || isProcessing) return
     setLocalErr(null)
@@ -30,17 +30,17 @@ export default function GatewayView() {
       const { case_id } = await initCase()
       setCaseId(case_id)
       setUserProblem(text.trim())
-      setStage('IDLE') // Reset processing stage so UI unlocks for the passkey screen
-      setShowPasskeyScreen(true)
+      setStage('IDLE')
+      setShowPasskeyModal(true)
     } catch (err) {
       setLocalErr(err?.response?.data?.detail || err.message || 'Something went wrong.')
       setStage('IDLE')
     }
   }
 
-  // STEP 2: Triggered when user clicks "Continue to AI Classification"
+  // STEP 2: Triggered when user clicks "Continue to AI Classification" inside the modal
   const handleProceedToAI = async () => {
-    setShowPasskeyScreen(false)
+    setShowPasskeyModal(false)
     setLocalErr(null)
     try {
       setStage('CLASSIFYING')
@@ -50,7 +50,7 @@ export default function GatewayView() {
     } catch (err) {
       setLocalErr(err?.response?.data?.detail || err.message || 'Something went wrong during classification.')
       setStage('IDLE')
-      setShowPasskeyScreen(true) // Return to passkey screen if it fails
+      setShowPasskeyModal(true)
     }
   }
 
@@ -86,79 +86,97 @@ export default function GatewayView() {
 
   return (
     <div className="gradient-bg min-h-screen flex flex-col items-center justify-center p-4 relative">
-      <AnimatePresence mode="wait">
-        
-        {/* --- PASSKEY REGISTRATION SCREEN (MOCKUP MATCH WITH MAROON THEME) --- */}
-        {showPasskeyScreen ? (
-          <motion.div key="passkey-screen" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="w-full max-w-xl text-center">
-            
-            {/* Top Local Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-semibold mb-5 shadow-sm">
-              <KeyRound size={13} />
-              <span>Case Registered Locally</span>
-            </div>
-
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-ashoka-navy mb-2 tracking-tight">
-              Save Your Private Case ID
-            </h1>
-            <p className="text-sm text-slate-500 mb-8 max-w-md mx-auto">
-              Save this 10-character code before we identify your route. You will need it to reopen your case anytime without an account.
-            </p>
-
-            {/* Central Passkey Container Box */}
-            <div className="bg-white border border-[#b8c2cc]/60 rounded-3xl p-8 shadow-sm mb-6 relative overflow-hidden">
-              <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
-                YOUR PRIVATE ACCESS IDENTIFIER
-              </span>
-              
-              <div className="text-3xl sm:text-4xl font-mono font-black text-ashoka-navy tracking-widest mb-8">
-                {caseId}
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <button 
-                  onClick={handleCopyId}
-                  className="w-full sm:w-auto flex-1 bg-court-maroon hover:bg-[#701A75] text-white font-semibold py-3 px-5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-sm cursor-pointer"
-                >
-                  {copied ? <Check size={16} className="text-emerald-300" /> : <Copy size={16} />}
-                  {copied ? 'Copied!' : 'Copy Case ID'}
-                </button>
-
-                <button 
-                  onClick={handleDownloadTxt}
-                  className="w-full sm:w-auto flex-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-3 px-5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-sm cursor-pointer"
-                >
-                  <Download size={16} className="text-slate-500" />
-                  <span>Download .txt Key</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Zero-Account Privacy Footer Note */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 text-left flex items-start gap-3 shadow-sm mb-6">
-              <div className="mt-0.5 text-emerald-600 flex-shrink-0">
-                <Lock size={16} />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide mb-1">Zero-Account Privacy:</h4>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Take a quick screenshot or write it down. Your case is encrypted in this browser and never linked to your phone number or email.
-                </p>
-              </div>
-            </div>
-
-            {localErr && <div className="p-3 bg-red-50 text-red-700 text-sm rounded-xl mb-4 text-left">{localErr}</div>}
-
-            <button 
-              onClick={handleProceedToAI} 
-              disabled={stage === 'CLASSIFYING'}
-              className="btn-primary w-full justify-center text-base py-3.5 cursor-pointer"
+      
+      {/* ── PASSKEY POP-UP MODAL OVERLAY ── */}
+      <AnimatePresence>
+        {showPasskeyModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-ashoka-navy/60 backdrop-blur-sm p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-8 border border-slate-200 relative overflow-hidden text-center"
             >
-              {stage === 'CLASSIFYING' ? <><Loader2 size={18} className="animate-spin" /> Analyzing Legal Route...</> : <><span>Continue to AI Classification</span><ArrowRight size={18} /></>}
-            </button>
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-court-maroon"></div>
+              
+              {/* Top Local Badge */}
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-semibold mb-4 shadow-sm">
+                <KeyRound size={13} />
+                <span>Case Registered Locally</span>
+              </div>
 
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-ashoka-navy mb-2 tracking-tight">
+                Save Your Private Case ID
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 mb-6 max-w-sm mx-auto">
+                Save this 10-character code before we identify your route. You will need it to reopen your case anytime without an account.
+              </p>
+
+              {/* Central Passkey Container Box */}
+              <div className="bg-slate-50/70 border border-[#b8c2cc]/60 rounded-2xl p-6 shadow-inner mb-6">
+                <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">
+                  YOUR PRIVATE ACCESS IDENTIFIER
+                </span>
+                
+                <div className="text-2xl sm:text-3xl font-mono font-black text-ashoka-navy tracking-widest mb-6">
+                  {caseId}
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                  <button 
+                    onClick={handleCopyId}
+                    className="w-full sm:w-auto flex-1 bg-court-maroon hover:bg-[#701A75] text-white font-semibold py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-xs cursor-pointer"
+                  >
+                    {copied ? <Check size={15} className="text-emerald-300" /> : <Copy size={15} />}
+                    {copied ? 'Copied!' : 'Copy Case ID'}
+                  </button>
+
+                  <button 
+                    onClick={handleDownloadTxt}
+                    className="w-full sm:w-auto flex-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-xs cursor-pointer"
+                  >
+                    <Download size={15} className="text-slate-500" />
+                    <span>Download .txt Key</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Zero-Account Privacy Footer Note */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-3.5 text-left flex items-start gap-3 shadow-sm mb-6">
+                <div className="mt-0.5 text-emerald-600 flex-shrink-0">
+                  <Lock size={15} />
+                </div>
+                <div>
+                  <h4 className="text-[11px] font-bold text-slate-900 uppercase tracking-wide mb-0.5">Zero-Account Privacy:</h4>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Take a quick screenshot or write it down. Your case is encrypted in this browser and never linked to your phone number or email.
+                  </p>
+                </div>
+              </div>
+
+              {localErr && <div className="p-3 bg-red-50 text-red-700 text-xs rounded-xl mb-4 text-left">{localErr}</div>}
+
+              <button 
+                onClick={handleProceedToAI} 
+                disabled={stage === 'CLASSIFYING'}
+                className="btn-primary w-full justify-center text-sm py-3 cursor-pointer"
+              >
+                {stage === 'CLASSIFYING' ? <><Loader2 size={16} className="animate-spin" /> Analyzing Legal Route...</> : <><span>Continue to AI Classification</span><ArrowRight size={16} /></>}
+              </button>
+
+            </motion.div>
           </motion.div>
-        ) : !resumeMode ? (
+        )}
+      </AnimatePresence>
+      {/* ──────────────────────────────────── */}
+
+      <AnimatePresence mode="wait">
+        {!resumeMode ? (
           
           /* --- MAIN INPUT SCREEN --- */
           <motion.div key="main" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-2xl text-center">
