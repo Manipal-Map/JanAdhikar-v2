@@ -3,7 +3,5 @@ uvicorn
 pydantic
 anthropic
 python-dotenv
-scikit-learn
-tabulate
 reportlab
 groq
