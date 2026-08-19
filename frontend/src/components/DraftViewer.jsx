@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Copy, Download, CheckCheck, FileText, Printer } from 'lucide-react'
+import { Copy, Download, CheckCheck, FileText, Printer, Loader2 } from 'lucide-react'
+import { downloadGenericPdf } from '../api'
 
 export default function DraftViewer({ title = 'Generated Document', draft, caseId }) {
   const [copied, setCopied] = useState(false)
+  const [downloading, setDownloading] = useState(false)
 
   if (!draft) return null
 
@@ -13,32 +15,65 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleDownload = () => {
-    const blob = new Blob([draft], { type: 'text/plain' })
-    const url  = URL.createObjectURL(blob)
-    const a    = document.createElement('a')
-    a.href     = url
-    a.download = `${caseId || 'draft'}.txt`
-    a.click()
-    URL.revokeObjectURL(url)
+  // Uses the backend PDF generator to ensure clean fonts and no Unicode black boxes
+  const handleDownloadPdf = async () => {
+    setDownloading(true)
+    try {
+      const blob = await downloadGenericPdf(title, draft)
+      const url = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }))
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${caseId || 'Legal_Notice'}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      link.parentNode.removeChild(link)
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Failed to download PDF:', err)
+      alert('Failed to generate PDF. Please try again.')
+    } finally {
+      setDownloading(false)
+    }
   }
 
+  // Uses an invisible Iframe to print, entirely bypassing browser Pop-Up Blockers
   const handlePrint = () => {
-    const win = window.open('', '_blank')
-    win.document.write(`
-      <html><head>
-        <title>${title}</title>
-        <style>
-          body { font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.7;
-                 padding: 40px; max-width: 800px; margin: 0 auto; color: #1e293b; }
-          pre  { white-space: pre-wrap; word-wrap: break-word; }
-        </style>
-      </head><body>
-        <pre>${draft.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
-      </body></html>
-    `)
-    win.document.close()
-    win.print()
+    const iframe = document.createElement('iframe')
+    iframe.style.position = 'fixed'
+    iframe.style.right = '0'
+    iframe.style.bottom = '0'
+    iframe.style.width = '0'
+    iframe.style.height = '0'
+    iframe.style.border = '0'
+    document.body.appendChild(iframe)
+    
+    const content = `
+      <html>
+        <head>
+          <title>${title}</title>
+          <style>
+            body { font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; padding: 40px; color: #000; }
+            pre { white-space: pre-wrap; font-family: inherit; margin: 0; }
+          </style>
+        </head>
+        <body>
+          <h2>${title}</h2>
+          <pre>${draft.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+        </body>
+      </html>
+    `
+    
+    iframe.contentWindow.document.open()
+    iframe.contentWindow.document.write(content)
+    iframe.contentWindow.document.close()
+    
+    iframe.contentWindow.focus()
+    setTimeout(() => {
+      iframe.contentWindow.print()
+      setTimeout(() => {
+        document.body.removeChild(iframe)
+      }, 1000)
+    }, 250)
   }
 
   return (
@@ -57,8 +92,8 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
           <button onClick={handleCopy} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
             {copied ? <><CheckCheck size={13} className="text-emerald-600" /> Copied!</> : <><Copy size={13} /> Copy</>}
           </button>
-          <button onClick={handleDownload} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
-            <Download size={13} /> Download
+          <button onClick={handleDownloadPdf} disabled={downloading} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
+            {downloading ? <><Loader2 size={13} className="animate-spin" /> Generating...</> : <><Download size={13} /> Download (PDF)</>}
           </button>
           <button onClick={handlePrint} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
             <Printer size={13} /> Print
