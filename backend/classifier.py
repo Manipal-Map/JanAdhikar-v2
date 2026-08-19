@@ -29,8 +29,7 @@ class RouteClassifier:
 
         if self.client:
             try:
-                # Instruct the AI to output the UI text in the chosen language (e.g. Hinglish)
-                system_msg = f"{CLASSIFIER_SYSTEM_PROMPT}\n\nCRITICAL: You MUST write your 'reasoning' and 'sub_category' in {language}. If the language is 'Hinglish', write conversational Hindi using the English alphabet (e.g., 'Aapka issue RTI me aayega...')."
+                system_msg = f"{CLASSIFIER_SYSTEM_PROMPT}\n\nCRITICAL LANGUAGE INSTRUCTION:\nThe user has selected '{language}'. ALL text values in your JSON MUST be written in {language}.\nIf '{language}' is 'Hinglish', you MUST write conversational Hindi strictly using the English alphabet. ABSOLUTELY NO Devanagari or regional scripts are allowed. Use English alphabet ONLY."
                 
                 prompt_messages = [{"role": "system", "content": system_msg}]
                 prompt_messages.append({"role": "user", "content": user_text})
