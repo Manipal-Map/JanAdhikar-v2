@@ -19,13 +19,19 @@ export const chatContinue = (case_id, message) =>
   api.post('/api/chat/continue', { case_id, message }).then((r) => r.data)
 
 // ── RTI Generate  (form submit → creates initial_draft on server) ──────────
-// Backend: POST /api/rti/generate  { case_id, form_data }
-// Returns: { case_id, initial_draft }
 export const rtiGenerate = (case_id, form_data) =>
   api.post('/api/rti/generate', { case_id, form_data }).then((r) => r.data)
 
+// ── RTI Department/Jurisdiction Resolve ─────────────────────────────────────
+export const resolveDepartment = (case_id, location = null) =>
+  api.post('/api/rti/resolve-department', { case_id, location }).then((r) => r.data)
+
+// ── RTI PDF download (returns a blob) ───────────────────────────────────────
+export const downloadRtiPdf = (case_id) =>
+  api.get(`/api/rti/pdf/${case_id}`, { responseType: 'blob' })
+     .then((r) => r.data)
+
 // ── RTI Risk Predict ───────────────────────────────────────────────────────
-// Backend reads initial_draft from the case; draft_text is optional override
 export const rtiPredict = (case_id, draft_text = null) =>
   api.post('/api/rti/predict', { case_id, draft_text }).then((r) => r.data)
 
@@ -34,8 +40,6 @@ export const rtiImprove = (case_id) =>
   api.post('/api/rti/improve', { case_id }).then((r) => r.data)
 
 // ── Grievance Generate (form/chat → demand notice + filing guide) ──────────
-// Backend: POST /api/grievance/generate  { case_id, form_data }
-// Returns: { case_id, legal_analysis, demand_notice_draft, filing_portal_guide }
 export const grievanceGenerate = (case_id, form_data = {}) =>
   api.post('/api/grievance/generate', { case_id, form_data }).then((r) => r.data)
 
