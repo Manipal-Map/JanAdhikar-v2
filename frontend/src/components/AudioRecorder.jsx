@@ -19,7 +19,7 @@ export default function AudioRecorder({ onTranscription }) {
 
       mediaRecorderRef.current.onstop = async () => {
         const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' })
-        chunksRef.current = [] // reset
+        chunksRef.current = []
         setIsTranscribing(true)
         try {
           const res = await transcribeAudio(audioBlob)
@@ -35,7 +35,7 @@ export default function AudioRecorder({ onTranscription }) {
       mediaRecorderRef.current.start()
       setIsRecording(true)
     } catch (err) {
-      alert("Microphone access denied or unavailable.")
+      alert("Microphone access denied.")
     }
   }
 
@@ -62,7 +62,7 @@ export default function AudioRecorder({ onTranscription }) {
           ? 'bg-red-50 border-red-200 text-red-600 animate-pulse' 
           : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
       }`}
-      title={isRecording ? "Stop Recording" : "Dictate Audio"}
+      title={isRecording ? "Stop" : "Dictate Audio"}
     >
       {isRecording ? <Square size={18} /> : <Mic size={18} />}
     </button>
