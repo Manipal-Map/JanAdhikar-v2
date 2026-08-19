@@ -15,7 +15,6 @@ const pageVariants = {
 export default function App() {
   const { stage, classifyResult, reset } = useCaseStore()
 
-  // Determine which view to show
   let currentView = 'gateway'
   if (stage === 'RTI_GATHERING' || stage === 'PREDICTING' || stage === 'IMPROVING' || (stage === 'COMPLETE' && classifyResult?.route === 'RTI')) {
     currentView = 'rti'
@@ -27,28 +26,19 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen bg-slate-50 text-slate-900">
-      {/* Global Restart Button */}
       {currentView !== 'gateway' && (
         <motion.button
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           onClick={reset}
-          title="Start a new case"
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 hover:text-slate-900 text-sm font-semibold rounded-full shadow-lg transition-all duration-200"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 hover:text-slate-900 text-sm font-semibold rounded-full shadow-lg transition-all"
         >
-          <RotateCcw size={14} />
-          New Case
+          <RotateCcw size={14} /> New Case
         </motion.button>
       )}
 
       <AnimatePresence mode="wait">
-        <motion.div
-          key={currentView}
-          variants={pageVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-        >
+        <motion.div key={currentView} variants={pageVariants} initial="initial" animate="animate" exit="exit">
           {currentView === 'gateway' && <GatewayView />}
           {currentView === 'rti' && <RTIView />}
           {currentView === 'grievance' && <GrievanceView />}
