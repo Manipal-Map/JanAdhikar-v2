@@ -12,7 +12,6 @@ def sanitize_for_pdf(text: str) -> str:
     if not text:
         return ""
     
-    # 1. Replace common Unicode characters and symbols with standard ASCII equivalents
     replacements = {
         '“': '"', '”': '"', 
         '‘': "'", '’': "'",
@@ -24,14 +23,9 @@ def sanitize_for_pdf(text: str) -> str:
     for k, v in replacements.items():
         text = text.replace(k, v)
         
-    # 2. Strip Markdown formatting (e.g., **bold**, *italic*, ### headers)
-    # This ensures the document looks like a formal typed letter, not code.
     text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)
     text = re.sub(r'\*(.*?)\*', r'\1', text)
     text = re.sub(r'#{1,6}\s?', '', text)
-    
-    # 3. Ultimate Fallback: Force Latin-1 encoding. 
-    # Any remaining weird invisible characters that would cause a black box are safely deleted.
     text = text.encode('latin-1', 'ignore').decode('latin-1')
     
     return text
@@ -49,12 +43,10 @@ def generate_rti_pdf(applicant_details: Dict[str, Any], department_info: Dict[st
 
     story = []
     
-    # Header
     story.append(Paragraph("<b>FORM A</b>", title))
     story.append(Paragraph("<b>Application under Section 6(1) of the Right to Information Act, 2005</b>", title))
     story.append(Spacer(1, 10*mm))
 
-    # PIO Address (Sanitized)
     story.append(Paragraph("To,", normal))
     pio_desig = sanitize_for_pdf(department_info.get('pio_designation', 'The Public Information Officer'))
     pub_auth = sanitize_for_pdf(department_info.get('public_authority_name', ''))
@@ -65,7 +57,6 @@ def generate_rti_pdf(applicant_details: Dict[str, Any], department_info: Dict[st
     story.append(Paragraph(address, normal))
     story.append(Spacer(1, 8*mm))
 
-    # Body Fields
     fields = [
         ("1. Full name of the applicant", applicant_details.get('name', '')),
         ("2. Permanent address", applicant_details.get('address', '')),
@@ -78,15 +69,10 @@ def generate_rti_pdf(applicant_details: Dict[str, Any], department_info: Dict[st
         story.append(Paragraph(f"<b>{label}:</b> {val_clean}", normal))
         story.append(Spacer(1, 4*mm))
 
-    # RTI Content (Sanitized and formatted)
-    clean_rti_body = sanitize_for_pdf(rti_body_text)
-    # Convert standard line breaks to ReportLab <br/> tags
-    clean_rti_body = clean_rti_body.replace("\n", "<br/>")
-    
+    clean_rti_body = sanitize_for_pdf(rti_body_text).replace("\n", "<br/>")
     story.append(Paragraph(clean_rti_body, normal))
     story.append(Spacer(1, 8*mm))
 
-    # Statutory Declarations
     story.append(Paragraph("<b>5. Mode of delivery:</b> Speed Post / Registered Post", normal))
     story.append(Spacer(1, 4*mm))
     story.append(Paragraph("<b>6. Fee details:</b> Rs. 10 paid via IPO/DD/Online", normal))
@@ -94,11 +80,35 @@ def generate_rti_pdf(applicant_details: Dict[str, Any], department_info: Dict[st
     story.append(Paragraph("I declare that I am a citizen of India. The requested information does not fall under exemptions of Section 8 or 9 of the RTI Act.", normal))
     story.append(Spacer(1, 15*mm))
 
-    # Signoff
     place_clean = sanitize_for_pdf(applicant_details.get('place', ''))
     story.append(Paragraph(f"<b>Place:</b> {place_clean}", normal))
     story.append(Paragraph("<b>Date:</b> ______________", normal))
     story.append(Paragraph("<b>Signature:</b> ________________________", ParagraphStyle('Sign', parent=normal, alignment=2)))
+
+    doc.build(story)
+    buffer.seek(0)
+    return buffer.getvalue()
+
+def generate_generic_pdf(title: str, body_text: str) -> bytes:
+    """Generates a clean, standard PDF for Grievance Notices and other documents."""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer, pagesize=A4, 
+        topMargin=20*mm, bottomMargin=20*mm, 
+        leftMargin=20*mm, rightMargin=20*mm
+    )
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle('Title', parent=styles['Heading3'], alignment=TA_CENTER, spaceAfter=15)
+    normal = ParagraphStyle('Normal', parent=styles['Normal'], alignment=TA_JUSTIFY, leading=16, fontSize=11)
+
+    story = []
+    
+    clean_title = sanitize_for_pdf(title)
+    story.append(Paragraph(f"<b>{clean_title}</b>", title_style))
+    story.append(Spacer(1, 10*mm))
+
+    clean_body = sanitize_for_pdf(body_text).replace("\n", "<br/>")
+    story.append(Paragraph(clean_body, normal))
 
     doc.build(story)
     buffer.seek(0)
