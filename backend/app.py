@@ -15,7 +15,6 @@ from grievance_resolver import grievance_resolver
 
 app = FastAPI(title="CivicRoute AI API", version="1.0")
 
-# Fix: Allow ALL origins securely so Vercel Preview branches never trigger CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origin_regex=r".*", 
@@ -36,7 +35,6 @@ class ClassifyRequest(BaseModel):
 class ChatMessageRequest(BaseModel):
     case_id: str
     message: str
-    language: str = "English"
 
 class FormSubmitRequest(BaseModel):
     case_id: str
@@ -73,23 +71,31 @@ async def transcribe_audio(
         if not client:
             raise HTTPException(status_code=503, detail="Groq client not initialized")
             
-        transcription = client.audio.transcriptions.create(
-            file=(audio_file.filename, file_bytes),
-            model="whisper-large-v3",
-            response_format="json"
-        )
-        
-        text = transcription.text
-        
-        # Intercept and translate to Hinglish if requested
-        if language == "Hinglish":
+        # FORCE ENGLISH: Use Whisper's native translation to English
+        if language == "English":
+            transcription = client.audio.translations.create(
+                file=(audio_file.filename, file_bytes),
+                model="whisper-large-v3",
+                response_format="json"
+            )
+            text = transcription.text
+            
+        # FORCE HINGLISH: Transcribe original, then forcefully translate to English-Alphabet Hindi
+        else:
+            transcription = client.audio.transcriptions.create(
+                file=(audio_file.filename, file_bytes),
+                model="whisper-large-v3",
+                response_format="json"
+            )
+            raw_text = transcription.text
+            
             resp = client.chat.completions.create(
                 model="openai/gpt-oss-120b",
                 messages=[
-                    {"role": "system", "content": "You are a translator. Convert the following text into 'Hinglish' (Conversational Hindi written using the English alphabet). Do not answer questions, just translate the text directly."},
-                    {"role": "user", "content": text}
+                    {"role": "system", "content": "You are a translator. Translate the following text into 'Hinglish' (conversational Hindi written using ONLY the English alphabet). Under NO circumstances should you use Devanagari script. Do not add commentary."},
+                    {"role": "user", "content": raw_text}
                 ],
-                temperature=0.1
+                temperature=0.0
             )
             text = resp.choices[0].message.content.strip()
 
@@ -104,7 +110,6 @@ def classify_problem(payload: ClassifyRequest):
     if not case:
         raise HTTPException(status_code=404, detail="Case ID not found.")
 
-    # Pass the language down to the classifier
     result = classifier.classify(payload.problem_text, payload.language)
     
     case_manager.update_case(payload.case_id, {
@@ -125,7 +130,8 @@ def generate_rti(payload: FormSubmitRequest):
         raise HTTPException(status_code=404, detail="Case ID not found.")
 
     user_problem = case.get("user_problem", "")
-    draft = outcome_engine.generate_initial_rti(payload.form_data, user_problem)
+    language = case.get("language", "English")
+    draft = outcome_engine.generate_initial_rti(payload.form_data, user_problem, language)
 
     case_manager.update_case(payload.case_id, {
         "status": "rti_drafted",
@@ -144,7 +150,8 @@ def predict_rti(payload: RTIPredictRequest):
     if not draft_text:
         raise HTTPException(status_code=400, detail="No RTI draft found to analyze.")
 
-    prediction_result = outcome_engine.predict_rti_outcome(draft_text)
+    language = case.get("language", "English")
+    prediction_result = outcome_engine.predict_rti_outcome(draft_text, language)
     case_manager.update_case(payload.case_id, {
         "status": "rti_predicted",
         "prediction_result": prediction_result
@@ -161,8 +168,9 @@ def improve_rti(payload: RTIImproveRequest):
     pred = case.get("prediction_result", {})
     risks = pred.get("detected_risks", [])
     suggestions = pred.get("improvement_suggestions", [])
+    language = case.get("language", "English")
 
-    improved_result = outcome_engine.generate_improved_rti(initial_draft, risks, suggestions)
+    improved_result = outcome_engine.generate_improved_rti(initial_draft, risks, suggestions, language)
     case_manager.update_case(payload.case_id, {
         "status": "rti_completed",
         "improved_draft": improved_result.get("improved_draft"),
@@ -179,8 +187,9 @@ def resolve_department(payload: DepartmentResolveRequest):
     user_problem = case.get("user_problem", "")
     extracted_facts = {**case.get("form_data", {}), **case.get("extracted_facts", {})}
     location = payload.location or extracted_facts.get("applicant_city") or extracted_facts.get("applicant_state", "")
+    language = case.get("language", "English")
 
-    dept_info = department_resolver.resolve("RTI", user_problem, location, extracted_facts)
+    dept_info = department_resolver.resolve("RTI", user_problem, location, extracted_facts, language)
     case_manager.update_case(payload.case_id, {"department_info": dept_info})
     return {"case_id": payload.case_id, **dept_info}
 
@@ -214,7 +223,7 @@ async def generate_grievance(
     form_data: str = Form(...),
     user_problem: str = Form(...),
     language: str = Form("English"),
-    proof_files: Optional[List[UploadFile]] = File(None) # Fix: Optional prevents 422 crash when no files attached!
+    proof_files: Optional[List[UploadFile]] = File(None)
 ):
     case = case_manager.get_case(case_id)
     if not case:
