@@ -13,9 +13,11 @@ export const downloadRtiPdf = (case_id) => api.get(`/api/rti/pdf/${case_id}`, { 
 export const rtiPredict = (case_id, draft_text = null) => api.post('/api/rti/predict', { case_id, draft_text }).then(r => r.data)
 export const rtiImprove = (case_id) => api.post('/api/rti/improve', { case_id }).then(r => r.data)
 
-export const transcribeAudio = (audioBlob) => {
+// Pass the language down to the audio transcriber so it knows to output Hinglish!
+export const transcribeAudio = (audioBlob, language) => {
   const formData = new FormData()
   formData.append('audio_file', audioBlob, 'recording.webm')
+  formData.append('language', language)
   return api.post('/api/transcribe', formData).then(r => r.data)
 }
 
