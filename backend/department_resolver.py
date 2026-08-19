@@ -11,7 +11,6 @@ class SmartDepartmentResolver:
         return classifier.client
 
     def _search_web_context(self, query: str, is_tender: bool = False) -> str:
-        """Pulls lightweight web context using Wikipedia API to avoid Vercel binary crashes. Enhanced for central records and tenders."""
         try:
             if is_tender:
                 query = f"{query} active tender portal eprocurement"
