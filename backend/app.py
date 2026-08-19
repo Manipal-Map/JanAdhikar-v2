@@ -23,7 +23,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Pydantic Schemas ---
 class CaseInitResponse(BaseModel):
     case_id: str
     message: str
@@ -31,18 +30,12 @@ class CaseInitResponse(BaseModel):
 class ClassifyRequest(BaseModel):
     case_id: str
     problem_text: str
-
-class ClassifyResponse(BaseModel):
-    case_id: str
-    route: str
-    sub_category: str
-    confidence: float
-    reasoning: str
-    form_schema: List[Dict[str, Any]]
+    language: str = "English"
 
 class ChatMessageRequest(BaseModel):
     case_id: str
     message: str
+    language: str = "English"
 
 class FormSubmitRequest(BaseModel):
     case_id: str
@@ -59,7 +52,6 @@ class DepartmentResolveRequest(BaseModel):
     case_id: str
     location: Optional[str] = None
 
-# --- Endpoints ---
 @app.get("/")
 def health_check():
     return {"status": "ok", "system": "CivicRoute Backend Active"}
@@ -69,60 +61,44 @@ def init_case():
     new_case_id = case_manager.create_case()
     return CaseInitResponse(case_id=new_case_id, message="Save this ID safely.")
 
-@app.post("/api/case/classify", response_model=ClassifyResponse)
+@app.post("/api/transcribe")
+async def transcribe_audio(audio_file: UploadFile = File(...)):
+    try:
+        file_bytes = await audio_file.read()
+        client = classifier.client
+        if not client:
+            raise HTTPException(status_code=503, detail="Groq client not initialized")
+            
+        transcription = client.audio.transcriptions.create(
+            file=(audio_file.filename, file_bytes),
+            model="whisper-large-v3",
+            response_format="json"
+        )
+        return {"text": transcription.text}
+    except Exception as e:
+        print(f"Transcription error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to transcribe audio.")
+
+@app.post("/api/case/classify")
 def classify_problem(payload: ClassifyRequest):
     case = case_manager.get_case(payload.case_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case ID not found.")
 
-    result = classifier.classify(payload.problem_text)
+    prompt_with_lang = f"[{payload.language}] {payload.problem_text}"
+    result = classifier.classify(prompt_with_lang)
+    
     case_manager.update_case(payload.case_id, {
         "status": "classified",
         "route": result["route"],
         "sub_category": result["sub_category"],
         "user_problem": payload.problem_text,
-        "form_schema": result["form_schema"]
+        "form_schema": result["form_schema"],
+        "language": payload.language
     })
 
-    return ClassifyResponse(
-        case_id=payload.case_id,
-        route=result["route"],
-        sub_category=result["sub_category"],
-        confidence=result["confidence"],
-        reasoning=result["reasoning"],
-        form_schema=result["form_schema"]
-    )
+    return {**result, "case_id": payload.case_id}
 
-@app.post("/api/chat/continue")
-def chat_continue(payload: ChatMessageRequest):
-    case = case_manager.get_case(payload.case_id)
-    if not case:
-        raise HTTPException(status_code=404, detail="Case ID not found.")
-    
-    route = case.get("route")
-    if route == "Other":
-        return {
-            "case_id": payload.case_id,
-            "updated_facts": {},
-            "ai_response": "This inquiry falls outside statutory RTI and administrative grievance frameworks. Please handle this matter independently through direct personal communication or appropriate civil channels.",
-            "is_complete": True
-        }
-    schema = case.get("form_schema", [])
-    current_facts = case.get("extracted_facts", {})
-    
-    result = outcome_engine.process_chat_turn(route, schema, current_facts, payload.message)
-    if result.get("new_facts_extracted"):
-        current_facts.update(result["new_facts_extracted"])
-    
-    case_manager.update_case(payload.case_id, {"extracted_facts": current_facts})
-    return {
-        "case_id": payload.case_id,
-        "updated_facts": current_facts,
-        "ai_response": result.get("ai_response"),
-        "is_complete": result.get("is_complete")
-    }
-
-# --- RTI Pipeline Endpoints ---
 @app.post("/api/rti/generate")
 def generate_rti(payload: FormSubmitRequest):
     case = case_manager.get_case(payload.case_id)
@@ -213,13 +189,13 @@ def download_rti_pdf(case_id: str):
         headers={"Content-Disposition": f"attachment; filename={case_id}_RTI.pdf"}
     )
 
-# --- Rights / Grievance Pipeline Endpoint (Updated for File Uploads) ---
 @app.post("/api/grievance/generate")
 async def generate_grievance(
     case_id: str = Form(...),
     form_data: str = Form(...),
     user_problem: str = Form(...),
-    proof_file: Optional[UploadFile] = File(None)
+    language: str = Form("English"),
+    proof_files: List[UploadFile] = File(None)
 ):
     case = case_manager.get_case(case_id)
     if not case:
@@ -228,18 +204,18 @@ async def generate_grievance(
     parsed_form_data = json.loads(form_data)
     location = parsed_form_data.get("applicant_city", "")
 
-    file_bytes = None
-    mime_type = ""
-    if proof_file:
-        file_bytes = await proof_file.read()
-        mime_type = proof_file.content_type
+    files_data = []
+    if proof_files:
+        for pf in proof_files:
+            bytes_data = await pf.read()
+            files_data.append({"bytes": bytes_data, "mime_type": pf.content_type})
 
     pack = grievance_resolver.analyze_proof_and_rights(
         user_problem=user_problem,
         location=location,
         form_data=parsed_form_data,
-        file_bytes=file_bytes,
-        mime_type=mime_type
+        files_data=files_data,
+        language=language
     )
 
     case_manager.update_case(case_id, {
