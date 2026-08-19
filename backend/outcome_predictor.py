@@ -1,14 +1,14 @@
 import json
 from typing import Dict, Any, List
 from groq import Groq
-from .prompts import (
+from prompts import (
     RTI_DRAFT_SYSTEM_PROMPT,
     RTI_PREDICTOR_SYSTEM_PROMPT,
     RTI_IMPROVE_SYSTEM_PROMPT,
     GRIEVANCE_PACK_SYSTEM_PROMPT,
     INFO_GATHERING_PROMPT
 )
-from .classifier import classifier
+from classifier import classifier
 
 class OutcomeEngine:
     def __init__(self):
