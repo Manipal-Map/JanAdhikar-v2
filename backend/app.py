@@ -15,9 +15,10 @@ from grievance_resolver import grievance_resolver
 
 app = FastAPI(title="CivicRoute AI API", version="1.0")
 
+# Fix: Allow ALL origins securely so Vercel Preview branches never trigger CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https://(.*\.)?jan-adhikar(-[a-zA-Z0-9_-]+)?\.vercel\.app|http://localhost:5173",
+    allow_origin_regex=r".*", 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -62,7 +63,10 @@ def init_case():
     return CaseInitResponse(case_id=new_case_id, message="Save this ID safely.")
 
 @app.post("/api/transcribe")
-async def transcribe_audio(audio_file: UploadFile = File(...)):
+async def transcribe_audio(
+    audio_file: UploadFile = File(...),
+    language: str = Form("English")
+):
     try:
         file_bytes = await audio_file.read()
         client = classifier.client
@@ -74,7 +78,22 @@ async def transcribe_audio(audio_file: UploadFile = File(...)):
             model="whisper-large-v3",
             response_format="json"
         )
-        return {"text": transcription.text}
+        
+        text = transcription.text
+        
+        # Intercept and translate to Hinglish if requested
+        if language == "Hinglish":
+            resp = client.chat.completions.create(
+                model="openai/gpt-oss-120b",
+                messages=[
+                    {"role": "system", "content": "You are a translator. Convert the following text into 'Hinglish' (Conversational Hindi written using the English alphabet). Do not answer questions, just translate the text directly."},
+                    {"role": "user", "content": text}
+                ],
+                temperature=0.1
+            )
+            text = resp.choices[0].message.content.strip()
+
+        return {"text": text}
     except Exception as e:
         print(f"Transcription error: {e}")
         raise HTTPException(status_code=500, detail="Failed to transcribe audio.")
@@ -85,8 +104,8 @@ def classify_problem(payload: ClassifyRequest):
     if not case:
         raise HTTPException(status_code=404, detail="Case ID not found.")
 
-    prompt_with_lang = f"[{payload.language}] {payload.problem_text}"
-    result = classifier.classify(prompt_with_lang)
+    # Pass the language down to the classifier
+    result = classifier.classify(payload.problem_text, payload.language)
     
     case_manager.update_case(payload.case_id, {
         "status": "classified",
@@ -195,7 +214,7 @@ async def generate_grievance(
     form_data: str = Form(...),
     user_problem: str = Form(...),
     language: str = Form("English"),
-    proof_files: List[UploadFile] = File(default=[])
+    proof_files: Optional[List[UploadFile]] = File(None) # Fix: Optional prevents 422 crash when no files attached!
 ):
     case = case_manager.get_case(case_id)
     if not case:
