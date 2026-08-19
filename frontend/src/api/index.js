@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: '',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '',
   timeout: 60000,
   headers: { 'Content-Type': 'application/json' },
 })
@@ -18,7 +18,7 @@ export const classifyCase = (case_id, problem_text) =>
 export const chatContinue = (case_id, message) =>
   api.post('/api/chat/continue', { case_id, message }).then((r) => r.data)
 
-// ── RTI Generate  (form submit → creates initial_draft on server) ──────────
+// ── RTI Generate ───────────────────────────────────────────────────────────
 export const rtiGenerate = (case_id, form_data) =>
   api.post('/api/rti/generate', { case_id, form_data }).then((r) => r.data)
 
@@ -39,7 +39,7 @@ export const rtiPredict = (case_id, draft_text = null) =>
 export const rtiImprove = (case_id) =>
   api.post('/api/rti/improve', { case_id }).then((r) => r.data)
 
-// ── Grievance Generate (form/chat → demand notice + filing guide) ──────────
+// ── Grievance Generate ─────────────────────────────────────────────────────
 export const grievanceGenerate = (case_id, form_data = {}) =>
   api.post('/api/grievance/generate', { case_id, form_data }).then((r) => r.data)
 
