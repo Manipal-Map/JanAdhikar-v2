@@ -22,7 +22,6 @@ export default function AudioRecorder({ onTranscription, language = "English" })
         chunksRef.current = []
         setIsTranscribing(true)
         try {
-          // Pass the language to API to enable auto-Hinglish translation
           const res = await transcribeAudio(audioBlob, language)
           if (res.text) onTranscription(res.text)
         } catch (error) {
@@ -49,8 +48,9 @@ export default function AudioRecorder({ onTranscription, language = "English" })
 
   if (isTranscribing) {
     return (
-      <button disabled className="p-3 bg-slate-100 text-slate-500 rounded-xl border border-slate-200 shadow-sm flex items-center justify-center">
-        <Loader2 size={18} className="animate-spin" />
+      <button disabled className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-500 rounded-full border border-slate-200 text-sm font-semibold cursor-not-allowed">
+        <Loader2 size={16} className="animate-spin" />
+        <span>Processing...</span>
       </button>
     )
   }
@@ -58,14 +58,15 @@ export default function AudioRecorder({ onTranscription, language = "English" })
   return (
     <button
       onClick={isRecording ? stopRecording : startRecording}
-      className={`p-3 rounded-xl border shadow-sm flex items-center justify-center transition-all ${
+      className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
         isRecording 
           ? 'bg-red-50 border-red-200 text-red-600 animate-pulse' 
-          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+          : 'bg-[#FAF8F5] border-[#E2E8F0] text-ashoka-navy hover:bg-slate-100'
       }`}
-      title={isRecording ? "Stop" : "Dictate Audio"}
+      title={isRecording ? "Stop Dictation" : "Start Voice Input"}
     >
-      {isRecording ? <Square size={18} /> : <Mic size={18} />}
+      {isRecording ? <Square size={16} /> : <Mic size={16} />}
+      <span>{isRecording ? 'Stop' : 'Voice'}</span>
     </button>
   )
 }
