@@ -3,7 +3,6 @@ import axios from 'axios'
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '',
   timeout: 60000,
-  headers: { 'Content-Type': 'application/json' },
 })
 
 // ── Case Init ──────────────────────────────────────────────────────────────
@@ -39,9 +38,11 @@ export const rtiPredict = (case_id, draft_text = null) =>
 export const rtiImprove = (case_id) =>
   api.post('/api/rti/improve', { case_id }).then((r) => r.data)
 
-// ── Grievance Generate ─────────────────────────────────────────────────────
-export const grievanceGenerate = (case_id, form_data = {}) =>
-  api.post('/api/grievance/generate', { case_id, form_data }).then((r) => r.data)
+// ── Grievance Generate (Handles Image Upload) ──────────────────────────────
+export const grievanceGenerate = (payload) =>
+  api.post('/api/grievance/generate', payload, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }).then((r) => r.data)
 
 // ── Get full case state ────────────────────────────────────────────────────
 export const getCase = (case_id) =>
