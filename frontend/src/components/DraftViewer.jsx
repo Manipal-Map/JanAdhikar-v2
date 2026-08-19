@@ -30,7 +30,7 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
         <title>${title}</title>
         <style>
           body { font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.7;
-                 padding: 40px; max-width: 800px; margin: 0 auto; color: #1a1a1a; }
+                 padding: 40px; max-width: 800px; margin: 0 auto; color: #1e293b; }
           pre  { white-space: pre-wrap; word-wrap: break-word; }
         </style>
       </head><body>
@@ -47,47 +47,26 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
       animate={{ opacity: 1, y: 0 }}
       className="glass-card overflow-hidden"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50">
         <div className="flex items-center gap-2.5">
-          <FileText size={16} className="text-brand-blue" />
-          <h3 className="text-sm font-semibold text-white">{title}</h3>
-          {caseId && (
-            <span className="text-xs font-mono text-slate-500">#{caseId}</span>
-          )}
+          <FileText size={16} className="text-blue-600" />
+          <h3 className="text-sm font-bold text-slate-900">{title}</h3>
+          {caseId && <span className="text-xs font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">#{caseId}</span>}
         </div>
         <div className="flex items-center gap-1.5">
-          <button
-            onClick={handleCopy}
-            className="btn-ghost text-xs py-1.5 px-3 gap-1.5"
-            title="Copy to clipboard"
-          >
-            {copied ? (
-              <><CheckCheck size={13} className="text-emerald-400" /> Copied!</>
-            ) : (
-              <><Copy size={13} /> Copy</>
-            )}
+          <button onClick={handleCopy} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
+            {copied ? <><CheckCheck size={13} className="text-emerald-600" /> Copied!</> : <><Copy size={13} /> Copy</>}
           </button>
-          <button
-            onClick={handleDownload}
-            className="btn-ghost text-xs py-1.5 px-3 gap-1.5"
-            title="Download as .txt"
-          >
+          <button onClick={handleDownload} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
             <Download size={13} /> Download
           </button>
-          <button
-            onClick={handlePrint}
-            className="btn-ghost text-xs py-1.5 px-3 gap-1.5"
-            title="Print / Save as PDF"
-          >
+          <button onClick={handlePrint} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
             <Printer size={13} /> Print
           </button>
         </div>
       </div>
-
-      {/* Document body */}
-      <div className="p-5 max-h-[500px] overflow-y-auto">
-        <pre className="text-sm text-slate-300 font-mono leading-relaxed whitespace-pre-wrap break-words">
+      <div className="p-5 max-h-[500px] overflow-y-auto bg-white">
+        <pre className="text-sm text-slate-800 font-mono leading-relaxed whitespace-pre-wrap break-words">
           {draft}
         </pre>
       </div>
