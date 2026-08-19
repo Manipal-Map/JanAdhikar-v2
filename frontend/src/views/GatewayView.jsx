@@ -90,10 +90,6 @@ export default function GatewayView() {
             <select value={language} onChange={(e) => setLanguage(e.target.value)} className="bg-transparent border-none outline-none cursor-pointer">
               <option value="English">English</option>
               <option value="Hinglish">Hinglish (Hindi in English Script)</option>
-              <option value="Hindi">हिंदी (Hindi)</option>
-              <option value="Marathi">मराठी (Marathi)</option>
-              <option value="Tamil">தமிழ் (Tamil)</option>
-              <option value="Bengali">বাংলা (Bengali)</option>
             </select>
           </div>
           {caseId && <CaseIdBadge caseId={caseId} />}
