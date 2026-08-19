@@ -3,43 +3,99 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
   body {
-    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+    @apply bg-[#FAF8F5] text-ashoka-navy font-sans antialiased;
+  }
+
+  ::selection {
+    @apply bg-court-maroon text-white;
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-1.5;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-[#FAF8F5];
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full;
   }
 }
 
 @layer components {
+  /* Mapped to your new glass-panel style */
   .glass-card {
-    @apply bg-white border border-slate-200 rounded-2xl shadow-sm;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    @apply rounded-2xl;
   }
 
+  /* Automatically turns all your Primary buttons into the btn-maroon-solid */
   .btn-primary {
-    @apply inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm;
+    @apply inline-flex items-center gap-2 px-5 py-2.5 bg-court-maroon text-white font-semibold rounded-xl transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed;
+    border: 1px solid #701A75;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background-color: #701A75;
+    box-shadow: 0 4px 14px rgba(136, 19, 55, 0.25);
+    transform: translateY(-1px);
+  }
+
+  /* New secondary navy button if you ever need it */
+  .btn-navy {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 bg-ashoka-navy text-white font-semibold rounded-xl transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed;
+    border: 1px solid #0F172A;
+  }
+  .btn-navy:hover:not(:disabled) {
+    background-color: #1E293B;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
+    transform: translateY(-1px);
   }
 
   .btn-ghost {
-    @apply inline-flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium rounded-xl transition-all duration-200 border border-slate-200 bg-white shadow-sm;
+    @apply inline-flex items-center gap-2 px-4 py-2 text-ashoka-navy hover:text-court-maroon hover:bg-[#FAF8F5] font-medium rounded-xl transition-all duration-200 border border-slate-200 bg-white shadow-sm;
   }
 
   .input-field {
-    @apply w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200;
+    @apply w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-ashoka-navy placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-court-maroon/30 focus:border-court-maroon transition-all duration-200;
   }
 
+  /* Mapped badges to the new institutional colors */
   .badge-rti {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-200;
+    @apply inline-flex items-center gap-1.5 px-3 py-1 bg-statutory-green/10 text-statutory-green text-xs font-semibold rounded-full border border-statutory-green/20;
   }
 
   .badge-grievance {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-700 text-xs font-semibold rounded-full border border-amber-200;
+    @apply inline-flex items-center gap-1.5 px-3 py-1 bg-saffron-deep/10 text-saffron-deep text-xs font-semibold rounded-full border border-saffron-deep/20;
   }
 
   .badge-other {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full border border-slate-200;
+    @apply inline-flex items-center gap-1.5 px-3 py-1 bg-ashoka-navy/10 text-ashoka-navy text-xs font-semibold rounded-full border border-ashoka-navy/20;
   }
 }
 
+/* Subtle maroon/navy glow applied to the cream background to keep the app from feeling flat */
 .gradient-bg {
-  background: radial-gradient(ellipse at top left, rgba(37,99,235,0.04) 0%, transparent 50%),
-              radial-gradient(ellipse at bottom right, rgba(79,70,229,0.03) 0%, transparent 50%),
-              #f8fafc;
+  background: radial-gradient(ellipse at top left, rgba(136, 19, 55, 0.03) 0%, transparent 50%),
+              radial-gradient(ellipse at bottom right, rgba(15, 23, 42, 0.03) 0%, transparent 50%),
+              #FAF8F5;
+}
+
+/* Handdrawn SVG Line Utilities */
+.handdrawn-line-main {
+  stroke-dasharray: 450;
+  stroke-dashoffset: 450;
+  @apply animate-draw-line;
+}
+.handdrawn-line-accent {
+  stroke-dasharray: 450;
+  stroke-dashoffset: 450;
+  animation: drawHanddrawnLine 1.1s cubic-bezier(0.65, 0, 0.35, 1) 0.5s forwards;
 }
