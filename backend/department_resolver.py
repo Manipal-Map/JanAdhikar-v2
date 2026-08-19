@@ -1,75 +1,68 @@
 import json
 from typing import Dict, Any
+from duckduckgo_search import DDGS
 from classifier import classifier
-from prompts import JURISDICTION_RESOLVER_PROMPT
-from data.jurisdiction_knowledge import JURISDICTION_KB
 
-
-class DepartmentResolver:
+class SmartDepartmentResolver:
     def __init__(self):
         self.model = "openai/gpt-oss-120b"
+        self.ddgs = DDGS()
 
     def _get_client(self):
         return classifier.client
+
+    def _search_web(self, query: str) -> str:
+        """Pulls live web snippets to feed the LLM."""
+        try:
+            results = self.ddgs.text(query, max_results=4)
+            return "\n".join([f"- {r['title']}: {r['body']}" for r in results])
+        except Exception:
+            return "Web search failed. Rely on internal knowledge."
 
     def resolve(self, route: str, user_problem: str, location: str, extracted_facts: Dict[str, Any]) -> Dict[str, Any]:
         client = self._get_client()
         if not client:
             return self._fallback(location)
 
-        kb_context = json.dumps(JURISDICTION_KB, indent=2)
-        user_content = (
-            f"Citizen's issue: {user_problem}\n"
-            f"Location provided: {location or 'Not specified'}\n"
-            f"Facts collected so far: {json.dumps(extracted_facts, indent=2)}"
-        )
+        # Step 1: Formulate search query based on problem & location
+        search_query = f"Public Information Officer PIO address {location} {user_problem.split()[0:3]}"
+        web_context = self._search_web(search_query)
+
+        system_prompt = """You are an expert Indian RTI Jurisdiction Resolver. 
+        Use the provided Live Web Context to find the EXACT Public Authority, PIO Designation, and Address.
+        Return ONLY valid JSON:
+        {
+          "public_authority_name": "Specific Dept Name",
+          "jurisdiction_level": "Central or State or Municipal",
+          "pio_designation": "e.g., The Public Information Officer, Ward 12",
+          "suggested_address_template": "Full physical address with PIN",
+          "address_confidence": "HIGH" or "LOW",
+          "reasoning": "Brief explanation"
+        }"""
+
+        user_content = f"Issue: {user_problem}\nLocation: {location}\n\nLive Web Context:\n{web_context}"
 
         try:
             resp = client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": JURISDICTION_RESOLVER_PROMPT.format(kb=kb_context)},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_content},
                 ],
-                temperature=0.0,
+                temperature=0.1,
                 response_format={"type": "json_object"},
             )
-            result = json.loads(resp.choices[0].message.content.strip())
-            result["verify_links"] = self._build_verify_links(result)
-            return result
-        except Exception as e:
-            print(f"[DepartmentResolver] Falling back due to: {e}")
+            return json.loads(resp.choices[0].message.content.strip())
+        except Exception:
             return self._fallback(location)
-
-    def _build_verify_links(self, result: Dict[str, Any]) -> list:
-        dept = (result.get("public_authority_name") or "").strip()
-        level = result.get("jurisdiction_level", "State")
-        q = dept.replace(" ", "+")
-        links = []
-        if level == "Central":
-            links.append({
-                "label": "RTI Online — Central PIO Directory",
-                "url": f"https://rtionline.gov.in/request/request.php?search={q}"
-            })
-        links.append({
-            "label": f"Verify '{dept or 'department'}' address online",
-            "url": f"https://www.google.com/search?q={q}+PIO+address+RTI+official"
-        })
-        return links
 
     def _fallback(self, location: str) -> Dict[str, Any]:
         return {
-            "public_authority_name": "Not identified — manual lookup required",
+            "public_authority_name": "Concerned Department",
             "jurisdiction_level": "Unknown",
             "pio_designation": "Public Information Officer",
             "address_confidence": "LOW",
-            "suggested_address_template": f"Office of the Public Information Officer, [Department Name], {location or '[City, District, State]'} - [PIN]",
-            "reasoning": "Automatic resolution unavailable right now. Please confirm the correct department using the verification link before filing.",
-            "supporting_rti_section": "",
-            "verify_links": [
-                {"label": "Search RTI PIO Directory", "url": "https://rtionline.gov.in/request/request.php"}
-            ],
+            "suggested_address_template": f"Office of the PIO, [Department], {location} - [PIN]",
         }
 
-
-department_resolver = DepartmentResolver()
+department_resolver = SmartDepartmentResolver()
