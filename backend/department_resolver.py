@@ -18,7 +18,10 @@ class SmartDepartmentResolver:
                 query = f"{query} central public information officer CIC"
                 
             search_url = f"https://en.wikipedia.org/w/api.php?action=opensearch&search={query}&limit=3&format=json"
-            with httpx.Client(timeout=5.0) as client:
+            
+            headers = {"User-Agent": "CivicRoute/1.0 (https://jan-adhikar.vercel.app)"}
+            
+            with httpx.Client(timeout=5.0, headers=headers) as client:
                 response = client.get(search_url)
                 data = response.json()
                 if len(data) > 2 and data[2]:
