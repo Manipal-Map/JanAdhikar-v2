@@ -4,6 +4,35 @@ export default {
   theme: {
     extend: {
       colors: {
+        // OVERRIDE: Replaces all startup "blues" with Court Maroon (Rose scale)
+        blue: {
+          50: '#fff1f2',
+          100: '#ffe4e6',
+          200: '#fecdd3',
+          300: '#fda4af',
+          400: '#fb7185',
+          500: '#f43f5e',
+          600: '#e11d48',
+          700: '#be123c',
+          800: '#9f1239',
+          900: '#881337', // Deep Court Maroon
+          950: '#4c0519',
+        },
+        // OVERRIDE: Replaces all "indigos" with Ashoka Navy (Slate scale)
+        indigo: {
+          50: '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5e1',
+          400: '#94a3b8',
+          500: '#64748b',
+          600: '#475569',
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a', // Deep Ashoka Navy
+          950: '#020617',
+        },
+        // Dedicated custom variables
         court: {
           maroon: '#881337',
           maroonHover: '#701A75',
@@ -25,7 +54,6 @@ export default {
       animation: {
         'fade-in': 'fadeIn 0.5s ease-out',
         'slide-up': 'slideUp 0.4s ease-out',
-        'draw-line': 'drawHanddrawnLine 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0.2s forwards',
       },
       keyframes: {
         fadeIn: {
@@ -35,11 +63,6 @@ export default {
         slideUp: {
           '0%': { opacity: '0', transform: 'translateY(20px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        drawHanddrawnLine: {
-          '0%': { strokeDashoffset: '450', opacity: '0' },
-          '10%': { opacity: '1' },
-          '100%': { strokeDashoffset: '0', opacity: '1' },
         }
       },
     },
