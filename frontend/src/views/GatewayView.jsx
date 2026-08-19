@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Sparkles, ArrowRight, Scale, FileSearch, Loader2, AlertCircle, CheckCircle2, RotateCcw, HelpCircle, Globe } from 'lucide-react'
+import { Sparkles, ArrowRight, Scale, FileSearch, Loader2, AlertCircle, CheckCircle2, RotateCcw, HelpCircle, Globe, KeyRound } from 'lucide-react'
 import useCaseStore from '../store/caseStore'
-import { initCase, classifyCase } from '../api'
+import { initCase, classifyCase, getCase } from '../api' // ADDED getCase
 import CaseIdBadge from '../components/CaseIdBadge'
 import AudioRecorder from '../components/AudioRecorder'
 
@@ -32,19 +32,22 @@ const ROUTE_DESCRIPTIONS = {
 
 export default function GatewayView() {
   const [text, setText] = useState('')
+  const [passkey, setPasskey] = useState('')
+  const [resumeMode, setResumeMode] = useState(false)
   const [localErr, setLocalErr] = useState(null)
 
   const {
     stage, setStage, caseId, setCaseId,
     classifyResult, setClassifyResult,
-    setUserProblem, language, setLanguage
+    setUserProblem, language, setLanguage,
+    hydrateState
   } = useCaseStore()
 
-  const isClassifying = stage === 'INITIALIZING' || stage === 'CLASSIFYING'
+  const isProcessing = stage === 'INITIALIZING' || stage === 'CLASSIFYING'
   const isClassified = stage === 'CLASSIFIED_CONFIRM' && classifyResult
 
   const handleClassify = async () => {
-    if (!text.trim() || isClassifying) return
+    if (!text.trim() || isProcessing) return
     setLocalErr(null)
 
     try {
@@ -59,6 +62,20 @@ export default function GatewayView() {
       setStage('CLASSIFIED_CONFIRM')
     } catch (err) {
       setLocalErr(err?.response?.data?.detail || err.message || 'Something went wrong.')
+      setStage('IDLE')
+    }
+  }
+
+  const handleResume = async () => {
+    if (!passkey.trim() || isProcessing) return
+    setLocalErr(null)
+    setStage('INITIALIZING')
+
+    try {
+      const res = await getCase(passkey.trim().toUpperCase())
+      hydrateState(res.case_id, res.data)
+    } catch (err) {
+      setLocalErr('Passkey not found or expired. Please check and try again.')
       setStage('IDLE')
     }
   }
@@ -107,35 +124,80 @@ export default function GatewayView() {
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight mb-4">
                   Describe your problem.<br /><span className="text-blue-600">AI finds the department & drafts the filing.</span>
                 </h1>
-                <div className="glass-card p-6 text-left shadow-md">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                    What issue or record do you need help with?
-                  </label>
-                  <div className="flex gap-2 mb-4">
-                    <textarea
-                      rows={5}
-                      value={text}
-                      onChange={(e) => setText(e.target.value)}
-                      disabled={isClassifying}
-                      placeholder="e.g., The road in Ward 8 of Jaipur was constructed 2 months ago for ₹35 Lakhs but already has huge potholes..."
-                      className="input-field resize-none text-sm leading-relaxed flex-1"
-                    />
-                    <div className="flex flex-col gap-2">
-                      <AudioRecorder 
-                        language={language} 
-                        onTranscription={(t) => setText(prev => prev + (prev ? " " : "") + t)} 
+
+                {!resumeMode ? (
+                  // --- NEW CASE MODE ---
+                  <div className="glass-card p-6 text-left shadow-md">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                      What issue or record do you need help with?
+                    </label>
+                    <div className="flex gap-2 mb-4">
+                      <textarea
+                        rows={5}
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        disabled={isProcessing}
+                        placeholder="e.g., The road in Ward 8 of Jaipur was constructed 2 months ago for ₹35 Lakhs but already has huge potholes..."
+                        className="input-field resize-none text-sm leading-relaxed flex-1"
                       />
+                      <div className="flex flex-col gap-2">
+                        <AudioRecorder 
+                          language={language} 
+                          onTranscription={(t) => setText(prev => prev + (prev ? " " : "") + t)} 
+                        />
+                      </div>
+                    </div>
+                    {localErr && (
+                      <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl mb-4 text-sm text-red-700">
+                        <AlertCircle size={16} className="mt-0.5 flex-shrink-0" /><span>{localErr}</span>
+                      </div>
+                    )}
+                    <button onClick={handleClassify} disabled={!text.trim() || isProcessing} className="btn-primary w-full justify-center text-sm py-3">
+                      {isProcessing ? <><Loader2 size={16} className="animate-spin" /> Analyzing your issue with Legal AI…</> : <>Analyze & Identify Legal Route <ArrowRight size={16} /></>}
+                    </button>
+                    
+                    {/* Resume Toggle Button */}
+                    <div className="mt-5 text-center">
+                      <button onClick={() => { setResumeMode(true); setLocalErr(null); }} className="text-xs font-medium text-slate-500 hover:text-blue-600 underline underline-offset-4 decoration-slate-300 hover:decoration-blue-600 transition-colors">
+                        Already have an Issue Passkey? Resume here.
+                      </button>
                     </div>
                   </div>
-                  {localErr && (
-                    <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl mb-4 text-sm text-red-700">
-                      <AlertCircle size={16} className="mt-0.5 flex-shrink-0" /><span>{localErr}</span>
+                ) : (
+                  // --- RESUME MODE ---
+                  <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card p-6 text-left shadow-md">
+                    <div className="flex items-center gap-2 mb-4">
+                      <KeyRound size={18} className="text-blue-600" />
+                      <h2 className="text-base font-bold text-slate-900">Resume Existing Case</h2>
                     </div>
-                  )}
-                  <button onClick={handleClassify} disabled={!text.trim() || isClassifying} className="btn-primary w-full justify-center text-sm py-3">
-                    {isClassifying ? <><Loader2 size={16} className="animate-spin" /> Analyzing your issue with Legal AI…</> : <>Analyze & Identify Legal Route <ArrowRight size={16} /></>}
-                  </button>
-                </div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                      Enter your Issue Passkey
+                    </label>
+                    <input 
+                      type="text"
+                      value={passkey}
+                      onChange={(e) => setPasskey(e.target.value.toUpperCase())}
+                      disabled={isProcessing}
+                      placeholder="e.g. CR-ABCD-1234"
+                      className="input-field text-sm font-mono tracking-widest uppercase mb-4"
+                    />
+                    
+                    {localErr && (
+                      <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl mb-4 text-sm text-red-700">
+                        <AlertCircle size={16} className="mt-0.5 flex-shrink-0" /><span>{localErr}</span>
+                      </div>
+                    )}
+
+                    <div className="flex gap-3">
+                      <button onClick={() => { setResumeMode(false); setLocalErr(null); }} disabled={isProcessing} className="btn-ghost flex-1 justify-center py-3">
+                        Back
+                      </button>
+                      <button onClick={handleResume} disabled={!passkey.trim() || isProcessing} className="btn-primary flex-1 justify-center py-3">
+                        {isProcessing ? <Loader2 size={16} className="animate-spin" /> : 'Resume Case'}
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
               </motion.div>
             ) : (
               <motion.div key="confirm-screen" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-card p-8 shadow-xl border border-slate-200">
