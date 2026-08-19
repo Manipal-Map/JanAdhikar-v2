@@ -23,8 +23,10 @@ class GrievanceResolver:
         3. Extract key facts from the evidence.
         4. Draft a formal Legal Demand Notice.
         
-        CRITICAL: ALL text values in your JSON response MUST be written in {language}. 
-        If {language} is 'Hinglish', write in conversational Hindi using the English alphabet (e.g., 'Aapka consumer right violate hua hai...').
+        CRITICAL LANGUAGE INSTRUCTION:
+        The user has selected '{language}'. ALL text values in your JSON MUST be written in {language}.
+        If '{language}' is 'Hinglish', you MUST write conversational Hindi strictly using the English alphabet (e.g., 'Aapka right violate hua hai...').
+        ABSOLUTELY NO Devanagari or regional scripts are allowed. Use English alphabet ONLY.
         
         Return ONLY valid JSON matching this exact schema:
         {{
@@ -33,7 +35,7 @@ class GrievanceResolver:
           "target_portal_name": "e.g., e-Daakhil / CPGRAMS / RERA",
           "target_portal_url": "e.g., https://edaakhil.nic.in",
           "evidence_analysis": "What the proofs show (or 'No proof provided')",
-          "demand_notice_draft": "The complete legal demand notice in {language}."
+          "demand_notice_draft": "The complete legal demand notice."
         }}"""
 
         user_content_str = f"Issue: {user_problem}\nLocation: {location}\nForm Data: {json.dumps(form_data)}"
