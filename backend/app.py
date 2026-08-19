@@ -12,10 +12,13 @@ from .department_resolver import department_resolver
 from .rti_pdf_generator import generate_rti_pdf
 
 app = FastAPI(title="CivicRoute AI API", version="1.0")
-
+origins = [
+    "https://jan-adhikar.vercel.app",
+    "http://localhost:5173",  # For local development
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
