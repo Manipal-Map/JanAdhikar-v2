@@ -18,7 +18,6 @@ class SmartDepartmentResolver:
                 query = f"{query} central public information officer CIC"
                 
             search_url = f"https://en.wikipedia.org/w/api.php?action=opensearch&search={query}&limit=3&format=json"
-            
             headers = {"User-Agent": "CivicRoute/1.0 (https://jan-adhikar.vercel.app)"}
             
             with httpx.Client(timeout=5.0, headers=headers) as client:
@@ -30,7 +29,7 @@ class SmartDepartmentResolver:
             print(f"Context search failed: {e}")
         return "No live context available. Proceed using internal legal and civic knowledge."
 
-    def resolve(self, route: str, user_problem: str, location: str, extracted_facts: Dict[str, Any]) -> Dict[str, Any]:
+    def resolve(self, route: str, user_problem: str, location: str, extracted_facts: Dict[str, Any], language: str) -> Dict[str, Any]:
         client = self._get_client()
         if not client:
             return self._fallback(location)
@@ -41,25 +40,23 @@ class SmartDepartmentResolver:
         
         web_context = self._search_web_context(search_query, is_tender)
 
-        system_prompt = """You are an expert Indian RTI Jurisdiction Resolver. 
-        Analyze the citizen's issue and location. Use your knowledge of the Indian bureaucratic system and the provided context to find the EXACT Public Authority, PIO Designation, and physical Address.
+        system_prompt = f"""You are an expert Indian RTI Jurisdiction Resolver. 
+        Analyze the citizen's issue and location. Use your knowledge of the Indian bureaucratic system to find the EXACT Public Authority, PIO Designation, and Address.
         
-        Rules:
-        1. If it's a city road/sanitation issue -> Route to the specific Municipal Corporation.
-        2. If it's a state highway/infrastructure issue -> Route to State PWD.
-        3. If it involves Central Records/Tenders -> Route to specific Ministry or CPSU.
-        4. Determine if the jurisdiction is Central, State, or Municipal.
-        5. NEVER invent a fake PIN code if you aren't certain; use [PIN] instead.
+        CRITICAL LANGUAGE INSTRUCTION:
+        The user has selected '{language}'. ALL text values in your JSON MUST be written in {language}.
+        If '{language}' is 'Hinglish', you MUST write conversational Hindi strictly using the English alphabet.
+        ABSOLUTELY NO Devanagari or regional scripts are allowed. Use English alphabet ONLY.
         
         Return ONLY valid JSON matching this exact schema:
-        {
-          "public_authority_name": "Specific Dept Name (e.g., Municipal Corporation of Delhi)",
+        {{
+          "public_authority_name": "Specific Dept Name",
           "jurisdiction_level": "Central or State or Municipal",
           "pio_designation": "e.g., The Public Information Officer, Engineering Department",
           "suggested_address_template": "Full physical address with PIN (or placeholder [PIN] if uncertain)",
           "address_confidence": "HIGH" or "LOW",
           "reasoning": "Brief explanation why this authority holds the records"
-        }"""
+        }}"""
 
         user_content = f"Citizen Issue: {user_problem}\nLocation: {location}\nExtracted Facts: {json.dumps(extracted_facts)}\n\nLocation Context:\n{web_context}"
 
