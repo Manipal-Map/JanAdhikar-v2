@@ -1,8 +1,8 @@
 import json
 from typing import Dict, Any
-from .classifier import classifier
-from .prompts import JURISDICTION_RESOLVER_PROMPT
-from .data.jurisdiction_knowledge import JURISDICTION_KB
+from classifier import classifier
+from prompts import JURISDICTION_RESOLVER_PROMPT
+from data.jurisdiction_knowledge import JURISDICTION_KB
 
 
 class DepartmentResolver:
