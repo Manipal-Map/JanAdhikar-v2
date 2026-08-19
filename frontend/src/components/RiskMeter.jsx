@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import {
-  RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer, Cell,
-} from 'recharts'
+import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer, Cell } from 'recharts'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 
 const COLORS = {
-  full_disclosure:     '#10b981', // emerald
-  partial_disclosure:  '#f59e0b', // amber
-  rejection:           '#ef4444', // red
+  full_disclosure:   '#059669', // emerald-600
+  partial_disclosure: '#d97706', // amber-600
+  rejection:         '#dc2626', // red-600
 }
 
 const LABELS = {
@@ -40,57 +38,31 @@ export default function RiskMeter({ prediction, probabilities }) {
     key,
     name: LABELS[key] || key,
     value: Math.round(val * 100),
-    fill: COLORS[key] || '#6366f1',
+    fill: COLORS[key] || '#2563eb',
   }))
 
-  const dominant = Object.entries(probabilities).reduce((a, b) =>
-    b[1] > a[1] ? b : a
-  )
-  const dominantColor = COLORS[dominant[0]] || '#6366f1'
+  const dominant = Object.entries(probabilities).reduce((a, b) => b[1] > a[1] ? b : a)
+  const dominantColor = COLORS[dominant[0]] || '#2563eb'
 
-  const PREDICTION_ICON = {
-    FULL:    TrendingUp,
-    PARTIAL: Minus,
-    REJECTION: TrendingDown,
-  }
+  const PREDICTION_ICON = { FULL: TrendingUp, PARTIAL: Minus, REJECTION: TrendingDown }
   const PredIcon = PREDICTION_ICON[prediction] || Minus
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="space-y-4"
-    >
-      {/* Prediction badge */}
+    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <PredIcon size={18} style={{ color: dominantColor }} />
-          <span className="text-sm font-semibold" style={{ color: dominantColor }}>
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-full shadow-sm">
+          <PredIcon size={16} style={{ color: dominantColor }} />
+          <span className="text-xs font-bold uppercase tracking-wider" style={{ color: dominantColor }}>
             {prediction} LIKELY
           </span>
         </div>
-        <span className="text-xs text-slate-500">RTI-Bench Analysis</span>
       </div>
 
-      {/* Radial bar chart */}
       <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">
-          <RadialBarChart
-            cx="50%"
-            cy="50%"
-            innerRadius="35%"
-            outerRadius="85%"
-            data={data}
-            startAngle={90}
-            endAngle={-270}
-          >
+          <RadialBarChart cx="50%" cy="50%" innerRadius="35%" outerRadius="85%" data={data} startAngle={90} endAngle={-270}>
             <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-            <RadialBar
-              dataKey="value"
-              cornerRadius={6}
-              background={{ fill: '#161f3d' }}
-              label={false}
-            >
+            <RadialBar dataKey="value" cornerRadius={6} background={{ fill: '#f1f5f9' }} label={false}>
               {data.map((entry) => (
                 <Cell key={entry.key} fill={entry.fill} />
               ))}
@@ -99,17 +71,13 @@ export default function RiskMeter({ prediction, probabilities }) {
         </ResponsiveContainer>
       </div>
 
-      {/* Probability breakdown */}
-      <div className="space-y-2">
+      <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
         {data.map((item) => (
           <div key={item.key} className="flex items-center gap-3">
-            <div
-              className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-              style={{ background: item.fill }}
-            />
-            <span className="text-sm text-slate-400 flex-1">{item.name}</span>
-            <div className="flex items-center gap-2">
-              <div className="w-24 h-1.5 bg-navy-700 rounded-full overflow-hidden">
+            <div className="w-3 h-3 rounded-full shadow-sm" style={{ background: item.fill }} />
+            <span className="text-sm font-semibold text-slate-700 flex-1">{item.name}</span>
+            <div className="flex items-center gap-3">
+              <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden shadow-inner">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${item.value}%` }}
