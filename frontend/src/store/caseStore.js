@@ -30,6 +30,43 @@ const useCaseStore = create((set, get) => ({
   isLoading: false,
   setIsLoading: (isLoading) => set({ isLoading }),
 
+  // ── New: Load existing case from backend ──
+  hydrateState: (caseId, backendData) => {
+    const route = backendData.route;
+    let newStage = 'IDLE';
+
+    // Map backend status back to the frontend UI stages
+    if (backendData.status === 'classified') {
+      newStage = route === 'RTI' ? 'RTI_GATHERING' : 'GRIEVANCE_GATHERING';
+    } else if (backendData.status === 'rti_drafted') {
+      newStage = 'PREDICTING';
+    } else if (backendData.status === 'rti_predicted') {
+      newStage = 'IMPROVING';
+    } else if (backendData.status === 'rti_completed' || backendData.status === 'grievance_completed') {
+      newStage = 'COMPLETE';
+    }
+
+    set({
+      caseId: caseId,
+      language: backendData.language || 'English',
+      userProblem: backendData.user_problem || '',
+      classifyResult: {
+        route: backendData.route,
+        sub_category: backendData.sub_category,
+        form_schema: backendData.form_schema || [],
+        reasoning: "Resumed from saved passkey."
+      },
+      triageConfirmed: true, // Auto-bypass the triage gate if resuming
+      formData: backendData.form_data || {},
+      departmentInfo: backendData.department_info || null,
+      departmentConfirmed: !!backendData.department_info,
+      rtiPrediction: backendData.prediction_result || null,
+      rtiDraft: backendData.improved_draft || backendData.initial_draft || null,
+      grievanceResult: backendData.grievance_pack || null,
+      stage: newStage,
+    });
+  },
+
   reset: () =>
     set({
       stage: 'IDLE',
