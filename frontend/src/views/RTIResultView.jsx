@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { FileSearch, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle2, ShieldCheck, Loader2 } from 'lucide-react'
+import { FileSearch, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle2, ShieldCheck, Loader2, AlertCircle } from 'lucide-react'
 import useCaseStore from '../store/caseStore'
 import { rtiPredict, rtiImprove } from '../api'
 import DraftViewer from '../components/DraftViewer'
@@ -112,7 +112,7 @@ export default function RTIResultView() {
               )}
 
               <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                <button onClick={() => setStage('RTI_GATHERING')} className="btn-ghost text-sm">
+                <button onClick={() => setStage('RTI_GATHERING')} className="btn-ghost text-sm cursor-pointer">
                   <ArrowLeft size={16} /> Edit Applicant Form
                 </button>
                 <button onClick={handleGenerateImproved} disabled={loadingImprove} className="btn-primary text-base py-3 px-8 cursor-pointer">
@@ -141,11 +141,24 @@ export default function RTIResultView() {
             <div className="space-y-6">
               <DraftViewer title="RTI Application (Section 6(1))" draft={improvedDraft || rtiDraft} caseId={caseId} />
 
+              {/* AI Disclaimer Notice Box */}
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 shadow-sm text-left">
+                <div className="mt-0.5 text-amber-600 flex-shrink-0">
+                  <AlertCircle size={18} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-amber-900 uppercase tracking-wide mb-1">Important Disclaimer</h4>
+                  <p className="text-xs text-amber-800 leading-relaxed font-medium">
+                    This is an AI generated document, read well before submission. Please verify all facts, dates, and claims thoroughly before sending it to the concerned authority or court.
+                  </p>
+                </div>
+              </div>
+
               <div className="flex items-center justify-between pt-2">
-                <button onClick={() => setSubStep(1)} className="btn-ghost text-sm">
+                <button onClick={() => setSubStep(1)} className="btn-ghost text-sm cursor-pointer">
                   <ArrowLeft size={16} /> Back to Risk Analysis
                 </button>
-                <button onClick={() => setStage('IDLE')} className="btn-ghost text-sm border-slate-300">
+                <button onClick={() => setStage('IDLE')} className="btn-ghost text-sm border-slate-300 cursor-pointer">
                   Start New Case
                 </button>
               </div>
