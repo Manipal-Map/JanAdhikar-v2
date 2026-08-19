@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Sparkles, ArrowRight, Scale, FileSearch, Loader2, AlertCircle, CheckCircle2, RotateCcw, HelpCircle, Globe, KeyRound, Copy } from 'lucide-react'
+import { Scale, FileSearch, Loader2, AlertCircle, CheckCircle2, RotateCcw, HelpCircle, Globe, KeyRound, Copy, Lock, ArrowRight } from 'lucide-react'
 import useCaseStore from '../store/caseStore'
 import { initCase, classifyCase, getCase } from '../api'
 import CaseIdBadge from '../components/CaseIdBadge'
@@ -36,7 +36,6 @@ export default function GatewayView() {
   const [resumeMode, setResumeMode] = useState(false)
   const [localErr, setLocalErr] = useState(null)
   
-  // New States for the Passkey Modal
   const [showPasskeyModal, setShowPasskeyModal] = useState(false)
   const [passkeyCopied, setPasskeyCopied] = useState(false)
 
@@ -47,11 +46,9 @@ export default function GatewayView() {
     hydrateState
   } = useCaseStore()
 
-  // Include showPasskeyModal in isProcessing so background buttons stay disabled while modal is open
   const isProcessing = stage === 'INITIALIZING' || stage === 'CLASSIFYING' || showPasskeyModal
   const isClassified = stage === 'CLASSIFIED_CONFIRM' && classifyResult
 
-  // STEP 1: Initialize the case and pop up the modal
   const handleStartCase = async () => {
     if (!text.trim() || isProcessing) return
     setLocalErr(null)
@@ -61,8 +58,6 @@ export default function GatewayView() {
       const { case_id } = await initCase()
       setCaseId(case_id)
       setUserProblem(text.trim())
-      
-      // Stop here and show the Modal so the user saves the key
       setShowPasskeyModal(true)
     } catch (err) {
       setLocalErr(err?.response?.data?.detail || err.message || 'Something went wrong.')
@@ -70,7 +65,6 @@ export default function GatewayView() {
     }
   }
 
-  // STEP 2: Triggered when user clicks "I've saved it" inside the modal
   const handleProceedToAI = async () => {
     setShowPasskeyModal(false)
     try {
@@ -180,7 +174,7 @@ export default function GatewayView() {
             <Scale size={18} />
           </div>
           <div>
-            <span className="font-bold text-ashoka-navy text-lg tracking-tight">CivicRoute</span>
+            <span className="font-bold text-ashoka-navy text-lg tracking-tight">JanAdhikar</span>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -196,90 +190,103 @@ export default function GatewayView() {
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-        <div className="w-full max-w-2xl mx-auto">
+        <div className="w-full max-w-3xl mx-auto">
           <AnimatePresence mode="wait">
             {!isClassified ? (
-              <motion.div key="input-screen" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="text-center">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-court-maroon/10 border border-court-maroon/20 rounded-full text-xs font-semibold text-court-maroon mb-6 shadow-sm">
-                  <Sparkles size={14} /><span>Free Citizen Assistance · Indian Legal AI</span>
-                </div>
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-ashoka-navy leading-tight mb-4">
-                  Describe your problem.<br /><span className="text-court-maroon">AI finds the department & drafts the filing.</span>
-                </h1>
-
+              <motion.div key="input-screen" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                
                 {!resumeMode ? (
-                  // --- NEW CASE MODE ---
-                  <div className="glass-card p-6 text-left shadow-md">
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                      What issue or record do you need help with?
-                    </label>
-                    <div className="flex gap-2 mb-4">
+                  // --- NEW CASE MODE (MATCHES MOCKUP EXACTLY) ---
+                  <div className="text-center">
+                    <h1 className="text-4xl sm:text-5xl font-extrabold text-[#1a233a] mb-3 tracking-tight">
+                      What is your problem?
+                    </h1>
+                    <p className="text-lg text-slate-500 mb-8">
+                      Write it in your own words. Our AI will figure out the rest.
+                    </p>
+
+                    <div className="relative bg-white border border-[#b8c2cc] rounded-3xl shadow-sm mb-6 transition-all focus-within:border-saffron-deep focus-within:ring-4 focus-within:ring-saffron-deep/10 text-left">
                       <textarea
-                        rows={5}
+                        rows={6}
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                         disabled={isProcessing}
-                        placeholder="e.g., The road in Ward 8 of Jaipur was constructed 2 months ago for Rs. 35 Lakhs but already has huge potholes..."
-                        className="input-field resize-none text-sm leading-relaxed flex-1"
+                        placeholder="e.g. My pension has not come for 3 months. My landlord refuses to return my deposit..."
+                        className="w-full bg-transparent p-6 text-lg text-ashoka-navy placeholder-slate-400 focus:outline-none resize-none rounded-t-3xl"
                       />
-                      <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between px-6 pb-5">
                         <AudioRecorder 
                           language={language} 
                           onTranscription={(t) => setText(prev => prev + (prev ? " " : "") + t)} 
                         />
+                        <span className="text-sm text-slate-400 font-medium">
+                          {text.length} chars
+                        </span>
                       </div>
                     </div>
+
                     {localErr && (
-                      <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl mb-4 text-sm text-red-700">
+                      <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl mb-6 text-sm text-red-700 text-left">
                         <AlertCircle size={16} className="mt-0.5 flex-shrink-0" /><span>{localErr}</span>
                       </div>
                     )}
-                    
-                    {/* Changed onClick to handleStartCase to trigger the modal */}
-                    <button onClick={handleStartCase} disabled={!text.trim() || isProcessing} className="btn-primary w-full justify-center text-sm py-3">
-                      {stage === 'INITIALIZING' ? <><Loader2 size={16} className="animate-spin" /> Generating Secure Passkey…</> 
-                        : stage === 'CLASSIFYING' ? <><Loader2 size={16} className="animate-spin" /> Analyzing Legal Route…</> 
-                        : <>Analyze & Identify Legal Route <ArrowRight size={16} /></>}
+
+                    <button 
+                      onClick={handleStartCase} 
+                      disabled={!text.trim() || isProcessing} 
+                      className="w-full bg-[#EA580C] hover:bg-[#C2410C] disabled:bg-[#EA580C]/60 disabled:cursor-not-allowed text-white text-lg font-bold py-4 rounded-2xl transition-all shadow-md flex items-center justify-center gap-2"
+                    >
+                      {stage === 'INITIALIZING' ? <><Loader2 size={20} className="animate-spin" /> Generating Secure Passkey…</> 
+                        : stage === 'CLASSIFYING' ? <><Loader2 size={20} className="animate-spin" /> Analyzing Legal Route…</> 
+                        : <>Analyse my problem <ArrowRight size={20} /></>}
                     </button>
+
+                    <div className="flex items-center justify-center gap-1.5 mt-5 text-sm text-slate-500">
+                      <Lock size={14} className="text-emerald-600" />
+                      <span>No account needed. Private & stays on your device.</span>
+                    </div>
                     
-                    {/* Resume Toggle Button */}
-                    <div className="mt-5 text-center">
-                      <button onClick={() => { setResumeMode(true); setLocalErr(null); }} className="text-xs font-medium text-slate-500 hover:text-court-maroon underline underline-offset-4 decoration-slate-300 hover:decoration-court-maroon transition-colors">
+                    {/* Resume Toggle */}
+                    <div className="mt-8 text-center">
+                      <button onClick={() => { setResumeMode(true); setLocalErr(null); }} className="text-sm font-medium text-slate-400 hover:text-court-maroon underline underline-offset-4 decoration-slate-300 hover:decoration-court-maroon transition-colors">
                         Already have an Issue Passkey? Resume here.
                       </button>
                     </div>
                   </div>
                 ) : (
                   // --- RESUME MODE ---
-                  <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card p-6 text-left shadow-md">
-                    <div className="flex items-center gap-2 mb-4">
-                      <KeyRound size={18} className="text-court-maroon" />
-                      <h2 className="text-base font-bold text-ashoka-navy">Resume Existing Case</h2>
+                  <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card p-8 text-left shadow-xl">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-court-maroon/10 rounded-xl flex items-center justify-center text-court-maroon">
+                        <KeyRound size={24} />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-bold text-ashoka-navy">Resume Case</h2>
+                        <p className="text-sm text-slate-500">Enter your secure passkey to retrieve your data.</p>
+                      </div>
                     </div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                      Enter your Issue Passkey
-                    </label>
+                    
                     <input 
                       type="text"
                       value={passkey}
                       onChange={(e) => setPasskey(e.target.value.toUpperCase())}
                       disabled={isProcessing}
                       placeholder="e.g. CR-ABCD-1234"
-                      className="input-field text-sm font-mono tracking-widest uppercase mb-4"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-4 text-ashoka-navy placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-court-maroon/30 focus:border-court-maroon transition-all text-lg font-mono tracking-widest uppercase mb-6"
                     />
                     
                     {localErr && (
-                      <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl mb-4 text-sm text-red-700">
+                      <div className="flex items-start gap-2 p-4 bg-red-50 border border-red-200 rounded-xl mb-6 text-sm text-red-700">
                         <AlertCircle size={16} className="mt-0.5 flex-shrink-0" /><span>{localErr}</span>
                       </div>
                     )}
 
-                    <div className="flex gap-3">
-                      <button onClick={() => { setResumeMode(false); setLocalErr(null); }} disabled={isProcessing} className="btn-ghost flex-1 justify-center py-3">
+                    <div className="flex gap-4">
+                      <button onClick={() => { setResumeMode(false); setLocalErr(null); }} disabled={isProcessing} className="btn-ghost flex-1 justify-center py-3.5 text-base">
                         Back
                       </button>
-                      <button onClick={handleResume} disabled={!passkey.trim() || isProcessing} className="btn-primary flex-1 justify-center py-3">
-                        {isProcessing ? <Loader2 size={16} className="animate-spin" /> : 'Resume Case'}
+                      <button onClick={handleResume} disabled={!passkey.trim() || isProcessing} className="btn-primary flex-1 justify-center py-3.5 text-base">
+                        {isProcessing ? <Loader2 size={20} className="animate-spin" /> : 'Retrieve Case Data'}
                       </button>
                     </div>
                   </motion.div>
