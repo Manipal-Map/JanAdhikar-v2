@@ -79,12 +79,12 @@ export default function GatewayView() {
             </button>
 
             <div className="mt-8 flex items-center justify-between px-2">
-              <button onClick={() => setResumeMode(true)} className="text-[#C2410C] font-semibold text-sm hover:underline">Start a new case instead</button>
-              <button className="text-slate-500 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy"><RefreshCw size={14}/> Reset Demos</button>
+              <button onClick={() => setResumeMode(true)} className="text-[#C2410C] font-semibold text-sm hover:underline">Resume your case</button>
+              <button onClick={() => window.location.reload()} className="text-slate-500 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy"><RefreshCw size={14}/> Reset Demos</button>
             </div>
           </motion.div>
         ) : (
-          /* --- RESUME CASE SCREEN (MATCHES YOUR IMAGE) --- */
+          /* --- RESUME CASE SCREEN --- */
           <motion.div key="resume" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="w-full max-w-lg bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center">
             <div className="w-14 h-14 bg-indigo-50 text-[#1a233a] rounded-2xl flex items-center justify-center mx-auto mb-6">
               <FolderOpen size={28} />
