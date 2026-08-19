@@ -1,5 +1,6 @@
 import io
-from fastapi import FastAPI, HTTPException
+import json
+from fastapi import FastAPI, HTTPException, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -10,6 +11,7 @@ from classifier import classifier
 from outcome_predictor import outcome_engine
 from department_resolver import department_resolver
 from rti_pdf_generator import generate_rti_pdf
+from grievance_resolver import grievance_resolver
 
 app = FastAPI(title="CivicRoute AI API", version="1.0")
 
@@ -58,7 +60,6 @@ class DepartmentResolveRequest(BaseModel):
     location: Optional[str] = None
 
 # --- Endpoints ---
-
 @app.get("/")
 def health_check():
     return {"status": "ok", "system": "CivicRoute Backend Active"}
@@ -99,7 +100,6 @@ def chat_continue(payload: ChatMessageRequest):
         raise HTTPException(status_code=404, detail="Case ID not found.")
     
     route = case.get("route")
-    
     if route == "Other":
         return {
             "case_id": payload.case_id,
@@ -110,18 +110,11 @@ def chat_continue(payload: ChatMessageRequest):
     schema = case.get("form_schema", [])
     current_facts = case.get("extracted_facts", {})
     
-    # Run the chat engine
     result = outcome_engine.process_chat_turn(route, schema, current_facts, payload.message)
-    
-    # Merge new facts into the current state
     if result.get("new_facts_extracted"):
         current_facts.update(result["new_facts_extracted"])
     
-    # Save back to database / memory
-    case_manager.update_case(payload.case_id, {
-        "extracted_facts": current_facts
-    })
-    
+    case_manager.update_case(payload.case_id, {"extracted_facts": current_facts})
     return {
         "case_id": payload.case_id,
         "updated_facts": current_facts,
@@ -130,10 +123,8 @@ def chat_continue(payload: ChatMessageRequest):
     }
 
 # --- RTI Pipeline Endpoints ---
-
 @app.post("/api/rti/generate")
 def generate_rti(payload: FormSubmitRequest):
-    """Generates initial RTI Draft from user problem and filled Guided Form."""
     case = case_manager.get_case(payload.case_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case ID not found.")
@@ -146,12 +137,10 @@ def generate_rti(payload: FormSubmitRequest):
         "form_data": payload.form_data,
         "initial_draft": draft
     })
-
     return {"case_id": payload.case_id, "initial_draft": draft}
 
 @app.post("/api/rti/predict")
 def predict_rti(payload: RTIPredictRequest):
-    """RTI-Bench ML Outcome Prediction + Risk Detection + Improvement Suggestions."""
     case = case_manager.get_case(payload.case_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case ID not found.")
@@ -161,17 +150,14 @@ def predict_rti(payload: RTIPredictRequest):
         raise HTTPException(status_code=400, detail="No RTI draft found to analyze.")
 
     prediction_result = outcome_engine.predict_rti_outcome(draft_text)
-
     case_manager.update_case(payload.case_id, {
         "status": "rti_predicted",
         "prediction_result": prediction_result
     })
-
     return {"case_id": payload.case_id, **prediction_result}
 
 @app.post("/api/rti/improve")
 def improve_rti(payload: RTIImproveRequest):
-    """Generates the final improved high-success RTI Draft and filing instructions."""
     case = case_manager.get_case(payload.case_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case ID not found.")
@@ -182,13 +168,11 @@ def improve_rti(payload: RTIImproveRequest):
     suggestions = pred.get("improvement_suggestions", [])
 
     improved_result = outcome_engine.generate_improved_rti(initial_draft, risks, suggestions)
-
     case_manager.update_case(payload.case_id, {
         "status": "rti_completed",
         "improved_draft": improved_result.get("improved_draft"),
         "filing_instructions": improved_result.get("filing_instructions")
     })
-
     return {"case_id": payload.case_id, **improved_result}
 
 @app.post("/api/rti/resolve-department")
@@ -229,25 +213,42 @@ def download_rti_pdf(case_id: str):
         headers={"Content-Disposition": f"attachment; filename={case_id}_RTI.pdf"}
     )
 
-# --- Rights / Grievance Pipeline Endpoint ---
-
+# --- Rights / Grievance Pipeline Endpoint (Updated for File Uploads) ---
 @app.post("/api/grievance/generate")
-def generate_grievance(payload: FormSubmitRequest):
-    """Generates Rights Analysis, Legal Demand Notice, and CPGRAMS/NCH Filing Guide."""
-    case = case_manager.get_case(payload.case_id)
+async def generate_grievance(
+    case_id: str = Form(...),
+    form_data: str = Form(...),
+    user_problem: str = Form(...),
+    proof_file: Optional[UploadFile] = File(None)
+):
+    case = case_manager.get_case(case_id)
     if not case:
         raise HTTPException(status_code=404, detail="Case ID not found.")
 
-    user_problem = case.get("user_problem", "")
-    pack = outcome_engine.generate_grievance_pack(payload.form_data, user_problem)
+    parsed_form_data = json.loads(form_data)
+    location = parsed_form_data.get("applicant_city", "")
 
-    case_manager.update_case(payload.case_id, {
+    file_bytes = None
+    mime_type = ""
+    if proof_file:
+        file_bytes = await proof_file.read()
+        mime_type = proof_file.content_type
+
+    pack = grievance_resolver.analyze_proof_and_rights(
+        user_problem=user_problem,
+        location=location,
+        form_data=parsed_form_data,
+        file_bytes=file_bytes,
+        mime_type=mime_type
+    )
+
+    case_manager.update_case(case_id, {
         "status": "grievance_completed",
-        "form_data": payload.form_data,
+        "form_data": parsed_form_data,
         "grievance_pack": pack
     })
 
-    return {"case_id": payload.case_id, **pack}
+    return {"case_id": case_id, **pack}
 
 @app.get("/api/case/{case_id}")
 def get_case_state(case_id: str):
