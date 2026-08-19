@@ -16,14 +16,13 @@ export const rtiImprove = (case_id) => api.post('/api/rti/improve', { case_id })
 export const transcribeAudio = (audioBlob) => {
   const formData = new FormData()
   formData.append('audio_file', audioBlob, 'recording.webm')
-  return api.post('/api/transcribe', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }).then(r => r.data)
+  return api.post('/api/transcribe', formData).then(r => r.data)
 }
 
-export const grievanceGenerate = (payload) =>
-  api.post('/api/grievance/generate', payload, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }).then((r) => r.data)
+export const grievanceGenerate = (payload) => {
+  return api.post('/api/grievance/generate', payload).then((r) => r.data)
+}
+
+export const getCase = (case_id) => api.get(`/api/case/${case_id}`).then(r => r.data)
 
 export default api
