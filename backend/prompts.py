@@ -94,6 +94,13 @@ DYNAMIC_FORM_SCHEMAS = {
     "Other": []
 }
 
+DYNAMIC_FORM_SCHEMAS["RTI"] += [
+    {"key": "applicant_name", "label": "Your Full Name", "required": True, "placeholder": "e.g., Rohan Sharma"},
+    {"key": "applicant_address", "label": "Your Postal Address", "required": True, "placeholder": "e.g., House No. 12, Sector 5, Delhi - 110001"},
+    {"key": "applicant_contact", "label": "Phone / Email", "required": True, "placeholder": "e.g., 9876543210 / rohan@email.com"},
+    {"key": "applicant_city", "label": "Your City / District", "required": True, "placeholder": "e.g., New Delhi"},
+]
+
 # --- Phase 3 RTI-Bench Prompts ---
 
 RTI_DRAFT_SYSTEM_PROMPT = """You are an expert Indian RTI lawyer. Generate a formal, Section 6(1) Right to Information Act application draft using the facts provided.
