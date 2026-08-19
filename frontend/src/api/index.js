@@ -20,7 +20,10 @@ export const transcribeAudio = (audioBlob, language) => {
   formData.append('language', language)
   return api.post('/api/transcribe', formData).then(r => r.data)
 }
-
+export const downloadGenericPdf = (title, content) => {
+  return api.post('/api/generate-pdf', { title, content }, { responseType: 'blob' })
+    .then(r => r.data)
+}
 export const grievanceGenerate = (payload) => {
   return api.post('/api/grievance/generate', payload).then((r) => r.data)
 }
