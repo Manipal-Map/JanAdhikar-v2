@@ -122,8 +122,39 @@ export default function GatewayView() {
   const RouteIcon = currentRouteMeta?.icon || FileSearch
 
   return (
-    <div className="gradient-bg min-h-screen flex flex-col items-center justify-center p-4 relative">
+    <div className="gradient-bg min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
       
+      {/* BACKGROUND ASHOKA CHAKRA */}
+      <div className="fixed inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden">
+        <svg
+          className="w-[950px] h-[950px] opacity-[0.022] text-[#881337] select-none -translate-y-12"
+          viewBox="0 0 200 200"
+          fill="none"
+          stroke="currentColor"
+        >
+          <circle cx="100" cy="100" r="95" strokeWidth="2.5" />
+          <circle cx="100" cy="100" r="82" strokeWidth="1.5" />
+          <circle cx="100" cy="100" r="20" strokeWidth="2.5" />
+          <circle cx="100" cy="100" r="6" fill="currentColor" />
+
+          {Array.from({ length: 24 }).map((_, i) => {
+            const angle = (i * 360) / 24;
+
+            return (
+              <line
+                key={i}
+                x1="100"
+                y1="100"
+                x2="100"
+                y2="18"
+                strokeWidth="1.5"
+                transform={`rotate(${angle} 100 100)`}
+              />
+            );
+          })}
+        </svg>
+      </div>
+
       {/* ── PASSKEY POP-UP MODAL OVERLAY ── */}
       <AnimatePresence>
         {showPasskeyModal && (
@@ -225,14 +256,14 @@ export default function GatewayView() {
 
       <AnimatePresence mode="wait">
         {stage === 'CLASSIFYING' ? (
-          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
+          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12 z-10">
             <Loader2 size={40} className="animate-spin text-court-maroon mx-auto mb-4" />
             <h2 className="text-xl font-bold text-ashoka-navy">Analyzing your issue with Legal AI...</h2>
           </motion.div>
         ) : isClassified ? (
           
           /* --- ROUTE CONFIRMATION SCREEN --- */
-          <motion.div key="confirm-screen" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-card p-8 shadow-xl border border-slate-200 max-w-xl w-full">
+          <motion.div key="confirm-screen" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-card p-8 shadow-xl border border-slate-200 max-w-xl w-full z-10">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-court-maroon/10 text-court-maroon flex items-center justify-center flex-shrink-0">
                 <RouteIcon size={24} />
@@ -260,7 +291,7 @@ export default function GatewayView() {
         ) : !resumeMode ? (
           
           /* --- MAIN INPUT SCREEN --- */
-          <motion.div key="main" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-2xl text-center">
+          <motion.div key="main" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-2xl text-center z-10">
             <h1 className="text-4xl sm:text-5xl font-extrabold text-ashoka-navy mb-3 tracking-tight">What is your problem?</h1>
             <p className="text-lg text-slate-500 mb-8">Write it in your own words. Our AI will figure out the rest.</p>
             
@@ -293,7 +324,7 @@ export default function GatewayView() {
         ) : (
           
           /* --- RESUME CASE SCREEN --- */
-          <motion.div key="resume" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="w-full max-w-lg bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center">
+          <motion.div key="resume" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="w-full max-w-lg bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center z-10">
             <div className="w-14 h-14 bg-rose-50 text-court-maroon rounded-2xl flex items-center justify-center mx-auto mb-6 border border-rose-100">
               <FolderOpen size={28} />
             </div>
