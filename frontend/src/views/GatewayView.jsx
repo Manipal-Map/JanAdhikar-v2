@@ -193,7 +193,7 @@ export default function GatewayView() {
                 </div>
               </div>
 
-              {/* --- MANDATORY AGREEMENT CHECKBOX --- */}
+              {/* --- UPDATED PASSKEY AGREEMENT CHECKBOX --- */}
               <div className="flex items-start gap-2.5 mb-5 bg-[#FAF8F5] p-3.5 rounded-2xl border border-slate-200 text-left">
                 <input
                   type="checkbox"
@@ -203,7 +203,7 @@ export default function GatewayView() {
                   className="mt-0.5 w-4 h-4 text-court-maroon border-slate-300 rounded focus:ring-court-maroon cursor-pointer flex-shrink-0"
                 />
                 <label htmlFor="modal-agreement" className="text-xs text-slate-700 font-medium cursor-pointer leading-relaxed select-none">
-                  I understand this is an <strong className="text-ashoka-navy">AI-generated document assistant</strong> and agree to verify all facts, dates, and claims thoroughly before formal submission.
+                  I acknowledge that this <strong className="text-ashoka-navy">Passkey is solely responsible for retrieving my case data</strong> later, and I confirm I have safely saved or copied it.
                 </label>
               </div>
 
