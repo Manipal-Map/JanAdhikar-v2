@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚖️ Janआधिकार 
+# ⚖️ Janअधिकार 
 
 ### *जन अधिकार — People's Right*
 
