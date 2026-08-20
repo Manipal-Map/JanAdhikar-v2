@@ -217,7 +217,7 @@ export default function GatewayView() {
                 disabled={stage === 'CLASSIFYING' || !hasAgreed}
                 className="btn-primary w-full justify-center text-sm py-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {stage === 'CLASSIFYING' ? <><Loader2 size={16} className="animate-spin" /> Analyzing Legal Route...</> : <><span>Continue to AI Classification</span><ArrowRight size={16} /></>}
+                {stage === 'CLASSIFYING' ? <><Loader2 size={16} className="animate-spin" /> Analyzing Legal Route...</> : <><span>Please Proceed!</span><ArrowRight size={16} /></>}
               </button>
 
             </motion.div>
