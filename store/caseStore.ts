@@ -1,7 +1,46 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
-const useCaseStore = create(
+// 1. We define the exact shape of your store so TypeScript knows what exists
+interface CaseState {
+  stage: string;
+  setStage: (stage: string) => void;
+  language: string;
+  setLanguage: (language: string) => void;
+  caseId: string | null;
+  setCaseId: (caseId: string | null) => void;
+  userProblem: string;
+  setUserProblem: (userProblem: string) => void;
+  classifyResult: any;
+  setClassifyResult: (classifyResult: any) => void;
+  triageConfirmed: boolean;
+  setTriageConfirmed: (triageConfirmed: boolean) => void;
+  formData: Record<string, any>;
+  setFormData: (formData: Record<string, any>) => void;
+  departmentInfo: any;
+  setDepartmentInfo: (departmentInfo: any) => void;
+  departmentConfirmed: boolean;
+  setDepartmentConfirmed: (v: boolean) => void;
+  rtiPrediction: any;
+  setRtiPrediction: (rtiPrediction: any) => void;
+  rtiDraft: string | null;
+  setRtiDraft: (rtiDraft: string | null) => void;
+  grievanceResult: any;
+  setGrievanceResult: (grievanceResult: any) => void;
+  error: string | null;
+  setError: (error: string | null) => void;
+  isLoading: boolean;
+  setIsLoading: (isLoading: boolean) => void;
+  hydrateState: (caseId: string, backendData: any) => void;
+  reset: () => void;
+  
+  // A catch-all to ensure strict mode doesn't block future rapid prototyping
+  [key: string]: any; 
+}
+
+// 2. Pass the interface into create. 
+// Note the extra () after create<CaseState>. This is required by Zustand when using middlewares like 'persist' in TypeScript.
+const useCaseStore = create<CaseState>()(
   persist(
     (set, get) => ({
       stage: 'IDLE',
@@ -96,4 +135,4 @@ const useCaseStore = create(
   )
 )
 
-export default useCaseStore
+export default useCaseStore;
