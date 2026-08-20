@@ -1,7 +1,7 @@
 import json
 import base64
 from typing import Dict, Any, List
-from classifier import classifier
+from .classifier import classifier
 
 class GrievanceResolver:
     def __init__(self):
