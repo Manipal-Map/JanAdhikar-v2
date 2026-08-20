@@ -8,7 +8,7 @@ from .prompts import (
     GRIEVANCE_PACK_SYSTEM_PROMPT,
     INFO_GATHERING_PROMPT
 )
-from classifier import classifier
+from .classifier import classifier
 
 class OutcomeEngine:
     def __init__(self):
@@ -42,7 +42,6 @@ class OutcomeEngine:
             except Exception as e:
                 print(f"[OutcomeEngine] Initial RTI generation via Groq failed: {e}")
 
-        # High quality statutory template fallback
         app_name = form_data.get("applicant_name", "Applicant")
         app_city = form_data.get("applicant_city", "Local Jurisdiction")
         return f"""APPLICATION UNDER SECTION 6(1) OF THE RIGHT TO INFORMATION ACT, 2005
@@ -89,7 +88,6 @@ I hereby state that I am a citizen of India. The information sought falls within
             except Exception as e:
                 print(f"[OutcomeEngine] RTI prediction via Groq failed: {e}")
 
-        # Intelligent prediction fallback
         return {
             "prediction": "APPROVED",
             "probabilities": {"approved": 0.88, "partial": 0.09, "rejected": 0.03},
