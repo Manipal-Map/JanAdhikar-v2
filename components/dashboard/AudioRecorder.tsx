@@ -1,19 +1,19 @@
+'use client';
 import { useState, useRef } from 'react'
 import { Mic, Square, Loader2 } from 'lucide-react'
 
-// Adjust the import path if your api index is located elsewhere in the frontend
-import { transcribeAudio } from '../api/index.js' 
+// CORRECT NEXT.JS IMPORT
+import { transcribeAudio } from '@/lib/api' 
 
-export default function AudioRecorder({ onTranscription, language = "English" }) {
+export default function AudioRecorder({ onTranscription, language = "English" }: any) {
   const [isRecording, setIsRecording] = useState(false)
   const [isTranscribing, setIsTranscribing] = useState(false)
-  const mediaRecorderRef = useRef(null)
-  const chunksRef = useRef([])
-  const streamRef = useRef(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const chunksRef = useRef<BlobPart[]>([])
+  const streamRef = useRef<MediaStream | null>(null)
 
   const startRecording = async () => {
-    // FIX: Web Speech API has been permanently removed.
-    // This entirely prevents the "Apps on device" permission prompt from ever appearing.
+    // Web Speech API removed to permanently block the "Apps on device" prompt.
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       streamRef.current = stream
@@ -63,7 +63,7 @@ export default function AudioRecorder({ onTranscription, language = "English" })
     return (
       <button disabled className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-500 rounded-full border border-slate-200 text-sm font-semibold cursor-not-allowed">
         <Loader2 size={16} className="animate-spin" />
-        <span>Processing...</span>
+        <span>Processing Audio...</span>
       </button>
     )
   }
