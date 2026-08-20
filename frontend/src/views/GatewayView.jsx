@@ -12,21 +12,21 @@ const ROUTE_DESCRIPTIONS = {
     badge: 'Statutory RTI Filing',
     icon: FileSearch,
     description: 'You are requesting official government records, tender documents, inspection reports, or file movements under the RTI Act, 2005.',
-    actionText: 'Confirm & Proceed to RTI',
+    actionText: 'Proceed to RTI',
   },
   'Rights/Grievance': {
     title: 'Consumer / Administrative Grievance',
     badge: 'Legal Dispute / Relief',
     icon: Scale,
     description: 'You are seeking dispute resolution, refunds, compensation, or action against service deficiency.',
-    actionText: 'Confirm & Generate Legal Notice',
+    actionText: 'Generate Legal Notice',
   },
   Other: {
     title: 'General or Out of Scope Query',
     badge: 'Outside Platform Scope',
     icon: HelpCircle,
     description: 'This problem falls outside statutory RTI and administrative consumer grievance frameworks.',
-    actionText: 'View Guidance & Resources',
+    actionText: 'View Resources',
   }
 }
 
