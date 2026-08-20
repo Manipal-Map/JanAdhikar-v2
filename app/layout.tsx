@@ -4,6 +4,12 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "JanAdhikar — Institutional Legal Engine for Civic Rights",
   description: "An autonomous, local-first legal engine that translates everyday civic problems into legally binding RTI applications and Grievance appeals.",
+  icons: {
+    icon: {
+      url: "/favicon.svg",
+      type: "image/svg+xml",
+    },
+  },
 };
 
 export default function RootLayout({
