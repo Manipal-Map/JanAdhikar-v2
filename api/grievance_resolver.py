@@ -18,7 +18,6 @@ class GrievanceResolver:
         app_addr = form_data.get("applicant_address") or app_city
         app_contact = form_data.get("applicant_contact") or "Provided on Record"
 
-        # Tenancy & Rental Disputes
         if any(w in p_lower for w in ["landlord", "deposit", "tenant", "rent", "lease", "evict", "flat", "apartment"]):
             return {
                 "violated_rights": [
@@ -65,7 +64,6 @@ Yours faithfully,
 (Complainant / Tenant)"""
             }
 
-        # Consumer, E-Commerce, Banking & Defective Goods
         elif any(w in p_lower for w in ["airline", "flight", "refund", "defective", "consumer", "order", "delivery", "bank", "card", "cheated", "fraud", "e-commerce", "flipkart", "amazon"]):
             return {
                 "violated_rights": [
@@ -107,7 +105,6 @@ Failure to comply within 15 days shall constrain the complainant to file a forma
 (Aggrieved Consumer)"""
             }
 
-        # Civic, Administrative & Public Service Delivery
         else:
             return {
                 "violated_rights": [
