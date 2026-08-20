@@ -1,70 +1,70 @@
 'use client';
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Copy, Download, CheckCheck, FileText, Printer, Loader2 } from 'lucide-react'
+import { downloadGenericPdf } from '@/lib/api'
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Copy, Download, CheckCheck, FileText, Printer, Loader2 } from 'lucide-react';
-import { downloadGenericPdf } from '@/lib/api';
+export default function DraftViewer({ title = 'Generated Document', draft, caseId }) {
+  const [copied, setCopied] = useState(false)
+  const [downloading, setDownloading] = useState(false)
 
-interface DraftViewerProps {
-  title?: string;
-  draft?: string;
-  caseId?: string;
-}
-
-export default function DraftViewer({
-  title = 'Generated Document',
-  draft = '',
-  caseId,
-}: DraftViewerProps) {
-  const [copied, setCopied] = useState(false);
-  const [downloading, setDownloading] = useState(false);
-
-  if (!draft) return null;
+  if (!draft) return null
 
   const handleCopy = () => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(draft);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
+    navigator.clipboard.writeText(draft)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   const handleDownloadPdf = async () => {
-    if (typeof window === 'undefined') return;
-    setDownloading(true);
+    setDownloading(true)
     try {
-      const blob = await downloadGenericPdf(title, draft);
-      const url = window.URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${caseId || 'Legal_Notice'}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode?.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const blob = await downloadGenericPdf(title, draft)
+      
+      // FIX 1: Change 'application/pdf' to 'application/octet-stream'
+      // This forces Chrome to treat it as a standard file download, 
+      // completely bypassing the "Apps on device" permission prompt.
+      const fileBlob = new Blob([blob], { type: 'application/octet-stream' })
+      const url = URL.createObjectURL(fileBlob)
+      
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${caseId || 'Legal_Notice'}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      
+      // Cleanup DOM
+      if (link.parentNode) {
+        link.parentNode.removeChild(link)
+      }
+      
+      // FIX 2: Delay the revocation of the Object URL
+      // Gives mobile browsers time to write the file to disk before 
+      // we clear it from memory, preventing the "Network Error".
+      setTimeout(() => {
+        URL.revokeObjectURL(url)
+      }, 5000)
+
     } catch (err) {
-      console.error('Failed to download PDF:', err);
-      alert('Failed to generate PDF. Please try again.');
+      console.error('Failed to download PDF:', err)
+      alert('Failed to generate PDF. Please try again.')
     } finally {
-      setDownloading(false);
+      setDownloading(false)
     }
-  };
+  }
 
+  // Uses an invisible Iframe to print, entirely bypassing browser Pop-Up Blockers
   const handlePrint = () => {
-    if (typeof document === 'undefined' || typeof window === 'undefined') return;
-
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = '0';
-    document.body.appendChild(iframe);
-
-    const safeDraft = draft.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const iframe = document.createElement('iframe')
+    iframe.style.position = 'fixed'
+    iframe.style.right = '0'
+    iframe.style.bottom = '0'
+    iframe.style.width = '0'
+    iframe.style.height = '0'
+    iframe.style.border = '0'
+    document.body.appendChild(iframe)
+    
     const content = `
-      <!DOCTYPE html>
       <html>
         <head>
           <title>${title}</title>
@@ -75,27 +75,30 @@ export default function DraftViewer({
         </head>
         <body>
           <h2>${title}</h2>
-          <pre>${safeDraft}</pre>
+          <pre>${draft.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
         </body>
       </html>
-    `;
-
+    `
+    
+    // Check if contentWindow exists before writing
     if (iframe.contentWindow) {
-      iframe.contentWindow.document.open();
-      iframe.contentWindow.document.write(content);
-      iframe.contentWindow.document.close();
-
-      iframe.contentWindow.focus();
+      iframe.contentWindow.document.open()
+      iframe.contentWindow.document.write(content)
+      iframe.contentWindow.document.close()
+      
+      iframe.contentWindow.focus()
       setTimeout(() => {
-        iframe.contentWindow?.print();
+        if (iframe.contentWindow) {
+          iframe.contentWindow.print()
+        }
         setTimeout(() => {
-          if (iframe.parentNode) {
-            document.body.removeChild(iframe);
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe)
           }
-        }, 1000);
-      }, 250);
+        }, 1000)
+      }, 250)
     }
-  };
+  }
 
   return (
     <motion.div
@@ -107,46 +110,16 @@ export default function DraftViewer({
         <div className="flex items-center gap-2.5">
           <FileText size={16} className="text-blue-600" />
           <h3 className="text-sm font-bold text-slate-900">{title}</h3>
-          {caseId && (
-            <span className="text-xs font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
-              #{caseId}
-            </span>
-          )}
+          {caseId && <span className="text-xs font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">#{caseId}</span>}
         </div>
         <div className="flex items-center gap-1.5">
-          <button
-            onClick={handleCopy}
-            className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200"
-          >
-            {copied ? (
-              <>
-                <CheckCheck size={13} className="text-emerald-600" /> Copied!
-              </>
-            ) : (
-              <>
-                <Copy size={13} /> Copy
-              </>
-            )}
+          <button onClick={handleCopy} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
+            {copied ? <><CheckCheck size={13} className="text-emerald-600" /> Copied!</> : <><Copy size={13} /> Copy</>}
           </button>
-          <button
-            onClick={handleDownloadPdf}
-            disabled={downloading}
-            className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200"
-          >
-            {downloading ? (
-              <>
-                <Loader2 size={13} className="animate-spin" /> Generating...
-              </>
-            ) : (
-              <>
-                <Download size={13} /> Download (PDF)
-              </>
-            )}
+          <button onClick={handleDownloadPdf} disabled={downloading} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
+            {downloading ? <><Loader2 size={13} className="animate-spin" /> Generating...</> : <><Download size={13} /> Download (PDF)</>}
           </button>
-          <button
-            onClick={handlePrint}
-            className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200"
-          >
+          <button onClick={handlePrint} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
             <Printer size={13} /> Print
           </button>
         </div>
@@ -157,5 +130,5 @@ export default function DraftViewer({
         </pre>
       </div>
     </motion.div>
-  );
+  )
 }
