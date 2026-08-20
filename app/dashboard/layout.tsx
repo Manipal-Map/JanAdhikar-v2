@@ -1,23 +1,13 @@
-import React, { Suspense } from "react";
+import type { NextConfig } from "next";
 
-export const dynamic = "force-dynamic";
+const nextConfig: NextConfig = {
+  transpilePackages: ["framer-motion", "recharts", "lucide-react"],
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+};
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#FAF8F5]">
-          <div className="text-sm font-mono text-slate-500 animate-pulse">
-            Loading Civic Workspace...
-          </div>
-        </div>
-      }
-    >
-      {children}
-    </Suspense>
-  );
-}
+export default nextConfig;
