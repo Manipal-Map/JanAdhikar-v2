@@ -122,39 +122,11 @@ export default function GatewayView() {
   const RouteIcon = currentRouteMeta?.icon || FileSearch
 
   return (
-    <div className="gradient-bg min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div 
+      className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: "url('/bg.image.png')" }}
+    >
       
-      {/* BACKGROUND ASHOKA CHAKRA */}
-      <div className="fixed inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden">
-        <svg
-          className="w-[950px] h-[950px] opacity-[0.022] text-[#881337] select-none -translate-y-12"
-          viewBox="0 0 200 200"
-          fill="none"
-          stroke="currentColor"
-        >
-          <circle cx="100" cy="100" r="95" strokeWidth="2.5" />
-          <circle cx="100" cy="100" r="82" strokeWidth="1.5" />
-          <circle cx="100" cy="100" r="20" strokeWidth="2.5" />
-          <circle cx="100" cy="100" r="6" fill="currentColor" />
-
-          {Array.from({ length: 24 }).map((_, i) => {
-            const angle = (i * 360) / 24;
-
-            return (
-              <line
-                key={i}
-                x1="100"
-                y1="100"
-                x2="100"
-                y2="18"
-                strokeWidth="1.5"
-                transform={`rotate(${angle} 100 100)`}
-              />
-            );
-          })}
-        </svg>
-      </div>
-
       {/* ── PASSKEY POP-UP MODAL OVERLAY ── */}
       <AnimatePresence>
         {showPasskeyModal && (
