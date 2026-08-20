@@ -1,52 +1,73 @@
 'use client';
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer, Cell } from 'recharts'
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 
-const COLORS = {
-  full_disclosure:   '#059669', // emerald-600
-  partial_disclosure: '#d97706', // amber-600
-  rejection:         '#dc2626', // red-600
-}
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer, Cell } from 'recharts';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
-const LABELS = {
-  full_disclosure:    'Full Disclosure',
+const COLORS: Record<string, string> = {
+  full_disclosure: '#059669',
+  partial_disclosure: '#d97706',
+  rejection: '#dc2626',
+};
+
+const LABELS: Record<string, string> = {
+  full_disclosure: 'Full Disclosure',
   partial_disclosure: 'Partial Disclosure',
-  rejection:          'Rejection',
-}
+  rejection: 'Rejection',
+};
 
-function AnimatedNumber({ value }) {
-  const [display, setDisplay] = useState(0)
+function AnimatedNumber({ value }: { value: number }) {
+  const [display, setDisplay] = useState(0);
+
   useEffect(() => {
-    let start = 0
-    const target = Math.round(value * 100)
-    const step = Math.ceil(target / 40)
+    let start = 0;
+    const target = Math.round(value * 100);
+    const step = Math.ceil(target / 40);
     const timer = setInterval(() => {
-      start = Math.min(start + step, target)
-      setDisplay(start)
-      if (start >= target) clearInterval(timer)
-    }, 25)
-    return () => clearInterval(timer)
-  }, [value])
-  return <>{display}</>
+      start = Math.min(start + step, target);
+      setDisplay(start);
+      if (start >= target) clearInterval(timer);
+    }, 25);
+    return () => clearInterval(timer);
+  }, [value]);
+
+  return <>{display}</>;
 }
 
-export default function RiskMeter({ prediction, probabilities }) {
-  if (!probabilities) return null
+interface RiskMeterProps {
+  prediction?: string;
+  probabilities?: Record<string, number>;
+}
+
+export default function RiskMeter({ prediction = 'PARTIAL', probabilities }: RiskMeterProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!probabilities) return null;
 
   const data = Object.entries(probabilities).map(([key, val]) => ({
     key,
     name: LABELS[key] || key,
     value: Math.round(val * 100),
     fill: COLORS[key] || '#2563eb',
-  }))
+  }));
 
-  const dominant = Object.entries(probabilities).reduce((a, b) => b[1] > a[1] ? b : a)
-  const dominantColor = COLORS[dominant[0]] || '#2563eb'
+  const dominant = Object.entries(probabilities).reduce((a, b) => (b[1] > a[1] ? b : a), [
+    'partial_disclosure',
+    0,
+  ]);
+  const dominantColor = COLORS[dominant[0]] || '#2563eb';
 
-  const PREDICTION_ICON = { FULL: TrendingUp, PARTIAL: Minus, REJECTION: TrendingDown }
-  const PredIcon = PREDICTION_ICON[prediction] || Minus
+  const PREDICTION_ICON: Record<string, any> = {
+    FULL: TrendingUp,
+    PARTIAL: Minus,
+    REJECTION: TrendingDown,
+  };
+  const PredIcon = PREDICTION_ICON[prediction] || Minus;
 
   return (
     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4">
@@ -60,16 +81,30 @@ export default function RiskMeter({ prediction, probabilities }) {
       </div>
 
       <div className="h-48">
-        <ResponsiveContainer width="100%" height="100%">
-          <RadialBarChart cx="50%" cy="50%" innerRadius="35%" outerRadius="85%" data={data} startAngle={90} endAngle={-270}>
-            <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-            <RadialBar dataKey="value" cornerRadius={6} background={{ fill: '#f1f5f9' }} label={false}>
-              {data.map((entry) => (
-                <Cell key={entry.key} fill={entry.fill} />
-              ))}
-            </RadialBar>
-          </RadialBarChart>
-        </ResponsiveContainer>
+        {mounted ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <RadialBarChart
+              cx="50%"
+              cy="50%"
+              innerRadius="35%"
+              outerRadius="85%"
+              data={data}
+              startAngle={90}
+              endAngle={-270}
+            >
+              <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
+              <RadialBar dataKey="value" cornerRadius={6} background={{ fill: '#f1f5f9' }}>
+                {data.map((entry) => (
+                  <Cell key={entry.key} fill={entry.fill} />
+                ))}
+              </RadialBar>
+            </RadialBarChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-full w-full flex items-center justify-center bg-slate-50 rounded-xl">
+            <span className="text-xs text-slate-400 font-mono">Loading chart metrics...</span>
+          </div>
+        )}
       </div>
 
       <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
@@ -95,5 +130,5 @@ export default function RiskMeter({ prediction, probabilities }) {
         ))}
       </div>
     </motion.div>
-  )
+  );
 }
