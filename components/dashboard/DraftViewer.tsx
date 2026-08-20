@@ -21,9 +21,9 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
     try {
       const blob = await downloadGenericPdf(title, draft)
       
-      // FIX 1: Change 'application/pdf' to 'application/octet-stream'
-      // This forces Chrome to treat it as a standard file download, 
-      // completely bypassing the "Apps on device" permission prompt.
+      // BYPASS TRICK: Changing 'application/pdf' to 'application/octet-stream'
+      // forces a silent background download. Chrome won't try to open it in a 
+      // PDF viewer, meaning it NEVER asks for the "Apps on device" permission.
       const fileBlob = new Blob([blob], { type: 'application/octet-stream' })
       const url = URL.createObjectURL(fileBlob)
       
@@ -33,15 +33,10 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
       document.body.appendChild(link)
       link.click()
       
-      // Cleanup DOM
-      if (link.parentNode) {
-        link.parentNode.removeChild(link)
-      }
-      
-      // FIX 2: Delay the revocation of the Object URL
-      // Gives mobile browsers time to write the file to disk before 
-      // we clear it from memory, preventing the "Network Error".
+      // DELAY FIX: Waiting 5 seconds before deleting the file from memory
+      // gives mobile browsers time to save the file, preventing the "Network error".
       setTimeout(() => {
+        if (link.parentNode) link.parentNode.removeChild(link)
         URL.revokeObjectURL(url)
       }, 5000)
 
@@ -80,7 +75,6 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
       </html>
     `
     
-    // Check if contentWindow exists before writing
     if (iframe.contentWindow) {
       iframe.contentWindow.document.open()
       iframe.contentWindow.document.write(content)
