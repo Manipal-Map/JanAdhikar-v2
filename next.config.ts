@@ -1,16 +1,12 @@
-import type { NextConfig } from 'next';
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  transpilePackages: ["framer-motion", "recharts", "lucide-react"],
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   eslint: {
     ignoreDuringBuilds: true,
-  },
-  images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: '**' },
-    ],
   },
 };
 
