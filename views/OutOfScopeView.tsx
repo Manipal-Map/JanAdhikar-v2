@@ -6,11 +6,11 @@ import useCaseStore from '@/store/caseStore'
 import CaseIdBadge from '@/components/dashboard/CaseIdBadge'
 
 const SCOPE_ITEMS = [
-  { icon: '📄', label: 'RTI Applications',        desc: 'Requesting official government documents, tender records, inspection reports, audit files.' },
-  { icon: '⚖️',  label: 'Consumer Grievances',     desc: 'Defective products, service deficiency, refunds, warranty disputes under Consumer Protection Act.' },
-  { icon: '🏠',  label: 'Tenancy Disputes',        desc: 'Security deposit disputes, illegal eviction, rent authority complaints.' },
-  { icon: '💼',  label: 'Employment Rights',       desc: 'Unpaid salary, illegal termination, PF/ESI disputes.' },
-  { icon: '🏛️',  label: 'Civic Complaints',        desc: 'CPGRAMS, pension delays, broken infrastructure, municipal grievances.' },
+  { icon: '📄', label: 'RTI Applications', desc: 'Requesting official government documents, tender records, inspection reports, audit files.' },
+  { icon: '⚖️', label: 'Consumer Grievances', desc: 'Defective products, service deficiency, refunds, warranty disputes under Consumer Protection Act.' },
+  { icon: '🏠', label: 'Tenancy Disputes', desc: 'Security deposit disputes, illegal eviction, rent authority complaints.' },
+  { icon: '💼', label: 'Employment Rights', desc: 'Unpaid salary, illegal termination, PF/ESI disputes.' },
+  { icon: '🏛️', label: 'Civic Complaints', desc: 'CPGRAMS, pension delays, broken infrastructure, municipal grievances.' },
 ]
 
 export default function OutOfScopeView() {
@@ -32,11 +32,11 @@ export default function OutOfScopeView() {
       >
         {/* Header card */}
         <div className="glass-card p-8 text-center mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-slate-500/20 border border-slate-500/30 flex items-center justify-center mx-auto mb-5">
-            <ShieldOff size={28} className="text-slate-400" />
+          <div className="w-16 h-16 rounded-2xl bg-court-maroon/10 border border-court-maroon/20 flex items-center justify-center mx-auto mb-5">
+            <ShieldOff size={28} className="text-court-maroon" />
           </div>
           <h1 className="text-2xl font-bold text-ashoka-navy mb-3">Outside Platform Scope</h1>
-          <p className="text-slate-500 leading-relaxed mb-4">
+          <p className="text-slate-600 leading-relaxed mb-4 text-sm sm:text-base">
             Your query doesn't fall within our supported legal domains. JanAdhikar specialises
             in RTI applications, consumer rights, tenancy disputes, and civic grievances under
             Indian law.
@@ -49,22 +49,22 @@ export default function OutOfScopeView() {
           )}
 
           {classifyResult?.reasoning && (
-            <div className="p-4 bg-white/70 rounded-xl border border-slate-200 text-sm text-slate-600 text-left mb-5">
-              <span className="font-semibold text-ashoka-navy">AI Reasoning: </span>
+            <div className="p-4 bg-white/80 rounded-xl border border-slate-200 text-sm text-slate-700 text-left mb-5 shadow-2xs">
+              <span className="font-bold text-ashoka-navy">AI Reasoning: </span>
               {classifyResult.reasoning}
             </div>
           )}
 
-          <div className="flex items-center justify-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
               onClick={handleReset}
-              className="btn-primary cursor-pointer"
+              className="btn-primary cursor-pointer w-full sm:w-auto justify-center"
             >
               <RotateCcw size={15} /> Start a New Case
             </button>
             <button
               onClick={() => { reset(); router.push('/'); }}
-              className="btn-ghost cursor-pointer"
+              className="btn-ghost cursor-pointer w-full sm:w-auto justify-center border border-slate-300"
             >
               <ArrowLeft size={15} /> Back to Landing
             </button>
@@ -74,8 +74,8 @@ export default function OutOfScopeView() {
         {/* What we support */}
         <div className="glass-card p-6">
           <div className="flex items-center gap-2 mb-4">
-            <BookOpen size={16} className="text-brand-blue" />
-            <h2 className="text-sm font-bold text-white">What CivicRoute Handles</h2>
+            <BookOpen size={16} className="text-court-maroon" />
+            <h2 className="text-sm font-bold text-ashoka-navy uppercase tracking-wider">What JanAdhikar Handles</h2>
           </div>
           <div className="space-y-3">
             {SCOPE_ITEMS.map((item, i) => (
@@ -84,20 +84,20 @@ export default function OutOfScopeView() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.07 }}
-                className="flex items-start gap-3 p-3 bg-navy-700/60 rounded-xl border border-white/5"
+                className="flex items-start gap-3 p-3.5 bg-white/90 rounded-xl border border-slate-200 shadow-2xs"
               >
                 <span className="text-lg leading-none mt-0.5">{item.icon}</span>
-                <div>
-                  <p className="text-sm font-semibold text-white mb-0.5">{item.label}</p>
-                  <p className="text-xs text-slate-500 leading-relaxed">{item.desc}</p>
+                <div className="text-left">
+                  <p className="text-sm font-bold text-ashoka-navy mb-0.5">{item.label}</p>
+                  <p className="text-xs text-slate-600 leading-relaxed">{item.desc}</p>
                 </div>
               </motion.div>
             ))}
           </div>
-          <div className="mt-4 p-3 bg-brand-blue/10 border border-brand-blue/20 rounded-xl flex items-start gap-2">
-            <MessageSquare size={14} className="text-blue-400 mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-slate-400">
-              <span className="text-blue-400 font-semibold">Tip: </span>
+          <div className="mt-4 p-3.5 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-2.5 text-left">
+            <MessageSquare size={16} className="text-blue-700 mt-0.5 shrink-0" />
+            <p className="text-xs text-slate-700 leading-relaxed">
+              <span className="font-bold text-blue-900">Tip: </span>
               Try rephrasing your query to describe a specific legal issue — e.g.
               "I want to know the status of my RTI application filed with PWD" or
               "My landlord refused to return my security deposit."
