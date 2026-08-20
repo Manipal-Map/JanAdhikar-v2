@@ -1,5 +1,6 @@
 import io
 import json
+import email
 from fastapi import FastAPI, HTTPException, File, UploadFile, Form
 from starlette.requests import Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,7 +12,7 @@ from .case_manager import case_manager
 from .classifier import classifier
 from .outcome_predictor import outcome_engine
 from .department_resolver import department_resolver
-from .rti_pdf_generator import generate_rti_pdf
+from .rti_pdf_generator import generate_rti_pdf, generate_generic_pdf
 from .grievance_resolver import grievance_resolver
 
 app = FastAPI(title="CivicRoute AI API", version="1.0")
@@ -23,6 +24,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 class GeneratePDFRequest(BaseModel):
     title: Optional[str] = "Document"
     content: Optional[str] = ""
@@ -35,10 +37,6 @@ class ClassifyRequest(BaseModel):
     case_id: Optional[str] = None
     problem_text: Optional[str] = ""
     language: Optional[str] = "English"
-
-class ChatMessageRequest(BaseModel):
-    case_id: Optional[str] = None
-    message: Optional[str] = ""
 
 class FormSubmitRequest(BaseModel):
     case_id: Optional[str] = None
@@ -71,8 +69,6 @@ def init_case():
     new_case_id = case_manager.create_case()
     return CaseInitResponse(case_id=new_case_id, message="Save this ID safely.")
 
-import email
-
 async def parse_request_data(request: Request):
     content_type = request.headers.get("content-type", "")
     body_bytes = await request.body()
@@ -84,7 +80,6 @@ async def parse_request_data(request: Request):
         except Exception:
             return {}, []
             
-    # Multipart form-data parsing using standard library
     msg = email.message_from_bytes(b"Content-Type: " + content_type.encode() + b"\r\n\r\n" + body_bytes)
     fields = {}
     files = []
@@ -125,7 +120,6 @@ async def transcribe_audio(request: Request):
         if not client:
             return {"text": "Voice input received. Please review your text.", "transcription": "Voice input received."}
             
-        # FORCE ENGLISH: Use Whisper's native translation to English
         if language == "English":
             text = client.audio.translations.create(
                 file=(filename, file_bytes),
@@ -307,9 +301,6 @@ def generate_grievance(payload: GrievanceGenerateRequest):
 
 @app.post("/api/generate-pdf")
 def generate_generic_pdf_endpoint(payload: GeneratePDFRequest):
-    # Import the new generic pdf generator
-    from rti_pdf_generator import generate_generic_pdf
-    
     pdf_bytes = generate_generic_pdf(payload.title, payload.content)
     return StreamingResponse(
         io.BytesIO(pdf_bytes),
