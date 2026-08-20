@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "An autonomous, local-first legal engine that translates everyday civic problems into legally binding RTI applications and Grievance appeals.",
   icons: {
     icon: {
-      url: "/favicon.svg",
+      url: "/favicon.png",
       type: "image/svg+xml",
     },
   },
