@@ -6,10 +6,7 @@ import {
   Sparkles, 
   ArrowRight, 
   CheckCircle2, 
-  AlertTriangle, 
   Scale, 
-  FileText, 
-  Download, 
   Copy, 
   Check, 
   ShieldCheck, 
@@ -17,11 +14,8 @@ import {
   ExternalLink,
   ChevronLeft,
   Paperclip,
-  TrendingUp,
-  Clock,
-  Zap
+  Clock
 } from "lucide-react";
-import confetti from "canvas-confetti";
 
 interface GuidedCaseModalProps {
   isOpen: boolean;
@@ -36,7 +30,6 @@ export default function GuidedCaseModal({ isOpen, onClose, initialPrompt = "" }:
   const [citizenCity, setCitizenCity] = useState("New Delhi");
   const [selectedRoute, setSelectedRoute] = useState<"RTI" | "GRIEVANCE" | "ACTION">("RTI");
   
-  // Checklist items
   const [checklist, setChecklist] = useState({
     specificPeriod: true,
     exactLocation: true,
@@ -58,7 +51,6 @@ export default function GuidedCaseModal({ isOpen, onClose, initialPrompt = "" }:
   const handleNextToAnalyze = () => {
     if (!problemText.trim()) return;
     setLoading(true);
-    // Simple heuristic for demo routing
     setTimeout(() => {
       const lower = problemText.toLowerCase();
       if (lower.includes("refund") || lower.includes("deposit") || lower.includes("salary") || lower.includes("pension not received")) {
@@ -71,24 +63,30 @@ export default function GuidedCaseModal({ isOpen, onClose, initialPrompt = "" }:
     }, 600);
   };
 
-  const handleFinishCase = () => {
+  const handleFinishCase = async () => {
     setStep(4);
-    try {
-      confetti({
-        particleCount: 60,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-    } catch (e) {
-      // ignore
+    if (typeof window !== "undefined") {
+      try {
+        const confettiModule = await import("canvas-confetti");
+        const confetti = confettiModule.default || confettiModule;
+        confetti({
+          particleCount: 60,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      } catch (e) {
+        // Safe fallback if canvas is not initialized
+      }
     }
   };
 
   const handleCopyDraft = () => {
     const draft = generateDraftText();
-    navigator.clipboard.writeText(draft);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(draft);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const generateDraftText = () => {
@@ -176,10 +174,8 @@ Petitioner: ${citizenName}`;
           </button>
         </div>
 
-        {/* Modal Step Content (Scrollable) */}
+        {/* Modal Step Content */}
         <div className="p-6 sm:p-8 overflow-y-auto flex-1 space-y-6">
-          
-          {/* STEP 1: Problem Intake */}
           {step === 1 && (
             <div className="space-y-5 animate-in slide-in-from-right-4 duration-300">
               <div>
@@ -201,7 +197,6 @@ Petitioner: ${citizenName}`;
                 />
               </div>
 
-              {/* Citizen Details */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">Applicant Name</label>
@@ -223,7 +218,6 @@ Petitioner: ${citizenName}`;
                 </div>
               </div>
 
-              {/* Quick Presets */}
               <div>
                 <span className="text-[11px] font-semibold uppercase text-slate-400 tracking-wider">
                   Or select a common citizen issue:
@@ -248,7 +242,6 @@ Petitioner: ${citizenName}`;
             </div>
           )}
 
-          {/* STEP 2: Route & Authority Recommendation */}
           {step === 2 && (
             <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
               <div>
@@ -261,7 +254,6 @@ Petitioner: ${citizenName}`;
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Option 1: RTI */}
                 <div
                   onClick={() => setSelectedRoute("RTI")}
                   className={`p-5 rounded-2xl border cursor-pointer transition-all ${
@@ -286,7 +278,6 @@ Petitioner: ${citizenName}`;
                   </div>
                 </div>
 
-                {/* Option 2: Grievance */}
                 <div
                   onClick={() => setSelectedRoute("GRIEVANCE")}
                   className={`p-5 rounded-2xl border cursor-pointer transition-all ${
@@ -312,7 +303,6 @@ Petitioner: ${citizenName}`;
                 </div>
               </div>
 
-              {/* Identified Authority Registry Match */}
               <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center gap-3.5">
                 <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
                   <Building2 className="w-5 h-5" />
@@ -331,7 +321,6 @@ Petitioner: ${citizenName}`;
             </div>
           )}
 
-          {/* STEP 3: Green-Tick Readiness Checklist */}
           {step === 3 && (
             <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
               <div className="flex items-center justify-between">
@@ -390,7 +379,6 @@ Petitioner: ${citizenName}`;
                 </label>
               </div>
 
-              {/* File Attachment Simulation */}
               <div className="border-2 border-dashed border-slate-800 hover:border-emerald-500/50 rounded-2xl p-4 text-center cursor-pointer transition">
                 <Paperclip className="w-5 h-5 text-slate-400 mx-auto mb-1.5" />
                 <div className="text-xs font-semibold text-slate-300">
@@ -401,10 +389,8 @@ Petitioner: ${citizenName}`;
             </div>
           )}
 
-          {/* STEP 4: Generated Draft & Outcome Intelligence Panel */}
           {step === 4 && (
             <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-              {/* Outcome Intelligence Header Banner */}
               <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-950 border border-emerald-500/30 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
@@ -429,7 +415,6 @@ Petitioner: ${citizenName}`;
                 </button>
               </div>
 
-              {/* Ready-to-file Formatted Document */}
               <div>
                 <div className="flex items-center justify-between text-xs font-semibold text-slate-400 mb-1.5">
                   <span>Generated Statutory Application</span>
@@ -440,7 +425,6 @@ Petitioner: ${citizenName}`;
                 </pre>
               </div>
 
-              {/* Next Action & Submission Instructions */}
               <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-2">
                 <h5 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5" />
