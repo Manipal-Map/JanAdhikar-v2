@@ -28,9 +28,27 @@ class RouteClassifier:
                 "form_schema": []
             }
 
-        rti_terms = ["rti", "tender", "inspection", "records", "sanction", "fund", "allocated", "status", "pending", "delay", "pension", "epfo", "officer", "road", "pds", "ration", "exam", "answer key"]
-        grievance_terms = ["landlord", "deposit", "tenant", "eviction", "refund", "airline", "flight", "defective", "consumer", "service", "salary", "termination", "hospital", "cheated", "fraud", "bill", "overcharged"]
 
+        # RTI terms focus purely on demanding documents, files, records, and transparency
+        rti_terms = [
+            "rti", "tender", "inspection", "records", "sanction order", "fund allocated", 
+            "status report", "file notings", "copy of", "certified copies", "blueprint", 
+            "budget", "procurement", "contractor details", "audit report", "guidelines", 
+            "policy document", "minutes of meeting", "merit list", "answer key", 
+            "response sheet", "cutoff marks", "attendance sheet", "empaneled"
+        ]
+
+        # Grievance terms focus on personal loss, financial delays, corruption, harassment, and service failure
+        grievance_terms = [
+            "pension", "not come", "delayed", "withheld", "disburse", "not credited", 
+            "refund", "deposit", "tenant", "eviction", "rent", "defective", "consumer", 
+            "service failure", "salary", "unpaid", "termination", "harassment", "bribe", 
+            "corruption", "extortion", "hospital", "negligence", "cheated", "fraud", 
+            "bill", "overcharged", "epfo", "pf withdrawal", "ration", "pds", "electricity cut", 
+            "water supply", "pothole", "garbage", "illegal construction", "encroachment", 
+            "arbitrary", "denied entry", "police inaction", "FIR not registered"
+        ]
+        
         rti_score = sum(1 for term in rti_terms if term in lower)
         grievance_score = sum(1 for term in grievance_terms if term in lower)
 
