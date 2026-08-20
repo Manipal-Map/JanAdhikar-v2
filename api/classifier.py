@@ -16,36 +16,48 @@ class RouteClassifier:
             self.client = None
 
     def _rule_based_fallback(self, text: str) -> Dict[str, Any]:
-        lower = text.lower()
+        lower = text.strip().lower()
+        
+        # If it's a completely short or random string (like "obb"), route to Other
+        if len(lower) < 4 or not any(char.isalnum() for char in lower):
+            return {
+                "route": "Other",
+                "sub_category": "Irrelevant",
+                "confidence": 0.95,
+                "reasoning": "The provided input is too short or unstructured to be a civic or legal inquiry.",
+                "form_schema": []
+            }
+
         rti_terms = ["rti", "tender", "inspection", "records", "sanction", "fund", "allocated", "status", "pending", "delay", "pension", "epfo", "officer", "road", "pds", "ration", "exam", "answer key"]
         grievance_terms = ["landlord", "deposit", "tenant", "eviction", "refund", "airline", "flight", "defective", "consumer", "service", "salary", "termination", "hospital", "cheated", "fraud", "bill", "overcharged"]
 
         rti_score = sum(1 for term in rti_terms if term in lower)
         grievance_score = sum(1 for term in grievance_terms if term in lower)
 
-        if rti_score >= grievance_score and rti_score > 0:
+        if rti_score == 0 and grievance_score == 0:
+            return {
+                "route": "Other",
+                "sub_category": "General Query",
+                "confidence": 0.80,
+                "reasoning": "This query does not contain recognized civic, administrative, or consumer law keywords.",
+                "form_schema": []
+            }
+
+        if rti_score >= grievance_score:
             return {
                 "route": "RTI",
                 "sub_category": "Municipal / Public Records",
                 "confidence": 0.88,
-                "reasoning": "You are seeking official administrative records, inspection sheets, or fund disbursement logs under the Right to Information Act, 2005.",
+                "reasoning": "You are seeking official administrative records or documents under the Right to Information Act, 2005.",
                 "form_schema": DYNAMIC_FORM_SCHEMAS.get("RTI", [])
             }
-        elif grievance_score > 0:
+        else:
             return {
                 "route": "Rights/Grievance",
                 "sub_category": "Consumer / Statutory Grievance",
                 "confidence": 0.85,
-                "reasoning": "You are seeking dispute resolution, statutory refund, compensation, or action against deficiency of public/commercial service.",
+                "reasoning": "You are seeking dispute resolution, statutory refund, or action against service deficiency.",
                 "form_schema": DYNAMIC_FORM_SCHEMAS.get("Rights/Grievance", [])
-            }
-        else:
-            return {
-                "route": "RTI",
-                "sub_category": "Civic Rights Query",
-                "confidence": 0.78,
-                "reasoning": "Your issue involves a public authority or government service and is eligible for Section 6(1) RTI inquiry.",
-                "form_schema": DYNAMIC_FORM_SCHEMAS.get("RTI", [])
             }
 
     def classify(self, user_text: str, language: str = "English") -> Dict[str, Any]:
@@ -54,14 +66,23 @@ class RouteClassifier:
 
         if self.client:
             try:
-                system_msg = f"{CLASSIFIER_SYSTEM_PROMPT}\n\nCRITICAL LANGUAGE INSTRUCTION:\nThe user has selected '{language}'. ALL text values in your JSON MUST be written in {language}.\nIf '{language}' is 'Hinglish', you MUST write conversational Hindi strictly using the English alphabet. ABSOLUTELY NO Devanagari or regional scripts are allowed. Use English alphabet ONLY."
+                system_msg = (
+                    f"{CLASSIFIER_SYSTEM_PROMPT}\n\n"
+                    f"CRITICAL LANGUAGE INSTRUCTION:\n"
+                    f"The user has selected '{language}'. ALL text values in your JSON MUST be written in {language}.\n"
+                    f"If '{language}' is 'Hinglish', you MUST write conversational Hindi strictly using the English alphabet. "
+                    f"ABSOLUTELY NO Devanagari or regional scripts are allowed. Use English alphabet ONLY.\n\n"
+                    f"IMPORTANT TRIAJ RULE:\n"
+                    f"If the input is gibberish, random letters (like 'obb'), or completely unrelated to Indian civic/legal/RTI matters, "
+                    f"you MUST classify it as route: 'Other'."
+                )
                 
-                prompt_messages = [{"role": "system", "content": system_msg}]
-                prompt_messages.append({"role": "user", "content": user_text})
-
                 response = self.client.chat.completions.create(
                     model="llama-3.3-70b-versatile",
-                    messages=prompt_messages,
+                    messages=[
+                        {"role": "system", "content": system_msg},
+                        {"role": "user", "content": user_text}
+                    ],
                     temperature=0.0,
                     response_format={"type": "json_object"}
                 )
