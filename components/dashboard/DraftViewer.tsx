@@ -1,54 +1,70 @@
 'use client';
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Copy, Download, CheckCheck, FileText, Printer, Loader2 } from 'lucide-react'
-import { downloadGenericPdf } from '@/lib/api'
 
-export default function DraftViewer({ title = 'Generated Document', draft, caseId }) {
-  const [copied, setCopied] = useState(false)
-  const [downloading, setDownloading] = useState(false)
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Copy, Download, CheckCheck, FileText, Printer, Loader2 } from 'lucide-react';
+import { downloadGenericPdf } from '@/lib/api';
 
-  if (!draft) return null
+interface DraftViewerProps {
+  title?: string;
+  draft?: string;
+  caseId?: string;
+}
+
+export default function DraftViewer({
+  title = 'Generated Document',
+  draft = '',
+  caseId,
+}: DraftViewerProps) {
+  const [copied, setCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
+  if (!draft) return null;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(draft)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  // Uses the backend PDF generator to ensure clean fonts and no Unicode black boxes
-  const handleDownloadPdf = async () => {
-    setDownloading(true)
-    try {
-      const blob = await downloadGenericPdf(title, draft)
-      const url = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }))
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `${caseId || 'Legal_Notice'}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      link.parentNode.removeChild(link)
-      URL.revokeObjectURL(url)
-    } catch (err) {
-      console.error('Failed to download PDF:', err)
-      alert('Failed to generate PDF. Please try again.')
-    } finally {
-      setDownloading(false)
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(draft);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
-  }
+  };
 
-  // Uses an invisible Iframe to print, entirely bypassing browser Pop-Up Blockers
+  const handleDownloadPdf = async () => {
+    if (typeof window === 'undefined') return;
+    setDownloading(true);
+    try {
+      const blob = await downloadGenericPdf(title, draft);
+      const url = window.URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${caseId || 'Legal_Notice'}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to download PDF:', err);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const handlePrint = () => {
-    const iframe = document.createElement('iframe')
-    iframe.style.position = 'fixed'
-    iframe.style.right = '0'
-    iframe.style.bottom = '0'
-    iframe.style.width = '0'
-    iframe.style.height = '0'
-    iframe.style.border = '0'
-    document.body.appendChild(iframe)
-    
+    if (typeof document === 'undefined' || typeof window === 'undefined') return;
+
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
+
+    const safeDraft = draft.replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const content = `
+      <!DOCTYPE html>
       <html>
         <head>
           <title>${title}</title>
@@ -59,23 +75,27 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
         </head>
         <body>
           <h2>${title}</h2>
-          <pre>${draft.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+          <pre>${safeDraft}</pre>
         </body>
       </html>
-    `
-    
-    iframe.contentWindow.document.open()
-    iframe.contentWindow.document.write(content)
-    iframe.contentWindow.document.close()
-    
-    iframe.contentWindow.focus()
-    setTimeout(() => {
-      iframe.contentWindow.print()
+    `;
+
+    if (iframe.contentWindow) {
+      iframe.contentWindow.document.open();
+      iframe.contentWindow.document.write(content);
+      iframe.contentWindow.document.close();
+
+      iframe.contentWindow.focus();
       setTimeout(() => {
-        document.body.removeChild(iframe)
-      }, 1000)
-    }, 250)
-  }
+        iframe.contentWindow?.print();
+        setTimeout(() => {
+          if (iframe.parentNode) {
+            document.body.removeChild(iframe);
+          }
+        }, 1000);
+      }, 250);
+    }
+  };
 
   return (
     <motion.div
@@ -87,16 +107,46 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
         <div className="flex items-center gap-2.5">
           <FileText size={16} className="text-blue-600" />
           <h3 className="text-sm font-bold text-slate-900">{title}</h3>
-          {caseId && <span className="text-xs font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">#{caseId}</span>}
+          {caseId && (
+            <span className="text-xs font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
+              #{caseId}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-1.5">
-          <button onClick={handleCopy} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
-            {copied ? <><CheckCheck size={13} className="text-emerald-600" /> Copied!</> : <><Copy size={13} /> Copy</>}
+          <button
+            onClick={handleCopy}
+            className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200"
+          >
+            {copied ? (
+              <>
+                <CheckCheck size={13} className="text-emerald-600" /> Copied!
+              </>
+            ) : (
+              <>
+                <Copy size={13} /> Copy
+              </>
+            )}
           </button>
-          <button onClick={handleDownloadPdf} disabled={downloading} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
-            {downloading ? <><Loader2 size={13} className="animate-spin" /> Generating...</> : <><Download size={13} /> Download (PDF)</>}
+          <button
+            onClick={handleDownloadPdf}
+            disabled={downloading}
+            className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200"
+          >
+            {downloading ? (
+              <>
+                <Loader2 size={13} className="animate-spin" /> Generating...
+              </>
+            ) : (
+              <>
+                <Download size={13} /> Download (PDF)
+              </>
+            )}
           </button>
-          <button onClick={handlePrint} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
+          <button
+            onClick={handlePrint}
+            className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200"
+          >
             <Printer size={13} /> Print
           </button>
         </div>
@@ -107,5 +157,5 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
         </pre>
       </div>
     </motion.div>
-  )
+  );
 }
