@@ -1,0 +1,281 @@
+'use client';
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { Scale, ArrowRight, ArrowLeft, ShieldAlert, CheckCircle2, Globe, ExternalLink, AlertCircle, FileText, Landmark, Clock, BookOpen, Download, Copy, Printer, Check } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import useCaseStore from '@/store/caseStore'
+import DraftViewer from '@/components/dashboard/DraftViewer'
+
+export default function GrievanceResultView() {
+  const router = useRouter()
+  const { caseId, userProblem, formData, grievanceResult, setGrievanceResult, setStage } = useCaseStore()
+  const [subStep, setSubStep] = useState(1) // Step 1: Rights Violated | Step 2: Legal Notice Draft
+
+  // Default fallback data if page is accessed directly
+  const defaultProblem = userProblem || "Unlawful withholding of security deposit / consumer deficiency of service"
+  const applicantName = formData?.applicant_name || "Applicant"
+  const applicantCity = formData?.applicant_city || "Local Jurisdiction"
+
+  const activeResult = grievanceResult && grievanceResult.violated_rights && grievanceResult.violated_rights.length > 0
+    ? grievanceResult
+    : {
+        violated_rights: [
+          "Transfer of Property Act, 1882 (Section 108 — Lessor's Statutory Liabilities)",
+          "Model Tenancy Act & State Rent Control Directives (Unlawful Retention of Security Corpus)",
+          "Indian Contract Act, 1872 (Section 73 — Compensation for Breach of Contract)",
+          "Consumer Protection Act, 2019 (Section 2(11) Deficiency in Service & Section 2(47) Unfair Trade Practice)"
+        ],
+        legal_explanation: `Under Indian tenancy law and the Indian Contract Act, 1872, a refundable security deposit is held in fiduciary trust by the property owner/service provider. Upon peaceful handover and clearance of electricity/maintenance dues, the owner is statutorily obligated to refund the principal amount within 30 days. Unilateral retention without producing certified inspection logs, photographic proof of damage, and actual repair receipts constitutes an actionable breach of contract and criminal breach of trust. Under Section 73 of the Indian Contract Act and Consumer Protection jurisprudence, the complainant is entitled to 100% refund along with 18% per annum statutory penal interest from the date of handover.`,
+        target_portal_name: "State Rent Authority / e-Daakhil National Consumer Commission",
+        target_portal_url: "https://edaakhil.nic.in",
+        evidence_analysis: `1. Tenancy Agreement & Security Deposit Receipts: Conclusive proof of financial consideration and terms of refund.\n2. Key Handover Acknowledgment / Move-out Communication: Establishes timely surrender of peaceful possession.\n3. Bank Statements & Transaction Proofs: Confirms complete clearance of all legitimate dues and proves unilateral retention.`,
+        demand_notice_draft: `FORMAL LEGAL DEMAND NOTICE
+(Under Section 80 CPC read with Consumer Protection Act, 2019 & Indian Contract Act, 1872)
+
+BY SPEED POST WITH ACKNOWLEDGMENT DUE / EMAIL
+
+Date: ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+Case Ref: ${caseId || 'CR-GRV-8821'}
+
+To:
+The Opposite Party / Respondent,
+${applicantCity}
+
+From:
+${applicantName}
+Address: ${formData?.applicant_address || applicantCity}
+Contact: ${formData?.applicant_contact || 'On Record'}
+
+SUBJECT: FINAL STATUTORY DEMAND NOTICE FOR IMMEDIATE RESOLUTION / REFUND WITH 18% STATUTORY INTEREST
+
+Sir/Madam,
+
+Under instructions and on behalf of my client/myself, ${applicantName}, I hereby serve upon you this formal statutory Legal Demand Notice:
+
+1. FACTUAL MATRIX:
+   That you entered into a binding contractual arrangement with the undersigned regarding: "${defaultProblem}". The undersigned fulfilled all contractual covenants and paid the agreed consideration in full.
+
+2. STATUTORY DEFICIENCY & BREACH:
+   That contrary to statutory obligations and established Indian jurisprudence, you have failed and neglected to refund the legitimate dues / remedy the service defect, causing severe financial loss, mental harassment, and distress.
+
+3. LEGAL LIABILITY:
+   Take notice that under Section 73 of the Indian Contract Act, 1872, and Section 2(11) read with Section 2(47) of the Consumer Protection Act, 2019, you are personally and commercially liable for the principal amount, compensation for mental agony, and statutory interest @ 18% per annum.
+
+NOW THEREFORE, you are hereby called upon to:
+(a) Effect 100% refund / resolution of the outstanding dispute within FIFTEEN (15) DAYS from the receipt of this notice.
+(b) Pay statutory interest @ 18% p.a. from the date the amount became due until final realization.
+(c) Pay Rs. 25,000/- towards litigation expenses and legal notice charges.
+
+Failure to comply shall constrain the undersigned to initiate formal proceedings before the Competent Consumer Commission (e-Daakhil) / Civil Court entirely at your risk, cost, and legal consequences.
+
+Yours faithfully,
+
+${applicantName}
+(Complainant / Aggrieved Party)`
+      }
+
+  const {
+    violated_rights = [],
+    legal_explanation = '',
+    target_portal_name = '',
+    target_portal_url = '',
+    evidence_analysis = '',
+    demand_notice_draft = ''
+  } = activeResult
+
+  return (
+    <div className="gradient-bg min-h-screen flex flex-col items-center justify-center p-4 py-12">
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-4xl">
+        
+        {subStep === 1 ? (
+          // ══════════════════════════════════════════════════════════════════════
+          // STEP 3: COMPREHENSIVE LEGAL ANALYSIS & RIGHTS BREAKDOWN
+          // ══════════════════════════════════════════════════════════════════════
+          <div className="space-y-6">
+            <div>
+              <div className="mb-3">
+                <span className="text-xs font-bold uppercase tracking-widest text-court-maroon bg-court-maroon/10 px-3 py-1 rounded-full border border-court-maroon/20">
+                  STEP 3 · Institutional Legal Analysis
+                </span>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-ashoka-navy mb-2 tracking-tight">
+                Identified Rights & Statutory Violations
+              </h1>
+              <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+                Based on your statement, our legal engine has analyzed the specific Indian statutory provisions, consumer protections, and case law precedents applicable to your case.
+              </p>
+            </div>
+
+            {/* Problem Context Banner */}
+            <div className="bg-[#FAF8F5] border border-slate-300 rounded-2xl p-4 sm:p-5 text-left flex items-start gap-3">
+              <BookOpen className="w-5 h-5 text-court-maroon mt-0.5 shrink-0" />
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Citizen Matter on Record:</span>
+                <p className="text-sm font-semibold text-ashoka-navy mt-0.5">{defaultProblem}</p>
+              </div>
+            </div>
+
+            {/* Main Content Container */}
+            <div className="bg-white border border-[#b8c2cc] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 text-left">
+              
+              {/* Violated Laws & Rights Cards */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <ShieldAlert className="w-4 h-4 text-court-maroon" />
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Applicable Acts & Violated Legal Provisions</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {violated_rights.map((right, idx) => (
+                    <div key={idx} className="p-4 bg-rose-50/70 border border-rose-200/80 rounded-2xl flex items-start gap-3">
+                      <span className="w-6 h-6 rounded-full bg-court-maroon text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                        {idx + 1}
+                      </span>
+                      <div>
+                        <p className="text-xs font-bold text-court-maroon leading-snug">{right}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Detailed Legal Explanation */}
+              <div className="border-t border-slate-200 pt-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Scale className="w-4 h-4 text-statutory-green" />
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Legal Analysis & Fiduciary Rights</h3>
+                </div>
+                <div className="bg-[#FAF8F5] p-5 sm:p-6 rounded-2xl border border-slate-200 text-sm text-ashoka-navy leading-relaxed font-medium">
+                  {legal_explanation}
+                </div>
+              </div>
+
+              {/* Evidence & Evidentiary Value */}
+              <div className="border-t border-slate-200 pt-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <FileText className="w-4 h-4 text-blue-600" />
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Evidentiary Audit & Key Proofs Required</h3>
+                </div>
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line font-mono">
+                  {evidence_analysis}
+                </div>
+              </div>
+
+              {/* Redressal Portal Card */}
+              {target_portal_name && (
+                <div className="border-t border-slate-200 pt-6">
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                        Statutory Forum
+                      </span>
+                      <h4 className="text-base font-bold text-slate-900 mt-1">{target_portal_name}</h4>
+                      <p className="text-xs text-slate-600 mt-0.5">Recommended statutory appellate authority & online filing portal</p>
+                    </div>
+                    {target_portal_url && (
+                      <a
+                        href={target_portal_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn-ghost text-xs py-2 px-4 gap-1.5 bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 shrink-0 self-start sm:self-auto"
+                      >
+                        <Globe size={14} /> Open Portal <ExternalLink size={12} />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Navigation Actions */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-slate-200">
+                <button
+                  onClick={() => router.push('/dashboard/grievance')}
+                  className="btn-ghost text-sm py-3 px-5 border border-slate-300 cursor-pointer w-full sm:w-auto justify-center"
+                >
+                  <ArrowLeft size={16} /> Edit Applicant Details
+                </button>
+                <button
+                  onClick={() => setSubStep(2)}
+                  className="btn-primary text-base py-3.5 px-8 cursor-pointer w-full sm:w-auto justify-center shadow-md"
+                >
+                  View Ready-to-File Notice <ArrowRight size={18} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          // ══════════════════════════════════════════════════════════════════════
+          // STEP 4: FORMAL STATUTORY NOTICE DRAFT VIEWER
+          // ══════════════════════════════════════════════════════════════════════
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-widest text-court-maroon bg-court-maroon/10 px-3 py-1 rounded-full border border-court-maroon/20">
+                  STEP 4 · Formal Legal Demand Notice
+                </span>
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-ashoka-navy mt-2 tracking-tight">
+                  Ready-to-File Legal Notice
+                </h1>
+              </div>
+              {caseId && (
+                <span className="text-xs font-mono font-bold text-slate-600 bg-white px-3 py-1 rounded-xl border border-slate-300 shadow-2xs self-start sm:self-auto">
+                  Case ID: #{caseId}
+                </span>
+              )}
+            </div>
+
+            <p className="text-slate-600 text-sm leading-relaxed text-left">
+              Your formal legal demand notice has been drafted in compliance with <strong>Section 80 CPC</strong> and the <strong>Consumer Protection Act, 2019</strong>. You can download it as a formal PDF, copy it, or print it.
+            </p>
+
+            <div className="space-y-6 text-left">
+              {/* Draft Viewer */}
+              <DraftViewer
+                title="Statutory Legal Demand Notice"
+                draft={demand_notice_draft}
+                caseId={caseId}
+              />
+
+              {/* Legal Notice Instructions Box */}
+              <div className="bg-slate-50 border border-slate-300 rounded-2xl p-5 text-left space-y-2">
+                <h4 className="text-xs font-bold text-ashoka-navy uppercase tracking-wider flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-court-maroon" /> Recommended Service Instructions
+                </h4>
+                <ul className="text-xs text-slate-600 space-y-1.5 pl-4 list-disc leading-relaxed">
+                  <li>Send this notice via <strong>Speed Post with Acknowledgment Due (AD)</strong> or by Registered Email to retain proof of delivery.</li>
+                  <li>Give the opposite party <strong>15 statutory calendar days</strong> to comply from the date of receipt.</li>
+                  <li>If the dispute remains unresolved after 15 days, submit the postal tracking receipt along with this notice on <strong>{target_portal_name || 'e-Daakhil'}</strong> to file your formal complaint.</li>
+                </ul>
+              </div>
+
+              {/* Disclaimer */}
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-left">
+                <AlertCircle size={18} className="text-amber-600 mt-0.5 shrink-0" />
+                <p className="text-xs text-amber-900 leading-relaxed font-medium">
+                  <strong>Statutory Notice Disclaimer:</strong> This legal notice has been generated by JanAdhikar's institutional AI engine. Please verify all party names, addresses, and transaction amounts before service.
+                </p>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                <button
+                  onClick={() => setSubStep(1)}
+                  className="btn-ghost text-sm py-3 px-5 border border-slate-300 cursor-pointer w-full sm:w-auto justify-center"
+                >
+                  <ArrowLeft size={16} /> Back to Rights Analysis
+                </button>
+                <button
+                  onClick={() => { setStage('IDLE'); router.push('/'); }}
+                  className="btn-primary text-sm py-3 px-6 cursor-pointer w-full sm:w-auto justify-center"
+                >
+                  Start Another Case
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </motion.div>
+    </div>
+  )
+}
