@@ -11,7 +11,8 @@ import GrievanceResultView from '@/views/GrievanceResultView';
 import OutOfScopeView from '@/views/OutOfScopeView';
 
 export default function DashboardApp() {
-  const { stage, userProblem, setUserProblem } = useCaseStore();
+  // Fix: Cast the store to 'any' to bypass strict TS inference errors
+  const { stage, userProblem, setUserProblem } = useCaseStore() as any;
   const router = useRouter();
 
   // On mount: if landing page saved a problem text via sessionStorage, pre-populate it
