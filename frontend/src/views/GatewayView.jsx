@@ -285,7 +285,7 @@ export default function GatewayView() {
             {localErr && <div className="p-3 bg-red-50 text-red-700 text-sm rounded-xl mb-4 text-left">{localErr}</div>}
 
             <button onClick={handleStartCase} disabled={!text.trim() || stage === 'INITIALIZING'} className="btn-primary w-full justify-center text-lg py-4 cursor-pointer">
-              {stage === 'INITIALIZING' ? <><Loader2 className="animate-spin" /> Generating Passkey...</> : <>Analyse my problem <ArrowRight size={20} /></>}
+              {stage === 'INITIALIZING' ? <><Loader2 className="animate-spin" /> Generating Your Case ID...</> : <>Analyse my problem <ArrowRight size={20} /></>}
             </button>
 
             <div className="mt-8 flex items-center justify-between px-2">
