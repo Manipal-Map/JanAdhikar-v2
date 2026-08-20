@@ -1,9 +1,12 @@
+'use client';
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Copy, Download, CheckCheck, FileText, Printer, Loader2 } from 'lucide-react'
-import { downloadRtiPdf } from '../api/index.js'
 
-export default function DraftViewer({ title = 'Generated Document', draft, caseId }) {
+// CORRECT NEXT.JS IMPORT
+import { downloadGenericPdf } from '@/lib/api'
+
+export default function DraftViewer({ title = 'Generated Document', draft, caseId }: any) {
   const [copied, setCopied] = useState(false)
   const [downloading, setDownloading] = useState(false)
 
@@ -18,23 +21,22 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
   const handleDownloadPdf = async () => {
     setDownloading(true)
     try {
-      // Fetch the PDF from your backend
-      const blob = await downloadRtiPdf(caseId)
+      const blob = await downloadGenericPdf(title, draft)
       
-      // THE BULLETPROOF BYPASS: Using a Data String instead of a File Blob.
+      // BULLETPROOF BYPASS: Using a Data String instead of a File Blob.
       // This stops Android Chrome from scanning for PDF Viewer apps.
       const reader = new FileReader()
       reader.onloadend = () => {
         if (!reader.result) return;
         
-        const base64Data = reader.result.toString().replace(
+        const base64Data = (reader.result as string).replace(
           /^data:(.*?);/,
           'data:application/octet-stream;'
         )
 
         const link = document.createElement('a')
         link.href = base64Data
-        link.download = `${caseId || 'Legal_Document'}.pdf`
+        link.download = `${caseId || 'Legal_Notice'}.pdf`
         
         document.body.appendChild(link)
         link.click()
@@ -101,7 +103,7 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm"
+      className="glass-card overflow-hidden"
     >
       <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50">
         <div className="flex items-center gap-2.5">
@@ -110,13 +112,13 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
           {caseId && <span className="text-xs font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">#{caseId}</span>}
         </div>
         <div className="flex items-center gap-1.5">
-          <button onClick={handleCopy} className="text-xs py-1.5 px-3 flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50">
+          <button onClick={handleCopy} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
             {copied ? <><CheckCheck size={13} className="text-emerald-600" /> Copied!</> : <><Copy size={13} /> Copy</>}
           </button>
-          <button onClick={handleDownloadPdf} disabled={downloading} className="text-xs py-1.5 px-3 flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50">
-            {downloading ? <><Loader2 size={13} className="animate-spin" /> Generating...</> : <><Download size={13} /> Download</>}
+          <button onClick={handleDownloadPdf} disabled={downloading} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
+            {downloading ? <><Loader2 size={13} className="animate-spin" /> Generating...</> : <><Download size={13} /> Download (PDF)</>}
           </button>
-          <button onClick={handlePrint} className="text-xs py-1.5 px-3 flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50">
+          <button onClick={handlePrint} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
             <Printer size={13} /> Print
           </button>
         </div>
