@@ -230,7 +230,7 @@ export default function GatewayView() {
         {stage === 'CLASSIFYING' ? (
           <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12 z-10">
             <Loader2 size={40} className="animate-spin text-court-maroon mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-ashoka-navy">Analyzing your issue with Legal AI...</h2>
+            <h2 className="text-xl font-bold text-ashoka-navy">Hang on while we look at your case...</h2>
           </motion.div>
         ) : isClassified ? (
           
