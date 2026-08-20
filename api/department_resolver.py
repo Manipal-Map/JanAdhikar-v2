@@ -1,7 +1,7 @@
 import json
 import httpx
 from typing import Dict, Any
-from classifier import classifier
+from .classifier import classifier
 
 class SmartDepartmentResolver:
     def __init__(self):
