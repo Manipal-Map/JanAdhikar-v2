@@ -36,9 +36,10 @@ export default function GatewayView() {
   const [resumeMode, setResumeMode] = useState(false)
   const [localErr, setLocalErr] = useState(null)
   
-  // Modal State
+  // Modal State & Agreement Checkbox State
   const [showPasskeyModal, setShowPasskeyModal] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [hasAgreed, setHasAgreed] = useState(false)
 
   const { stage, setStage, caseId, setCaseId, classifyResult, setClassifyResult, setUserProblem, language, setLanguage, hydrateState } = useCaseStore()
 
@@ -49,6 +50,7 @@ export default function GatewayView() {
   const handleStartCase = async () => {
     if (!text.trim() || isProcessing) return
     setLocalErr(null)
+    setHasAgreed(false) // Reset agreement state for the new case
     try {
       setStage('INITIALIZING')
       const { case_id } = await initCase()
@@ -64,6 +66,7 @@ export default function GatewayView() {
 
   // STEP 2: Triggered when user clicks "Continue to AI Classification" inside the modal
   const handleProceedToAI = async () => {
+    if (!hasAgreed) return
     setShowPasskeyModal(false)
     setLocalErr(null)
     try {
@@ -150,7 +153,7 @@ export default function GatewayView() {
                 Save this 10-character code before we identify your route. You will need it to reopen your case anytime without an account.
               </p>
 
-              <div className="bg-slate-50/70 border border-[#b8c2cc]/60 rounded-2xl p-6 shadow-inner mb-6">
+              <div className="bg-slate-50/70 border border-[#b8c2cc]/60 rounded-2xl p-6 shadow-inner mb-5">
                 <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">
                   YOUR PRIVATE ACCESS IDENTIFIER
                 </span>
@@ -178,7 +181,7 @@ export default function GatewayView() {
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-2xl p-3.5 text-left flex items-start gap-3 shadow-sm mb-6">
+              <div className="bg-white border border-slate-200 rounded-2xl p-3.5 text-left flex items-start gap-3 shadow-sm mb-4">
                 <div className="mt-0.5 text-emerald-600 flex-shrink-0">
                   <Lock size={15} />
                 </div>
@@ -190,12 +193,26 @@ export default function GatewayView() {
                 </div>
               </div>
 
+              {/* --- MANDATORY AGREEMENT CHECKBOX --- */}
+              <div className="flex items-start gap-2.5 mb-5 bg-[#FAF8F5] p-3.5 rounded-2xl border border-slate-200 text-left">
+                <input
+                  type="checkbox"
+                  id="modal-agreement"
+                  checked={hasAgreed}
+                  onChange={(e) => setHasAgreed(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 text-court-maroon border-slate-300 rounded focus:ring-court-maroon cursor-pointer flex-shrink-0"
+                />
+                <label htmlFor="modal-agreement" className="text-xs text-slate-700 font-medium cursor-pointer leading-relaxed select-none">
+                  I understand this is an <strong className="text-ashoka-navy">AI-generated document assistant</strong> and agree to verify all facts, dates, and claims thoroughly before formal submission.
+                </label>
+              </div>
+
               {localErr && <div className="p-3 bg-red-50 text-red-700 text-xs rounded-xl mb-4 text-left">{localErr}</div>}
 
               <button 
                 onClick={handleProceedToAI} 
-                disabled={stage === 'CLASSIFYING'}
-                className="btn-primary w-full justify-center text-sm py-3 cursor-pointer"
+                disabled={stage === 'CLASSIFYING' || !hasAgreed}
+                className="btn-primary w-full justify-center text-sm py-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {stage === 'CLASSIFYING' ? <><Loader2 size={16} className="animate-spin" /> Analyzing Legal Route...</> : <><span>Continue to AI Classification</span><ArrowRight size={16} /></>}
               </button>
@@ -232,10 +249,10 @@ export default function GatewayView() {
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
-              <button onClick={handleConfirmRoute} className="btn-primary flex-1 justify-center py-3">
+              <button onClick={handleConfirmRoute} className="btn-primary flex-1 justify-center py-3 cursor-pointer">
                 <CheckCircle2 size={16} />{currentRouteMeta?.actionText}
               </button>
-              <button onClick={() => setStage('IDLE')} className="btn-ghost flex-initial justify-center py-3 border border-slate-200">
+              <button onClick={() => setStage('IDLE')} className="btn-ghost flex-initial justify-center py-3 border border-slate-200 cursor-pointer">
                 <RotateCcw size={15} /> Rephrase Problem
               </button>
             </div>
