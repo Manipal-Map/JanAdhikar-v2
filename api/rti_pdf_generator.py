@@ -13,7 +13,6 @@ except ImportError:
     HAS_REPORTLAB = False
 
 def sanitize_for_pdf(text: str) -> str:
-    """Cleans LLM text of Markdown and unsupported Unicode that causes black boxes in ReportLab."""
     if not text:
         return ""
     
@@ -36,7 +35,6 @@ def sanitize_for_pdf(text: str) -> str:
     return text
 
 def _simple_pdf(title: str, body: str) -> bytes:
-    """Generates a minimal valid PDF binary without external dependencies."""
     content = f"%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n"
     content += f"3 0 obj<</Type/Page/MediaBox[0 0 595 842]/Parent 2 0 R/Resources<</Font<</F1 4 0 R>>>>/Contents 5 0 R>>endobj\n"
     content += f"4 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\n"
@@ -112,7 +110,6 @@ def generate_rti_pdf(applicant_details: Dict[str, Any], department_info: Dict[st
     return buffer.getvalue()
 
 def generate_generic_pdf(title: str, body_text: str) -> bytes:
-    """Generates a clean, standard PDF for Grievance Notices and other documents."""
     if not HAS_REPORTLAB:
         return _simple_pdf(title, body_text)
 
