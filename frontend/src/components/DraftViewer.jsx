@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Copy, Download, CheckCheck, FileText, Printer, Loader2 } from 'lucide-react'
-import { downloadGenericPdf } from '../api'
+import { downloadRtiPdf } from '../api/index.js'
 
 export default function DraftViewer({ title = 'Generated Document', draft, caseId }) {
   const [copied, setCopied] = useState(false)
@@ -15,28 +15,43 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
     setTimeout(() => setCopied(false), 2000)
   }
 
-  // Uses the backend PDF generator to ensure clean fonts and no Unicode black boxes
   const handleDownloadPdf = async () => {
     setDownloading(true)
     try {
-      const blob = await downloadGenericPdf(title, draft)
-      const url = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }))
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `${caseId || 'Legal_Notice'}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      link.parentNode.removeChild(link)
-      URL.revokeObjectURL(url)
+      // Fetch the PDF from your backend
+      const blob = await downloadRtiPdf(caseId)
+      
+      // THE BULLETPROOF BYPASS: Using a Data String instead of a File Blob.
+      // This stops Android Chrome from scanning for PDF Viewer apps.
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        if (!reader.result) return;
+        
+        const base64Data = reader.result.toString().replace(
+          /^data:(.*?);/,
+          'data:application/octet-stream;'
+        )
+
+        const link = document.createElement('a')
+        link.href = base64Data
+        link.download = `${caseId || 'Legal_Document'}.pdf`
+        
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        
+        setDownloading(false)
+      }
+
+      reader.readAsDataURL(blob)
+
     } catch (err) {
       console.error('Failed to download PDF:', err)
       alert('Failed to generate PDF. Please try again.')
-    } finally {
       setDownloading(false)
     }
   }
 
-  // Uses an invisible Iframe to print, entirely bypassing browser Pop-Up Blockers
   const handlePrint = () => {
     const iframe = document.createElement('iframe')
     iframe.style.position = 'fixed'
@@ -63,24 +78,30 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
       </html>
     `
     
-    iframe.contentWindow.document.open()
-    iframe.contentWindow.document.write(content)
-    iframe.contentWindow.document.close()
-    
-    iframe.contentWindow.focus()
-    setTimeout(() => {
-      iframe.contentWindow.print()
+    if (iframe.contentWindow) {
+      iframe.contentWindow.document.open()
+      iframe.contentWindow.document.write(content)
+      iframe.contentWindow.document.close()
+      
+      iframe.contentWindow.focus()
       setTimeout(() => {
-        document.body.removeChild(iframe)
-      }, 1000)
-    }, 250)
+        if (iframe.contentWindow) {
+          iframe.contentWindow.print()
+        }
+        setTimeout(() => {
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe)
+          }
+        }, 1000)
+      }, 250)
+    }
   }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-card overflow-hidden"
+      className="bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm"
     >
       <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50">
         <div className="flex items-center gap-2.5">
@@ -89,13 +110,13 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
           {caseId && <span className="text-xs font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">#{caseId}</span>}
         </div>
         <div className="flex items-center gap-1.5">
-          <button onClick={handleCopy} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
+          <button onClick={handleCopy} className="text-xs py-1.5 px-3 flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50">
             {copied ? <><CheckCheck size={13} className="text-emerald-600" /> Copied!</> : <><Copy size={13} /> Copy</>}
           </button>
-          <button onClick={handleDownloadPdf} disabled={downloading} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
-            {downloading ? <><Loader2 size={13} className="animate-spin" /> Generating...</> : <><Download size={13} /> Download (PDF)</>}
+          <button onClick={handleDownloadPdf} disabled={downloading} className="text-xs py-1.5 px-3 flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50">
+            {downloading ? <><Loader2 size={13} className="animate-spin" /> Generating...</> : <><Download size={13} /> Download</>}
           </button>
-          <button onClick={handlePrint} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
+          <button onClick={handlePrint} className="text-xs py-1.5 px-3 flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50">
             <Printer size={13} /> Print
           </button>
         </div>
