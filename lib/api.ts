@@ -1,9 +1,9 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || '', 
   timeout: 60000,
-})
+});
 
 export const initCase = () => api.post('/api/case/init').then(r => r.data)
 export const classifyCase = (case_id, problem_text, language) => api.post('/api/case/classify', { case_id, problem_text, language }).then(r => r.data)
