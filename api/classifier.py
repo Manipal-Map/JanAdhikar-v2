@@ -1,13 +1,12 @@
 import os
 import json
-import re
 from typing import Dict, Any
 from groq import Groq
 from .prompts import CLASSIFIER_SYSTEM_PROMPT, FEW_SHOT_EXAMPLES, DYNAMIC_FORM_SCHEMAS
 
 class RouteClassifier:
     def __init__(self):
-        api_key = os.environ.get("GROQ_API_KEY") or "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"
+        api_key = os.environ.get("GROQ_API_KEY")
         if api_key and api_key.startswith("gsk_"):
             try:
                 self.client = Groq(api_key=api_key)
@@ -18,10 +17,7 @@ class RouteClassifier:
 
     def _rule_based_fallback(self, text: str) -> Dict[str, Any]:
         lower = text.lower()
-        
-        # RTI indicators
         rti_terms = ["rti", "tender", "inspection", "records", "sanction", "fund", "allocated", "status", "pending", "delay", "pension", "epfo", "officer", "road", "pds", "ration", "exam", "answer key"]
-        # Grievance indicators
         grievance_terms = ["landlord", "deposit", "tenant", "eviction", "refund", "airline", "flight", "defective", "consumer", "service", "salary", "termination", "hospital", "cheated", "fraud", "bill", "overcharged"]
 
         rti_score = sum(1 for term in rti_terms if term in lower)
@@ -44,7 +40,6 @@ class RouteClassifier:
                 "form_schema": DYNAMIC_FORM_SCHEMAS.get("Rights/Grievance", [])
             }
         else:
-            # Default to RTI if user describes general civic problem
             return {
                 "route": "RTI",
                 "sub_category": "Civic Rights Query",
