@@ -7,12 +7,12 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 
-from case_manager import case_manager
-from classifier import classifier
-from outcome_predictor import outcome_engine
-from department_resolver import department_resolver
-from rti_pdf_generator import generate_rti_pdf
-from grievance_resolver import grievance_resolver
+from .case_manager import case_manager
+from .classifier import classifier
+from .outcome_predictor import outcome_engine
+from .department_resolver import department_resolver
+from .rti_pdf_generator import generate_rti_pdf
+from .grievance_resolver import grievance_resolver
 
 app = FastAPI(title="CivicRoute AI API", version="1.0")
 
