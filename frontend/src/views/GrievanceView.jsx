@@ -54,8 +54,10 @@ export default function GrievanceView() {
   }
 
   return (
-    <div className="gradient-bg min-h-screen flex flex-col items-center justify-center p-4 py-12">
-      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl">
+    <div 
+      className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: "url('/bg.image.png')" }}
+    >
         
         {/* Step Badge */}
         <div className="mb-3">
