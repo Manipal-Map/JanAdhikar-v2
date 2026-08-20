@@ -1,13 +1,16 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  transpilePackages: ["framer-motion", "recharts", "lucide-react"],
-  typescript: {
-    ignoreBuildErrors: false,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-};
-
-export default nextConfig;
+import React from "react";
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="dashboard-layout-wrapper h-full">
+      {/* 
+        This children prop is mandatory for Next.js layouts. 
+        It renders your dashboard/page.tsx and sub-routes.
+      */}
+      {children}
+    </section>
+  );
+}
