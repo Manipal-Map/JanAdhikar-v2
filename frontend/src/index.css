@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Theme tokens */
+  --bg-beige: #FBF9F5;
+  --surface-beige: #F5F0E6;
+  --saffron-light: #FFF3E0;
+  --saffron-border: #FFE0B2;
+  --saffron-deep: #D97706;
+  --blue-light: #EBF5FF;
+  --blue-border: #D6E8FA;
+  --text-main: #2C271E;
+  --text-muted: #6B6355;
+}
+
+body {
+  background-color: var(--bg-beige);
+  color: var(--text-main);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+/* Background gradient blending beige, very light blue, and light saffron */
+.gradient-bg {
+  background: linear-gradient(
+    135deg,
+    #FBF9F5 0%,
+    #EBF5FF 50%,
+    #FFF3E0 100%
+  );
+}
+
+/* Card styled with beige tint and soft blue border */
+.glass-card {
+  background-color: rgba(245, 240, 230, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--blue-border);
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 20px -2px rgba(44, 39, 30, 0.05);
+}
+
+/* Primary Action Button (Saffron Accent) */
+.btn-primary {
+  display: inline-flex;
+  items-center: center;
+  gap: 0.5rem;
+  background-color: #FF9933;
+  color: #FFFFFF;
+  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.2);
+}
+
+.btn-primary:hover {
+  background-color: #E68A2E;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+}
+
+/* Secondary Button (Very Light Blue) */
+.btn-ghost {
+  display: inline-flex;
+  items-center: center;
+  gap: 0.5rem;
+  background-color: var(--blue-light);
+  color: #1E40AF;
+  border: 1px solid var(--blue-border);
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-ghost:hover {
+  background-color: #D6E8FA;
+}
+
+/* Inputs styled over beige canvas */
+.input-field {
+  width: 100%;
+  background-color: #FFFFFF;
+  border: 1px solid var(--saffron-border);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: var(--text-main);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-field:focus {
+  border-color: #FF9933;
+  box-shadow: 0 0 0 3px rgba(255, 153, 51, 0.15);
+}
