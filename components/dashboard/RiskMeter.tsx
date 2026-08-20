@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer, Cell } from 'recharts';
@@ -102,7 +100,7 @@ export default function RiskMeter({ prediction = 'PARTIAL', probabilities }: Ris
           </ResponsiveContainer>
         ) : (
           <div className="h-full w-full flex items-center justify-center bg-slate-50 rounded-xl">
-            <span className="text-xs text-slate-400 font-mono">Loading chart metrics...</span>
+            <span className="text-xs text-slate-400 font-mono">Loading metrics...</span>
           </div>
         )}
       </div>
