@@ -1,63 +1,72 @@
 'use client';
-import { useState, useRef } from 'react'
-import { Mic, Square, Loader2 } from 'lucide-react'
 
-// CORRECT NEXT.JS IMPORT
-import { transcribeAudio } from '@/lib/api' 
+import { useState, useRef } from 'react';
+import { Mic, Square, Loader2 } from 'lucide-react';
+import { transcribeAudio } from '@/lib/api';
 
-export default function AudioRecorder({ onTranscription, language = "English" }: any) {
-  const [isRecording, setIsRecording] = useState(false)
-  const [isTranscribing, setIsTranscribing] = useState(false)
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const chunksRef = useRef<BlobPart[]>([])
-  const streamRef = useRef<MediaStream | null>(null)
+interface AudioRecorderProps {
+  onTranscription: (text: string) => void;
+  language?: string;
+}
+
+export default function AudioRecorder({ onTranscription, language = "English" }: AudioRecorderProps) {
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  // Notice: The useEffect block that caused the Mac/Chrome prompt 
+  // is completely deleted from existence. 
 
   const startRecording = async () => {
-    // Web Speech API removed to permanently block the "Apps on device" prompt.
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      streamRef.current = stream
-      const mediaRecorder = new MediaRecorder(stream)
-      mediaRecorderRef.current = mediaRecorder
-      chunksRef.current = []
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
 
       mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data)
-      }
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' })
-        chunksRef.current = []
-        setIsTranscribing(true)
+        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        chunksRef.current = [];
+        setIsTranscribing(true);
+        
         try {
-          const res = await transcribeAudio(audioBlob, language)
-          const resultText = res.text || res.transcription || ''
-          if (resultText && onTranscription) onTranscription(resultText)
+          const res = await transcribeAudio(audioBlob, language);
+          const resultText = res?.text || res?.transcription || '';
+          if (resultText && onTranscription) {
+            onTranscription(resultText);
+          }
         } catch (error) {
-          console.error("Transcription failed", error)
+          console.error("Transcription failed", error);
         } finally {
-          setIsTranscribing(false)
+          setIsTranscribing(false);
           if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop())
+            streamRef.current.getTracks().forEach(track => track.stop());
           }
         }
-      }
+      };
 
-      mediaRecorder.start()
-      setIsRecording(true)
+      mediaRecorder.start();
+      setIsRecording(true);
     } catch (err) {
-      alert("Microphone permission was denied or is not supported by your browser.")
+      alert("Microphone permission was denied or is not supported by your browser.");
     }
-  }
+  };
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
       try {
-        mediaRecorderRef.current.stop()
+        mediaRecorderRef.current.stop();
       } catch (e) {}
     }
-    setIsRecording(false)
-  }
+    setIsRecording(false);
+  };
 
   if (isTranscribing) {
     return (
@@ -65,7 +74,7 @@ export default function AudioRecorder({ onTranscription, language = "English" }:
         <Loader2 size={16} className="animate-spin" />
         <span>Processing Audio...</span>
       </button>
-    )
+    );
   }
 
   return (
@@ -77,9 +86,10 @@ export default function AudioRecorder({ onTranscription, language = "English" }:
           ? 'bg-red-50 border-red-200 text-red-600 animate-pulse' 
           : 'bg-[#FAF8F5] border-[#E2E8F0] text-slate-800 hover:bg-slate-100'
       }`}
+      title={isRecording ? "Stop Dictation" : "Start Voice Input"}
     >
       {isRecording ? <Square size={16} /> : <Mic size={16} />}
       <span>{isRecording ? 'Listening (Stop)' : 'Voice Input'}</span>
     </button>
-  )
+  );
 }
