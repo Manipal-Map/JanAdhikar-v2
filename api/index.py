@@ -14,6 +14,7 @@ from .outcome_predictor import outcome_engine
 from .department_resolver import department_resolver
 from .rti_pdf_generator import generate_rti_pdf, generate_generic_pdf
 from .grievance_resolver import grievance_resolver
+from .intake_chat import router as intake_router  # AI Intake router
 
 app = FastAPI(title="JanAdhikar AI API", version="2.5")
 
@@ -24,6 +25,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(intake_router)
 
 class GeneratePDFRequest(BaseModel):
     title: Optional[str] = "Document"
@@ -72,6 +75,52 @@ def health_check():
 def init_case():
     new_case_id = case_manager.create_case()
     return CaseInitResponse(case_id=new_case_id, message="Save this ID safely.")
+
+@app.post("/api/transcribe")
+async def transcribe_audio(
+    audio_file: UploadFile = File(...), 
+    language: str = Form("English")
+):
+    try:
+        file_bytes = await audio_file.read()
+        filename = audio_file.filename or "recording.webm"
+        
+        if not file_bytes:
+            return {"text": "", "transcription": ""}
+            
+        client = classifier.client
+        if not client:
+            return {"text": "Voice input received. Please review your text.", "transcription": "Voice input received."}
+            
+        if language == "English":
+            text = client.audio.transcriptions.create(
+                file=(filename, file_bytes),
+                model="whisper-large-v3",
+                response_format="json",
+                language="en"
+            ).text
+        else:
+            raw_text = client.audio.transcriptions.create(
+                file=(filename, file_bytes),
+                model="whisper-large-v3",
+                prompt="The user is speaking Hinglish or an Indian language. Transcribe accurately.",
+                response_format="json"
+            ).text
+            
+            resp = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": "You are a translator. Translate the following text into 'Hinglish' (conversational Hindi written using ONLY the English alphabet). Under NO circumstances should you use Devanagari script. Do not add commentary."},
+                    {"role": "user", "content": raw_text}
+                ],
+                temperature=0.0
+            )
+            text = resp.choices[0].message.content.strip()
+
+        return {"text": text, "transcription": text}
+    except Exception as e:
+        print(f"Transcription error: {e}")
+        return {"text": "failed", "transcription": "failed"}
 
 @app.post("/api/case/classify")
 def classify_problem(payload: ClassifyRequest):
@@ -230,7 +279,7 @@ def generate_generic_pdf_endpoint(payload: GeneratePDFRequest):
     return StreamingResponse(
         io.BytesIO(pdf_bytes),
         media_type="application/pdf",
-        headers={"Content-Disposition": "attachment; filename=Document.pdf"}
+        headers={"Content-Disposition": f"attachment; filename=Document.pdf"}
     )
 
 @app.get("/api/case/{case_id}")
