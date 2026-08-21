@@ -13,12 +13,15 @@ export const downloadRtiPdf = (case_id: string) => api.get(`/api/rti/pdf/${case_
 export const rtiPredict = (case_id: string, draft_text: string | null = null) => api.post('/api/rti/predict', { case_id, draft_text }).then(r => r.data)
 export const rtiImprove = (case_id: string) => api.post('/api/rti/improve', { case_id }).then(r => r.data)
 
+// UPDATED: Dynamically assign the correct file extension based on browser
 export const transcribeAudio = (audioBlob: Blob, language: string) => {
   const formData = new FormData()
-  formData.append('audio_file', audioBlob, 'recording.webm')
-  formData.append('language', language)
+  const extension = audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
+  formData.append('audio_file', audioBlob, `recording.${extension}`)
+  formData.append('language', language || 'English')
   return api.post('/api/transcribe', formData).then(r => r.data)
 }
+
 export const downloadGenericPdf = (title: string, content: string) => {
   return api.post('/api/generate-pdf', { title, content }, { responseType: 'blob' })
     .then(r => r.data)
