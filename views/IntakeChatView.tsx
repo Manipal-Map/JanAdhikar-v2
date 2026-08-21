@@ -37,8 +37,7 @@ export default function IntakeChatView() {
     setLoading(true);
 
     try {
-      // Hardcoded to your live Vercel backend URL to bypass all proxy/axios issues
-      const res = await fetch('https://jan-adhikar-backend-o5xfbvm3m-anmol-s-project1.vercel.app/api/intake/chat', {
+      const res = await fetch('/api/intake/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -47,7 +46,6 @@ export default function IntakeChatView() {
           current_extracted_data: extractedData
         })
       });
-
       const data = await res.json();
       if (res.ok) {
         setMessages(prev => [...prev, { role: 'assistant', content: data.assistant_reply }]);
