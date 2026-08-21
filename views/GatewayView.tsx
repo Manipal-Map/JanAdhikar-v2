@@ -251,7 +251,7 @@ export default function GatewayView() {
                 <FolderOpen size={16} /> Resume Draft
               </button>
               <span className="hidden sm:block text-slate-500/50">•</span>
-              <Link href="/dashboard/track" className="text-white font-bold text-sm hover:text-emerald-400 transition cursor-pointer flex items-center gap-1.5">
+              <Link href="/track" className="text-white font-bold text-sm hover:text-emerald-400 transition cursor-pointer flex items-center gap-1.5">
                 <Activity size={16} /> Track Filed Case
               </Link>
               <span className="hidden sm:block text-slate-500/50">•</span>
