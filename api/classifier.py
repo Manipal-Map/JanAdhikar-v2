@@ -54,9 +54,8 @@ class RouteClassifier:
                     f"If '{language}' is 'Hinglish', write conversational Hindi using the English alphabet. "
                 )
                 
-                # --- UPDATED TO STABLE 8B MODEL ---
                 response = self.client.chat.completions.create(
-                    model="llama3-8b-8192",
+                    model="openai/gpt-oss-120b",
                     messages=[
                         {"role": "system", "content": system_msg},
                         {"role": "user", "content": user_text}
@@ -74,7 +73,7 @@ class RouteClassifier:
                 result["form_schema"] = DYNAMIC_FORM_SCHEMAS.get(route, [])
                 return result
             except Exception as e:
-                print(f"[Classifier Fallback] Groq API failed ({e}).")
+                print(f"[Classifier Fallback] API failed ({e}).")
 
         return self._rule_based_fallback(user_text)
 
