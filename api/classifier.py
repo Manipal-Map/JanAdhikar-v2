@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import logging
 from typing import Dict, Any, Optional
 from groq import Groq
@@ -52,6 +53,21 @@ You MUST respond strictly with a single valid JSON object containing these keys:
 Do NOT include markdown code fences or conversational prose.
 """
 
+def extract_json_from_text(text: str) -> dict:
+    """Safely extracts JSON from a string even if it's wrapped in markdown or conversational text."""
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
+        if json_match:
+            try: return json.loads(json_match.group(1))
+            except json.JSONDecodeError: pass
+        json_match = re.search(r'(\{.*\})', text, re.DOTALL)
+        if json_match:
+            try: return json.loads(json_match.group(1))
+            except json.JSONDecodeError: pass
+        return {}
+
 def analyze_pio_response(pio_text: str) -> Dict[str, Any]:
     """
     Parses unstructured PIO reply text into structured status, extracts cited Section 8 clauses,
@@ -68,9 +84,9 @@ def analyze_pio_response(pio_text: str) -> Dict[str, Any]:
         }
 
     api_key = os.environ.get("GROQ_API_KEY")
-    parsed_json = None
+    parsed_json = {}
 
-    if api_key and api_key.startswith("gsk_"):
+    if api_key:
         try:
             client = Groq(api_key=api_key)
             chat_completion = client.chat.completions.create(
@@ -80,26 +96,45 @@ def analyze_pio_response(pio_text: str) -> Dict[str, Any]:
                 ],
                 model="llama-3.3-70b-versatile",
                 temperature=0.1,
-                response_format={"type": "json_object"}
             )
             raw_content = chat_completion.choices[0].message.content.strip()
-            parsed_json = json.loads(raw_content)
+            parsed_json = extract_json_from_text(raw_content)
         except Exception as e:
             logger.error(f"[PIO Analyzer] Groq execution failed: {e}")
 
     if not parsed_json:
         parsed_json = _fallback_pio_parser(pio_text)
 
-    exemption = parsed_json.get("exemption_cited", "NONE")
-    precedent_info = CIC_PRECEDENT_KNOWLEDGE.get(exemption, {})
+    raw_exemption = parsed_json.get("exemption_cited", "NONE")
+    
+    # Clean up the exemption string if the LLM hallucinated words like "Section"
+    clean_exemption = raw_exemption.replace("Section ", "").replace("Sec ", "").replace(" ", "").strip()
+    
+    precedent_info = CIC_PRECEDENT_KNOWLEDGE.get(clean_exemption)
+    
+    if not precedent_info:
+        # Try substring matching if exact match fails
+        for key, val in CIC_PRECEDENT_KNOWLEDGE.items():
+            if key in clean_exemption:
+                precedent_info = val
+                clean_exemption = key
+                break
+        
+        # Ultimate fallback if no clause is matched but it was denied
+        if not precedent_info:
+            precedent_info = {
+                "title": "General Deficiency / Evasive Reply", 
+                "precedent": "As per Section 7(9) and CIC guidelines, exemptions must be strictly justified. General denial without specifying a Section 8/9 clause is unlawful.", 
+                "grounds": "The PIO provided an evasive and incomplete reply without citing a valid statutory exemption."
+            }
 
     return {
         "classification": parsed_json.get("classification", "PARTIAL_DISCLOSURE"),
-        "exemption_cited": exemption,
-        "summary": parsed_json.get("summary", "PIO response received and analyzed."),
-        "legal_counter": precedent_info.get("precedent", "Generates standard grounds for First Appeal citing non-compliance with RTI Act disclosure norms."),
-        "precedent_title": precedent_info.get("title", "Statutory First Appeal Grounds"),
-        "appeal_grounds": precedent_info.get("grounds", "The PIO failed to provide complete, accurate, and unredacted information within the prescribed period.")
+        "exemption_cited": clean_exemption,
+        "summary": parsed_json.get("summary", "PIO response analyzed."),
+        "legal_counter": precedent_info.get("precedent", ""),
+        "precedent_title": precedent_info.get("title", ""),
+        "appeal_grounds": precedent_info.get("grounds", "")
     }
 
 def _fallback_pio_parser(text: str) -> Dict[str, str]:
