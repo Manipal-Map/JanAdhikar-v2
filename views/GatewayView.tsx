@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, FileSearch, Loader2, KeyRound, Copy, Download, Lock, RefreshCw, FolderOpen, Check, ArrowLeft } from 'lucide-react'
+import { ArrowRight, FileSearch, Loader2, KeyRound, Copy, Download, Lock, RefreshCw, FolderOpen, Check, ArrowLeft, Activity } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import useCaseStore from '@/store/caseStore'
@@ -246,13 +246,15 @@ export default function GatewayView() {
               {stage === 'INITIALIZING' ? <><Loader2 className="animate-spin" /> Generating Your Case ID...</> : <>Start Analysis &amp; Form Fill <ArrowRight size={20} /></>}
             </button>
 
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-6 px-2">
-              <button onClick={() => setResumeMode(true)} className="text-white font-bold text-sm hover:text-amber-300 transition cursor-pointer">
-                Resume Draft
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 px-2">
+              <button onClick={() => setResumeMode(true)} className="text-white font-bold text-sm hover:text-amber-300 transition cursor-pointer flex items-center gap-1.5">
+                <FolderOpen size={16} /> Resume Draft
               </button>
-              <Link href="/dashboard/track" className="text-emerald-400 font-bold text-sm hover:text-emerald-300 transition cursor-pointer">
-                Track Filed Case
+              <span className="hidden sm:block text-slate-500/50">•</span>
+              <Link href="/dashboard/track" className="text-white font-bold text-sm hover:text-emerald-400 transition cursor-pointer flex items-center gap-1.5">
+                <Activity size={16} /> Track Filed Case
               </Link>
+              <span className="hidden sm:block text-slate-500/50">•</span>
               <button onClick={() => window.location.reload()} className="text-slate-400 flex items-center gap-1.5 text-sm font-medium hover:text-white transition cursor-pointer">
                 <RefreshCw size={14}/> Reset Form
               </button>
