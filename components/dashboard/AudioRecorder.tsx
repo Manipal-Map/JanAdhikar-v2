@@ -29,7 +29,6 @@ export default function AudioRecorder({ onTranscription, language = "English" }:
       };
 
       mediaRecorder.onstop = async () => {
-        // UPDATED: Dynamically fetch the browser's audio mimeType
         const mimeType = mediaRecorderRef.current?.mimeType || 'audio/webm';
         const audioBlob = new Blob(chunksRef.current, { type: mimeType });
         chunksRef.current = [];
@@ -73,7 +72,7 @@ export default function AudioRecorder({ onTranscription, language = "English" }:
 
   if (isTranscribing) {
     return (
-      <button disabled className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-500 rounded-full border border-slate-200 text-sm font-semibold cursor-not-allowed">
+      <button disabled className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-slate-400 rounded-full border border-slate-700 text-sm font-semibold cursor-not-allowed">
         <Loader2 size={16} className="animate-spin" />
         <span>Processing Audio...</span>
       </button>
@@ -86,8 +85,8 @@ export default function AudioRecorder({ onTranscription, language = "English" }:
       onClick={isRecording ? stopRecording : startRecording}
       className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-all cursor-pointer ${
         isRecording 
-          ? 'bg-red-50 border-red-200 text-red-600 animate-pulse' 
-          : 'bg-[#FAF8F5] border-[#E2E8F0] text-slate-800 hover:bg-slate-100'
+          ? 'bg-rose-950/50 border-rose-900/50 text-rose-400 animate-pulse' 
+          : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white'
       }`}
       title={isRecording ? "Stop Dictation" : "Start Voice Input"}
     >
