@@ -20,9 +20,10 @@ Your objectives:
 3. If the user doesn't know specific technical details or office addresses, you must intelligently infer or auto-fill them based on the context of their city and problem.
 4. Evaluate when you have gathered enough information to proceed.
 
-You must respond in strict JSON format matching this exact schema:
+You must respond ONLY in valid JSON format matching this exact schema:
 {
   "assistant_reply": "Your conversational response guiding the user or asking the next question.",
+  "is_ready_to_persist": false,
   "is_ready_to_proceed": boolean (true if you have enough facts to draft the RTI/Grievance, false if more info is needed),
   "extracted_data": {
     "problem_summary": "Concise summary of the grievance",
@@ -57,7 +58,18 @@ def intake_chat(payload: IntakeMessage):
             temperature=0.2,
             response_format={"type": "json_object"}
         )
-        result = json.loads(response.choices[0].message.content.strip())
+        
+        raw_content = response.choices[0].message.content.strip()
+        # Clean potential markdown wrapping if present
+        if raw_content.startswith("```json"):
+            raw_content = raw_content[7:]
+        if raw_content.startswith("```"):
+            raw_content = raw_content[3:]
+        if raw_content.endswith("```"):
+            raw_content = raw_content[:-3]
+            
+        result = json.loads(raw_content.strip())
         return result
     except Exception as e:
+        print(f"Intake Chat Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
