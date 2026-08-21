@@ -98,28 +98,28 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-[#0F172A]/80 backdrop-blur-md border border-slate-700/60 rounded-3xl overflow-hidden shadow-lg"
+      className="bg-white/95 backdrop-blur-sm border border-slate-300 rounded-3xl overflow-hidden shadow-xl"
     >
-      <div className="flex flex-col sm:flex-row items-center justify-between px-5 py-4 border-b border-slate-700 bg-[#1E293B]/60 gap-3">
+      <div className="flex flex-col sm:flex-row items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50 gap-3">
         <div className="flex items-center gap-2.5">
           <FileText size={16} className="text-[#FF9933]" />
-          <h3 className="text-sm font-bold text-white tracking-tight">{title}</h3>
-          {caseId && <span className="text-xs font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">#{caseId}</span>}
+          <h3 className="text-sm font-extrabold text-ashoka-navy tracking-tight font-sans">{title}</h3>
+          {caseId && <span className="text-xs font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">#{caseId}</span>}
         </div>
         <div className="flex items-center gap-1.5 w-full sm:w-auto">
-          <button onClick={handleCopy} className="btn-ghost flex-1 sm:flex-none text-xs py-1.5 px-3 gap-1.5 bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700">
-            {copied ? <><CheckCheck size={13} className="text-emerald-400" /> Copied!</> : <><Copy size={13} /> Copy</>}
+          <button onClick={handleCopy} className="btn-ghost flex-1 sm:flex-none text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200 text-slate-600 hover:text-ashoka-navy hover:bg-slate-50">
+            {copied ? <><CheckCheck size={13} className="text-emerald-500" /> Copied!</> : <><Copy size={13} /> Copy</>}
           </button>
-          <button onClick={handleDownloadPdf} disabled={downloading} className="btn-ghost flex-1 sm:flex-none text-xs py-1.5 px-3 gap-1.5 bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700">
+          <button onClick={handleDownloadPdf} disabled={downloading} className="btn-ghost flex-1 sm:flex-none text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200 text-slate-600 hover:text-ashoka-navy hover:bg-slate-50">
             {downloading ? <><Loader2 size={13} className="animate-spin" /> Gen...</> : <><Download size={13} /> PDF</>}
           </button>
-          <button onClick={handlePrint} className="btn-ghost flex-1 sm:flex-none text-xs py-1.5 px-3 gap-1.5 bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700">
+          <button onClick={handlePrint} className="btn-ghost flex-1 sm:flex-none text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200 text-slate-600 hover:text-ashoka-navy hover:bg-slate-50">
             <Printer size={13} /> Print
           </button>
         </div>
       </div>
       <div className="p-5 max-h-[500px] overflow-y-auto bg-transparent">
-        <pre className="text-sm text-slate-200 font-mono leading-relaxed whitespace-pre-wrap break-words">
+        <pre className="text-sm text-slate-800 font-mono leading-relaxed whitespace-pre-wrap break-words">
           {draft}
         </pre>
       </div>
