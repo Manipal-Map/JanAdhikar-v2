@@ -17,11 +17,9 @@ from .department_resolver import department_resolver
 from .rti_pdf_generator import generate_rti_pdf, generate_generic_pdf
 from .appeal_pdf_generator import generate_first_appeal_pdf
 from .grievance_resolver import grievance_resolver
-from .intake_chat import router as intake_router  # AI Intake & KYC router
+from .intake_chat import router as intake_router  # AI Intake router
 
-logger = logging.getLogger(__name__)
-
-app = FastAPI(title="CivicRoute AI API", version="2.0")
+app = FastAPI(title="JanAdhikar AI API", version="2.5")
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,7 +29,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include the AI Intake chat router for conversational pre-screening & KYC
 app.include_router(intake_router)
 
 class GeneratePDFRequest(BaseModel):
@@ -88,7 +85,7 @@ class FirstAppealRequest(BaseModel):
 def health_check():
     return {
         "status": "ok", 
-        "system": "CivicRoute Backend Active",
+        "system": "JanAdhikar Backend Active",
         "database_connected": getattr(case_manager, "is_connected", True)
     }
 
@@ -97,49 +94,14 @@ def init_case():
     new_case_id = case_manager.create_case()
     return CaseInitResponse(case_id=new_case_id, message="Save this ID safely.")
 
-async def parse_request_data(request: Request):
-    content_type = request.headers.get("content-type", "")
-    body_bytes = await request.body()
-    
-    if "application/json" in content_type:
-        try:
-            data = json.loads(body_bytes.decode())
-            return data, []
-        except Exception:
-            return {}, []
-            
-    msg = email.message_from_bytes(b"Content-Type: " + content_type.encode() + b"\r\n\r\n" + body_bytes)
-    fields = {}
-    files = []
-    if msg.is_multipart():
-        for part in msg.get_payload():
-            cd = part.get("Content-Disposition", "")
-            name = None
-            filename = None
-            for p in cd.split(";"):
-                p = p.strip()
-                if p.startswith("name="):
-                    name = p.split("name=")[1].strip(' "')
-                elif p.startswith("filename="):
-                    filename = p.split("filename=")[1].strip(' "')
-            payload = part.get_payload(decode=True)
-            if payload is None:
-                raw_p = part.get_payload()
-                payload = raw_p.encode() if isinstance(raw_p, str) else b""
-            if filename:
-                files.append({"filename": filename, "bytes": payload, "mime_type": part.get_content_type()})
-            elif name:
-                fields[name] = payload.decode(errors="ignore")
-    return fields, files
-
 @app.post("/api/transcribe")
-async def transcribe_audio(request: Request):
+async def transcribe_audio(
+    audio_file: UploadFile = File(...), 
+    language: str = Form("English")
+):
     try:
-        fields, files = await parse_request_data(request)
-        language = fields.get("language", "English")
-        
-        file_bytes = files[0]["bytes"] if files else b""
-        filename = files[0]["filename"] if files else "recording.webm"
+        file_bytes = await audio_file.read()
+        filename = audio_file.filename or "recording.webm"
         
         if not file_bytes:
             return {"text": "", "transcription": ""}
@@ -149,10 +111,11 @@ async def transcribe_audio(request: Request):
             return {"text": "Voice input received. Please review your text.", "transcription": "Voice input received."}
             
         if language == "English":
-            text = client.audio.translations.create(
+            text = client.audio.transcriptions.create(
                 file=(filename, file_bytes),
                 model="whisper-large-v3",
-                response_format="json"
+                response_format="json",
+                language="en"
             ).text
         else:
             raw_text = client.audio.transcriptions.create(
@@ -175,7 +138,7 @@ async def transcribe_audio(request: Request):
         return {"text": text, "transcription": text}
     except Exception as e:
         print(f"Transcription error: {e}")
-        return {"text": "Voice recorded. You may continue editing your statement.", "transcription": "Voice recorded."}
+        return {"text": "failed", "transcription": "failed"}
 
 @app.post("/api/case/classify")
 def classify_problem(payload: ClassifyRequest):
@@ -193,6 +156,7 @@ def classify_problem(payload: ClassifyRequest):
         "sub_category": result["sub_category"],
         "user_problem": problem_text,
         "form_schema": result["form_schema"],
+        "extracted_facts": result.get("extracted_data", {}),
         "language": language
     })
 
@@ -382,7 +346,7 @@ def generate_generic_pdf_endpoint(payload: GeneratePDFRequest):
     return StreamingResponse(
         io.BytesIO(pdf_bytes),
         media_type="application/pdf",
-        headers={"Content-Disposition": "attachment; filename=Document.pdf"}
+        headers={"Content-Disposition": f"attachment; filename=Document.pdf"}
     )
 
 @app.get("/api/case/{case_id}")

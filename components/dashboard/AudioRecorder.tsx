@@ -16,9 +16,6 @@ export default function AudioRecorder({ onTranscription, language = "English" }:
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // Notice: The useEffect block that caused the Mac/Chrome prompt 
-  // is completely deleted from existence. 
-
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -32,18 +29,24 @@ export default function AudioRecorder({ onTranscription, language = "English" }:
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        // UPDATED: Dynamically fetch the browser's audio mimeType
+        const mimeType = mediaRecorderRef.current?.mimeType || 'audio/webm';
+        const audioBlob = new Blob(chunksRef.current, { type: mimeType });
         chunksRef.current = [];
         setIsTranscribing(true);
         
         try {
           const res = await transcribeAudio(audioBlob, language);
           const resultText = res?.text || res?.transcription || '';
-          if (resultText && onTranscription) {
+          
+          if (resultText && !resultText.includes("failed")) {
             onTranscription(resultText);
+          } else {
+            alert("Audio transcription failed. Please try again or type manually.");
           }
         } catch (error) {
           console.error("Transcription failed", error);
+          alert("Audio transcription failed. Please check your connection.");
         } finally {
           setIsTranscribing(false);
           if (streamRef.current) {

@@ -3,7 +3,7 @@ import json
 import logging
 from typing import Dict, Any, Optional
 from groq import Groq
-from .prompts import CLASSIFIER_SYSTEM_PROMPT, FEW_SHOT_EXAMPLES, DYNAMIC_FORM_SCHEMAS
+from .prompts import CLASSIFIER_SYSTEM_PROMPT, DYNAMIC_FORM_SCHEMAS
 
 logger = logging.getLogger(__name__)
 
@@ -154,8 +154,10 @@ class RouteClassifier:
                 "route": "Other",
                 "sub_category": "Irrelevant",
                 "confidence": 0.95,
-                "reasoning": "The provided input is too short or unstructured.",
-                "form_schema": []
+                "reasoning": "The provided input is too short or unstructured to accurately classify legally.",
+                "specific_advice": "We could not automatically process this request. Please describe your problem in more detail, or consult a local legal aid clinic for specific guidance.",
+                "form_schema": [],
+                "extracted_data": {}
             }
 
         rti_terms = ["rti", "tender", "inspection", "records", "sanction order", "copy of", "budget"]
@@ -165,16 +167,16 @@ class RouteClassifier:
         grievance_score = sum(1 for term in grievance_terms if term in lower)
 
         if rti_score == 0 and grievance_score == 0:
-            return {"route": "Other", "sub_category": "General Query", "confidence": 0.80, "reasoning": "No civic keywords.", "form_schema": []}
+            return {"route": "Other", "sub_category": "General Query", "confidence": 0.80, "reasoning": "No civic or consumer keywords detected.", "specific_advice": "This matter appears to fall outside our standard RTI and Grievance workflows. Please seek appropriate legal counsel or try rephrasing your issue.", "form_schema": [], "extracted_data": {}}
 
         if rti_score >= grievance_score:
-            return {"route": "RTI", "sub_category": "Public Records", "confidence": 0.88, "reasoning": "Seeking official records.", "form_schema": DYNAMIC_FORM_SCHEMAS.get("RTI", [])}
+            return {"route": "RTI", "sub_category": "Public Records", "confidence": 0.88, "reasoning": "User is seeking official records from a public authority.", "specific_advice": "", "form_schema": DYNAMIC_FORM_SCHEMAS.get("RTI", []), "extracted_data": {}}
         else:
-            return {"route": "Rights/Grievance", "sub_category": "Grievance", "confidence": 0.85, "reasoning": "Seeking dispute resolution.", "form_schema": DYNAMIC_FORM_SCHEMAS.get("Rights/Grievance", [])}
+            return {"route": "Rights/Grievance", "sub_category": "Grievance", "confidence": 0.85, "reasoning": "User is seeking dispute resolution or service remedy.", "specific_advice": "", "form_schema": DYNAMIC_FORM_SCHEMAS.get("Rights/Grievance", []), "extracted_data": {}}
 
     def classify(self, user_text: str, language: str = "English") -> Dict[str, Any]:
         if not user_text or not user_text.strip():
-            return {"route": "Other", "sub_category": "Empty", "confidence": 1.0, "reasoning": "No text provided.", "form_schema": []}
+            return {"route": "Other", "sub_category": "Empty", "confidence": 1.0, "reasoning": "No text provided.", "specific_advice": "Please provide a valid problem statement.", "form_schema": [], "extracted_data": {}}
 
         if self.client:
             try:
@@ -202,6 +204,7 @@ class RouteClassifier:
                 if route not in ["RTI", "Rights/Grievance", "Other"]: route = "Other"
                 result["route"] = route
                 result["form_schema"] = DYNAMIC_FORM_SCHEMAS.get(route, [])
+                result["extracted_data"] = result.get("extracted_data", {})
                 return result
             except Exception as e:
                 print(f"[Classifier Fallback] API failed ({e}).")
