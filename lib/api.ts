@@ -1,35 +1,85 @@
-import axios from 'axios'
+'use client';
 
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || '', 
-  timeout: 60000,
-});
+import { useState } from 'react';
+import { Copy, Check, Download, Loader2 } from 'lucide-react';
+import { downloadRtiPdf, downloadGenericPdf } from '@/lib/api';
 
-export const initCase = () => api.post('/api/case/init').then(r => r.data)
-export const classifyCase = (case_id: string, problem_text: string, language: string) => api.post('/api/case/classify', { case_id, problem_text, language }).then(r => r.data)
-export const rtiGenerate = (case_id: string, form_data: any) => api.post('/api/rti/generate', { case_id, form_data }).then(r => r.data)
-export const resolveDepartment = (case_id: string, location: string | null = null) => api.post('/api/rti/resolve-department', { case_id, location }).then(r => r.data)
-export const downloadRtiPdf = (case_id: string) => api.get(`/api/rti/pdf/${case_id}`, { responseType: 'blob' }).then(r => r.data)
-export const rtiPredict = (case_id: string, draft_text: string | null = null) => api.post('/api/rti/predict', { case_id, draft_text }).then(r => r.data)
-export const rtiImprove = (case_id: string) => api.post('/api/rti/improve', { case_id }).then(r => r.data)
-
-export const transcribeAudio = (audioBlob: Blob, language: string) => {
-  const formData = new FormData()
-  formData.append('audio_file', audioBlob, 'recording.webm')
-  formData.append('language', language)
-  return api.post('/api/transcribe', formData).then(r => r.data)
-}
-export const downloadGenericPdf = (title: string, content: string) => {
-  return api.post('/api/generate-pdf', { title, content }, { responseType: 'blob' })
-    .then(r => r.data)
+interface DraftViewerProps {
+  title: string;
+  draft: string;
+  caseId: string;
 }
 
-export const grievanceGenerate = (payload: any) => {
-  return api.post('/api/grievance/generate', payload).then(r => r.data)
+export default function DraftViewer({ title, draft, caseId }: DraftViewerProps) {
+  const [copied, setCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(draft);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text:', err);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    setDownloading(true);
+    try {
+      let blobData: Blob;
+
+      // Use case-specific endpoint if caseId exists, otherwise fallback to generic endpoint
+      if (caseId) {
+        blobData = await downloadRtiPdf(caseId);
+      } else {
+        blobData = await downloadGenericPdf(title, draft);
+      }
+
+      const blob = new Blob([blobData], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `RTI_Application_${caseId || 'draft'}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('PDF Download failed:', err);
+      alert('Failed to generate PDF. Please try again or copy the text directly.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  return (
+    <div className="bg-white border border-[#b8c2cc] rounded-3xl p-6 shadow-sm text-left">
+      <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+        <h3 className="text-sm font-bold text-ashoka-navy uppercase tracking-wider">{title}</h3>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+          >
+            {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+
+          <button
+            onClick={handleDownloadPdf}
+            disabled={downloading}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-ashoka-navy hover:bg-ashoka-navy/90 disabled:opacity-50 rounded-lg transition-colors cursor-pointer"
+          >
+            {downloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+            {downloading ? 'Downloading...' : 'Download PDF'}
+          </button>
+        </div>
+      </div>
+
+      <pre className="font-mono text-xs text-slate-800 whitespace-pre-wrap leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200 max-h-[450px] overflow-y-auto">
+        {draft || 'No draft content available.'}
+      </pre>
+    </div>
+  );
 }
-
-export const getCase = (case_id: string) => api.get(`/api/case/${case_id}`).then(r => r.data)
-
-export const intakeChat = (payload: any) => api.post('/api/intake/chat', payload).then(r => r.data)
-
-export default api
