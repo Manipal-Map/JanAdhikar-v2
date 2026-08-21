@@ -4,11 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Bot, User, Sparkles, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import useCaseStore from '@/store/caseStore';
-import { intakeChat } from '@/lib/api'; // <--- Using the safe API instance
 
 export default function IntakeChatView() {
   const router = useRouter();
-  const { setClassifyResult, setFormData, setCaseId, setStage } = useCaseStore(); // <--- Added setStage
+  const { setClassifyResult, setFormData, setCaseId, setStage } = useCaseStore();
   
   const [messages, setMessages] = useState<Array<{ role: 'assistant' | 'user'; content: string }>>([
     {
@@ -38,31 +37,38 @@ export default function IntakeChatView() {
     setLoading(true);
 
     try {
-      // Connects cleanly via Axios (handles CORS and Base URLs automatically)
-      const data = await intakeChat({
-        message: userText,
-        history: newHistory.map(m => ({ role: m.role, content: m.content })),
-        current_extracted_data: extractedData
+      // Hardcoded to your live Vercel backend URL to bypass all proxy/axios issues
+      const res = await fetch('https://jan-adhikar-backend-o5xfbvm3m-anmol-s-project1.vercel.app/api/intake/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userText,
+          history: newHistory.map(m => ({ role: m.role, content: m.content })),
+          current_extracted_data: extractedData
+        })
       });
 
-      setMessages(prev => [...prev, { role: 'assistant', content: data.assistant_reply }]);
-      setIsReady(!!data.is_ready_to_proceed);
-      setExtractedData(data.extracted_data || {});
-      
+      const data = await res.json();
+      if (res.ok) {
+        setMessages(prev => [...prev, { role: 'assistant', content: data.assistant_reply }]);
+        setIsReady(!!data.is_ready_to_proceed);
+        setExtractedData(data.extracted_data || {});
+      } else {
+        setMessages(prev => [...prev, { role: 'assistant', content: "I encountered a minor connection glitch. Please tell me more about your situation." }]);
+      }
     } catch (err) {
-      console.error("Chat Error:", err);
-      setMessages(prev => [...prev, { role: 'assistant', content: "Network error occurred. Please check your connection or try again." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Network error occurred. Please try again." }]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleProceedToForm = () => {
-    // 1. Properly detect route from AI extraction
+    // 1. Detect route from AI extraction
     const isRTI = extractedData.route_guess === 'RTI';
     const finalRoute = isRTI ? 'RTI' : 'Rights/Grievance';
 
-    // 2. Save extracted facts
+    // 2. Save extracted facts into the global store
     setClassifyResult({
       route: finalRoute,
       sub_category: extractedData.problem_summary || 'Civic Grievance',
@@ -81,7 +87,7 @@ export default function IntakeChatView() {
     // 3. Setup Case ID
     setCaseId(`JA-${Math.floor(100000 + Math.random() * 900000)}`);
 
-    // 4. FIX: Safely route to the correct actual directory instead of /dashboard/form
+    // 4. Safely route to the correct actual directory instead of /dashboard/form
     if (isRTI) {
       setStage('RTI_GATHERING');
       router.push('/dashboard/rti');
