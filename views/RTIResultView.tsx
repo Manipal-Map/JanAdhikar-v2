@@ -9,6 +9,7 @@ import {
   AlertTriangle,
   Loader2,
   AlertCircle,
+  Activity
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import useCaseStore from '@/store/caseStore';
@@ -279,9 +280,11 @@ export default function RTIResultView() {
                 </button>
                 <button
                   onClick={() => router.push(`/dashboard/track?case_id=${caseId}`)}
-                  className="btn-primary text-sm py-3.5 px-6 cursor-pointer w-full sm:w-auto justify-center bg-ashoka-navy hover:bg-slate-800 border-none shadow-md"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-ashoka-navy hover:bg-[#1E293B] text-white font-bold text-sm transition-all shadow-md cursor-pointer w-full sm:w-auto"
                 >
-                  Track SLA & Appeals <ArrowRight size={16} />
+                  <Activity size={16} className="text-emerald-400" />
+                  <span>Track SLA & Appeals</span>
+                  <ArrowRight size={16} />
                 </button>
               </div>
             </div>
