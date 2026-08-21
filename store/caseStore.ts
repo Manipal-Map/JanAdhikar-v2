@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
-// 1. We define the exact shape of your store so TypeScript knows what exists
 interface CaseState {
   stage: string;
   setStage: (stage: string) => void;
@@ -34,12 +33,9 @@ interface CaseState {
   hydrateState: (caseId: string, backendData: any) => void;
   reset: () => void;
   
-  // A catch-all to ensure strict mode doesn't block future rapid prototyping
   [key: string]: any; 
 }
 
-// 2. Pass the interface into create. 
-// Note the extra () after create<CaseState>. This is required by Zustand when using middlewares like 'persist' in TypeScript.
 const useCaseStore = create<CaseState>()(
   persist(
     (set, get) => ({
@@ -86,25 +82,25 @@ const useCaseStore = create<CaseState>()(
           newStage = 'COMPLETE';
         }
 
-        set({
+        set((state) => ({
           caseId: caseId,
-          language: backendData.language || 'English',
-          userProblem: backendData.user_problem || '',
-          classifyResult: {
+          language: backendData.language || state.language || 'English',
+          userProblem: backendData.user_problem || state.userProblem || '',
+          classifyResult: backendData.route ? {
             route: backendData.route,
             sub_category: backendData.sub_category,
             form_schema: backendData.form_schema || [],
             reasoning: "Resumed from saved passkey."
-          },
-          triageConfirmed: true,
-          formData: backendData.form_data || {},
+          } : state.classifyResult,
+          triageConfirmed: !!backendData.route,
+          formData: backendData.form_data || state.formData || {},
           departmentInfo: backendData.department_info || null,
           departmentConfirmed: !!backendData.department_info,
           rtiPrediction: backendData.prediction_result || null,
           rtiDraft: backendData.improved_draft || backendData.initial_draft || null,
           grievanceResult: backendData.grievance_pack || null,
-          stage: newStage,
-        });
+          stage: newStage !== 'IDLE' ? newStage : state.stage,
+        }));
       },
 
       reset: () =>
