@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Bot, User, Sparkles, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import useCaseStore from '@/store/caseStore';
+import { intakeChat } from '@/lib/api';
 
 export default function IntakeChatView() {
   const router = useRouter();
@@ -37,36 +38,28 @@ export default function IntakeChatView() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/intake/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: userText,
-          history: newHistory.map(m => ({ role: m.role, content: m.content })),
-          current_extracted_data: extractedData
-        })
+      const data = await intakeChat({
+        message: userText,
+        history: newHistory.map(m => ({ role: m.role, content: m.content })),
+        current_extracted_data: extractedData
       });
-      const data = await res.json();
-      if (res.ok) {
-        setMessages(prev => [...prev, { role: 'assistant', content: data.assistant_reply }]);
-        setIsReady(!!data.is_ready_to_proceed);
-        setExtractedData(data.extracted_data || {});
-      } else {
-        setMessages(prev => [...prev, { role: 'assistant', content: "I encountered a minor connection glitch. Please tell me more about your situation." }]);
-      }
+
+      setMessages(prev => [...prev, { role: 'assistant', content: data.assistant_reply }]);
+      setIsReady(!!data.is_ready_to_proceed);
+      setExtractedData(data.extracted_data || {});
+      
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Network error occurred. Please try again." }]);
+      console.error("Chat Error:", err);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Network error occurred. Please check your connection or try again." }]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleProceedToForm = () => {
-    // 1. Detect route from AI extraction
     const isRTI = extractedData.route_guess === 'RTI';
     const finalRoute = isRTI ? 'RTI' : 'Rights/Grievance';
 
-    // 2. Save extracted facts into the global store
     setClassifyResult({
       route: finalRoute,
       sub_category: extractedData.problem_summary || 'Civic Grievance',
@@ -82,10 +75,8 @@ export default function IntakeChatView() {
       user_problem: extractedData.problem_summary || ''
     });
 
-    // 3. Setup Case ID
     setCaseId(`JA-${Math.floor(100000 + Math.random() * 900000)}`);
 
-    // 4. Safely route to the correct actual directory instead of /dashboard/form
     if (isRTI) {
       setStage('RTI_GATHERING');
       router.push('/dashboard/rti');
