@@ -30,7 +30,6 @@ export const grievanceGenerate = (payload: any) => {
 
 export const getCase = (case_id: string) => api.get(`/api/case/${case_id}`).then(r => r.data)
 
-// NEWLY ADDED
 export const intakeChat = (payload: any) => api.post('/api/intake/chat', payload).then(r => r.data)
 
 export default api
