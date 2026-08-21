@@ -281,7 +281,8 @@ export default function IntakeFormView() {
                   </h3>
                   <div className="mt-2">
                     <span className="text-sm font-bold text-court-maroon bg-court-maroon/10 px-3 py-1.5 rounded-lg inline-block border border-court-maroon/20">
-                      Category: {classifyResult.sub_category}
+                      {/* Added optional chaining `?.` to safely handle null state during reset */}
+                      Category: {classifyResult?.sub_category}
                     </span>
                   </div>
                 </div>
@@ -289,7 +290,8 @@ export default function IntakeFormView() {
                 <div className="pt-2">
                   <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Detailed Legal Analysis</h4>
                   <div className="text-sm font-medium text-slate-700 leading-relaxed">
-                    {formatAIText(classifyResult.reasoning)}
+                    {/* Added optional chaining `?.` */}
+                    {formatAIText(classifyResult?.reasoning)}
                   </div>
                 </div>
               </div>
@@ -298,10 +300,11 @@ export default function IntakeFormView() {
               {isOther && (
                 <div className="p-6 bg-blue-50 border border-blue-200 rounded-3xl text-left shadow-sm">
                   <h4 className="text-base font-bold text-blue-900 flex items-center gap-2 mb-4 pb-2 border-b border-blue-200/60">
-                    <Info size={20} className="text-blue-700"/> Recommended Action Plan
+                    <Info size={20} className="text-blue-700"/> Recommended Action Plan For Your Case
                   </h4>
                   <div className="text-sm text-blue-900 leading-relaxed font-medium">
-                    {formatAIText(classifyResult.specific_advice || 'This case falls outside RTI or Consumer/Administrative grievance jurisdictions. Please consult a local legal professional or the relevant authority for this specific issue.')}
+                    {/* Added optional chaining `?.` */}
+                    {formatAIText(classifyResult?.specific_advice || 'This case falls outside RTI or Consumer/Administrative grievance jurisdictions. Please consult a local legal professional or the relevant authority for this specific issue.')}
                   </div>
                 </div>
               )}
