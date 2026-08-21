@@ -5,7 +5,8 @@ from .classifier import classifier
 
 class SmartDepartmentResolver:
     def __init__(self):
-        self.model = "llama-3.1-70b-versatile"
+        # --- UPDATED TO STABLE 8B MODEL ---
+        self.model = "llama3-8b-8192"
 
     def _get_client(self):
         return classifier.client
