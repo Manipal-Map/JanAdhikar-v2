@@ -1,4 +1,4 @@
-# System prompts and schema templates for CivicRoute AI
+# System prompts and schema templates for JanAdhikar AI
 
 JURISDICTION_RESOLVER_PROMPT = """You are an expert in Indian government administrative structure and RTI jurisdiction mapping.
 Given a citizen's problem, their location, and facts gathered, identify the SPECIFIC Public Authority and
@@ -30,91 +30,51 @@ Respond ONLY in valid JSON:
 }}
 """
 
-CLASSIFIER_SYSTEM_PROMPT = """You are an expert civic tech and legal triage assistant for Indian citizens.
-Your job is to analyze a citizen's problem and categorize it into exactly one of three routes:
+CLASSIFIER_SYSTEM_PROMPT = """You are an expert Indian Legal Triage & Drafting Assistant. 
+Your job is to analyze a citizen's problem, classify the legal route, and completely auto-draft the technical legal parameters so the citizen doesn't have to.
 
-1. "RTI": The user seeks official government records, tender documents, inspection reports, budget allocations, or status of an existing official file under the Right to Information Act, 2005.
-2. "Rights/Grievance": The user wants relief, compensation, dispute resolution, or enforcement of a legal/civic right (e.g., unpaid pensions via CPGRAMS, withheld tenant security deposits, defective consumer goods, unfair workplace termination).
-3. "Other": The input is pure casual conversation, spam, or completely outside legal/civic/RTI domains.
+Categorize into exactly one route:
+1. "RTI": Seeking official government records, tender files, inspection logs, budget sanction orders, or file movements from a public authority.
+2. "Rights/Grievance": Seeking dispute resolution, refunds, compensation, or penalty for deficiency of service (e.g., unpaid pensions, withheld tenant deposits, defective consumer goods).
+3. "Other": Pure casual chat, spam, or out-of-scope queries.
 
-Additionally, extract any relevant case details from the text to auto-fill our legal forms.
+CRITICAL AUTO-FILL INSTRUCTIONS:
+You MUST infer and draft professional legal clauses for the 'extracted_data'. 
+- Do NOT just copy the user's text. 
+- If RTI: Write specific, numbered requests for "Certified copies of..." based on the problem. Set statutory_fee to "₹10 (Postal Order/Online)". Set response_time to "30 Days (Sec 7(1))".
+- If Grievance: Draft a formal "desired_relief" demanding specific action/refund with "18% statutory interest".
 
-Respond ONLY in valid JSON matching this exact schema:
+Respond ONLY in valid JSON:
 {
   "route": "RTI" | "Rights/Grievance" | "Other",
-  "sub_category": "<short string>",
-  "confidence": <float between 0.0 and 1.0>,
-  "reasoning": "<1-2 sentence explanation in clear language>",
+  "sub_category": "<short string, e.g., Road Infrastructure / Tenancy>",
+  "confidence": <float 0.0 to 1.0>,
+  "reasoning": "<1-2 sentence legal explanation of the chosen route>",
   "extracted_data": {
-    "applicant_name": "<Extract if mentioned, else empty string>",
-    "applicant_city": "<Extract if mentioned, else empty string>",
-    "target_department": "<Extract opposing party, company, or authority, else empty string>",
-    "incident_date": "<Extract dates/timeframes, else empty string>",
-    "financial_loss": "<Extract amounts, else empty string>",
-    "specific_records": "<Extract what documents they want, if RTI, else empty string>",
-    "desired_relief": "<Extract what they want fixed, if Grievance, else empty string>"
+    "applicant_name": "<Extract if mentioned in problem, else ''>",
+    "applicant_contact": "<Extract if mentioned, else ''>",
+    "applicant_city": "<Inferred or mentioned city, else ''>",
+    "applicant_state": "<Inferred or mentioned state, else ''>",
+    "applicant_address": "<Extract if mentioned, else ''>",
+    "applicant_pincode": "<Extract if mentioned, else ''>",
+    "target_department": "<INFER the specific Public Authority (e.g., 'PIO, Municipal Corporation') or Opposing Entity (e.g., 'Landlord / E-Commerce Provider')>",
+    "specific_records": "<If RTI: Write 2-3 numbered points asking for certified records related to the problem. If not RTI, leave empty.>",
+    "time_period": "<Infer relevant timeframe (e.g., '2023-2024' or 'Last 6 Months')>",
+    "file_or_work_no": "<Extract reference/work order number if mentioned, else 'Not Available'>",
+    "incident_date": "<Extract date of dispute/default. If none, write 'Recent / Ongoing'>",
+    "financial_loss": "<Extract claim amount in Rs. If none, write 'Subject to Assessment'>",
+    "desired_relief": "<If Grievance: Draft a formal demand (e.g., 'Immediate refund of security deposit with 18% p.a. penal interest and compensation for mental agony'). If RTI, leave empty.>",
+    "statutory_fee": "<If RTI: '₹10 (Postal Order/Online)'. If Grievance: 'N/A'>",
+    "response_time": "<If RTI: '30 Days (Sec 7(1) of RTI Act)'. If Grievance: '15 Days Statutory Notice'>"
   }
 }
 """
 
-FEW_SHOT_EXAMPLES = [
-    {
-        "input": "I want copies of the tender inspection reports and vendor invoices for the road work in Ward 12.",
-        "output": {
-            "route": "RTI",
-            "sub_category": "Roads & Infrastructure",
-            "confidence": 0.98,
-            "reasoning": "The user requests specific official records and inspection documents from a public authority."
-        }
-    },
-    {
-        "input": "My landlord deducted 20,000 from my deposit without any explanation and blocked my phone number.",
-        "output": {
-            "route": "Rights/Grievance",
-            "sub_category": "Tenancy Dispute",
-            "confidence": 0.96,
-            "reasoning": "This is a private contractual dispute requiring a legal demand notice or rent authority complaint."
-        }
-    },
-    {
-        "input": "Can you give me a recipe for butter chicken?",
-        "output": {
-            "route": "Other",
-            "sub_category": "Irrelevant",
-            "confidence": 0.99,
-            "reasoning": "This query is unrelated to civic rights, legal disputes, or RTI requests."
-        }
-    }
-]
-
 DYNAMIC_FORM_SCHEMAS = {
-    "RTI": [
-        {"key": "target_department", "label": "Public Authority / Department", "required": True, "placeholder": "e.g., Municipal Corporation of Delhi, NHAI, PWD"},
-        {"key": "specific_records", "label": "Specific Records Requested", "required": True, "placeholder": "e.g., Certified copies of tender sanction orders, bills, and road inspection logs"},
-        {"key": "time_period", "label": "Time Period / Year", "required": True, "placeholder": "e.g., 1st Jan 2023 to 31st Dec 2023"},
-        {"key": "file_or_work_no", "label": "Application / Work Order No. (if any)", "required": False, "placeholder": "e.g., WO/2023/8892"},
-        {"key": "applicant_state", "label": "State / Jurisdiction", "required": True, "placeholder": "e.g., Delhi, Maharashtra, Central Govt"}
-    ],
-    "Rights/Grievance": [
-        {"key": "target_department", "label": "Opposing Party / Department", "required": True, "placeholder": "e.g., Landlord Name / Company / Department"},
-        {"key": "incident_date", "label": "Date of Dispute / Default", "required": True, "placeholder": "e.g., 15th January 2024"},
-        {"key": "financial_loss", "label": "Amount Involved / Claim (₹)", "required": False, "placeholder": "e.g., 45000"},
-        {"key": "prior_communication", "label": "Prior Complaint / Reference No. (if any)", "required": False, "placeholder": "e.g., Complaint #9921"},
-        {"key": "desired_relief", "label": "Desired Relief / Remedy", "required": True, "placeholder": "e.g., Immediate refund of security deposit with 18% interest"}
-    ],
+    "RTI": [],
+    "Rights/Grievance": [],
     "Other": []
 }
-
-# Add standard personal intake fields to ALL valid routes
-personal_fields = [
-    {"key": "applicant_name", "label": "Your Full Name", "required": True, "placeholder": "e.g., Rohan Sharma"},
-    {"key": "applicant_address", "label": "Your Postal Address", "required": True, "placeholder": "e.g., House No. 12, Sector 5, Delhi - 110001"},
-    {"key": "applicant_contact", "label": "Phone / Email", "required": True, "placeholder": "e.g., 9876543210 / rohan@email.com"},
-    {"key": "applicant_city", "label": "Your City / District", "required": True, "placeholder": "e.g., New Delhi"},
-]
-
-DYNAMIC_FORM_SCHEMAS["RTI"].extend(personal_fields)
-DYNAMIC_FORM_SCHEMAS["Rights/Grievance"].extend(personal_fields)
 
 # --- Phase 3 RTI-Bench Prompts ---
 RTI_DRAFT_SYSTEM_PROMPT = """You are an expert Indian RTI lawyer. Generate a formal, Section 6(1) Right to Information Act application draft using the facts provided.
@@ -129,14 +89,7 @@ Return the draft as clean text with proper line breaks."""
 RTI_PREDICTOR_SYSTEM_PROMPT = """You simulate the RTI-Bench Machine Learning Benchmark trained on 100,000+ Central Information Commission (CIC) decisions.
 Analyze the provided RTI draft for rejection risks under Section 8, Section 9, Section 2(f), and procedural pitfalls.
 
-Common rejection triggers to detect:
-1. "INTERROGATIVE_OPINION": Asking 'Why', 'How', or seeking explanations/opinions rather than existing material records (violates Section 2(f)).
-2. "THIRD_PARTY_PRIVACY": Seeking personal details of individuals without established public interest (violates Section 8(1)(j)).
-3. "VAGUE_OVERBROAD": Requesting 'all documents' spanning excessive years without file numbers.
-4. "COMMERCIAL_CONFIDENCE": Seeking proprietary vendor trade secrets (violates Section 8(1)(d)).
-5. "JURISDICTION_MISMATCH": PIO department does not hold custody of requested information.
-
-Respond ONLY in valid JSON matching this exact schema:
+Respond ONLY in valid JSON:
 {
   "prediction": "FULL" | "PARTIAL" | "REJECT",
   "probabilities": {
