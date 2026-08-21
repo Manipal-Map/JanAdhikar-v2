@@ -260,8 +260,8 @@ export default function GatewayView() {
       <AnimatePresence mode="wait">
         {stage === 'CLASSIFYING' ? (
           <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12 z-10">
-            <Loader2 size={40} className="animate-spin text-court-maroon mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-ashoka-navy">Hang on while we classify your case...</h2>
+            <Loader2 size={40} className="animate-spin text-amber-300 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-white drop-shadow-sm">Hang on while we classify your case...</h2>
           </motion.div>
         ) : isClassified ? (
           <motion.div key="confirm-screen" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-card p-8 shadow-xl border border-slate-200 max-w-xl w-full z-10 bg-white">
@@ -300,8 +300,8 @@ export default function GatewayView() {
           </motion.div>
         ) : (!resumeMode && !isResumeNavigating) ? (
           <motion.div key="main" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-2xl text-center z-10">
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-ashoka-navy mb-3 tracking-tight">What is your problem?</h1>
-            <p className="text-lg text-slate-600 mb-8 font-medium">Write it in your own words. Our AI assistant will guide you step by step.</p>
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-3 tracking-tight drop-shadow-sm">What is your problem?</h1>
+            <p className="text-lg text-slate-300 mb-8 font-medium">Write it in your own words. Our AI assistant will guide you step by step.</p>
             
             <div className="bg-white border border-slate-300 rounded-3xl shadow-sm mb-6 text-left">
               <textarea
@@ -329,8 +329,8 @@ export default function GatewayView() {
             </button>
 
             <div className="mt-8 flex items-center justify-between px-2">
-              <button onClick={() => setResumeMode(true)} className="text-ashoka-navy font-bold text-sm hover:text-court-maroon transition cursor-pointer">Resume existing case</button>
-              <button onClick={() => window.location.reload()} className="text-slate-500 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy transition cursor-pointer"><RefreshCw size={14}/> Reset Form</button>
+              <button onClick={() => setResumeMode(true)} className="text-white font-bold text-sm hover:text-amber-300 transition cursor-pointer">Resume existing case</button>
+              <button onClick={() => window.location.reload()} className="text-slate-400 flex items-center gap-1.5 text-sm font-medium hover:text-white transition cursor-pointer"><RefreshCw size={14}/> Reset Form</button>
             </div>
           </motion.div>
         ) : (
