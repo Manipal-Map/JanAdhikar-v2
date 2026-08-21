@@ -133,13 +133,15 @@ export default function IntakeChatView() {
   };
 
   return (
-    <div className="gradient-bg min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 bg-[#FAF8F5]">
-      {/* Top Header */}
-      <div className="w-full max-w-3xl mx-auto flex items-center justify-between py-3 border-b border-slate-300 mb-4">
+    <div 
+      className="min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 bg-cover bg-center bg-no-repeat relative"
+      style={{ backgroundImage: "url('/bg.image.png')" }}
+    >
+      <div className="w-full max-w-3xl mx-auto flex items-center justify-between py-3 border-b border-slate-300 mb-4 bg-white/90 backdrop-blur-xs px-4 rounded-2xl shadow-xs relative z-10">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => router.push('/dashboard')}
-            className="p-2 rounded-xl bg-white border border-slate-300 text-slate-600 hover:text-ashoka-navy hover:bg-slate-50 transition shadow-sm cursor-pointer"
+            className="p-2 rounded-xl bg-white border border-slate-300 text-slate-700 hover:text-ashoka-navy hover:bg-slate-50 transition shadow-sm cursor-pointer"
             title="Back to Overview"
           >
             <ArrowLeft size={16} />
@@ -150,7 +152,7 @@ export default function IntakeChatView() {
             </div>
             <div>
               <h1 className="text-base font-bold text-ashoka-navy">JanAdhikar Legal Intake</h1>
-              <p className="text-xs text-slate-500">Step 2: Fact &amp; Information Gathering</p>
+              <p className="text-xs text-slate-600 font-medium">Step 2: Fact &amp; Information Gathering</p>
             </div>
           </div>
         </div>
@@ -161,8 +163,7 @@ export default function IntakeChatView() {
         )}
       </div>
 
-      {/* Chat Messages Container */}
-      <div className="w-full max-w-3xl flex-1 overflow-y-auto space-y-5 pr-1 mb-4">
+      <div className="w-full max-w-3xl flex-1 overflow-y-auto space-y-5 pr-1 mb-4 relative z-10">
         {messages.map((msg, index) => (
           <motion.div
             key={index}
@@ -178,7 +179,7 @@ export default function IntakeChatView() {
             <div className={`p-4 rounded-2xl max-w-[80%] text-sm leading-relaxed shadow-sm whitespace-pre-line text-left border ${
               msg.role === 'user' 
                 ? 'bg-ashoka-navy text-white rounded-tr-none border-transparent' 
-                : 'bg-white text-slate-800 border-slate-300 rounded-tl-none font-medium'
+                : 'bg-white/95 backdrop-blur-xs text-slate-800 border-slate-300 rounded-tl-none font-medium'
             }`}>
               {msg.content}
             </div>
@@ -190,24 +191,23 @@ export default function IntakeChatView() {
             <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center shadow-sm">
               <Bot size={15} />
             </div>
-            <div className="p-4 bg-white border border-slate-300 rounded-2xl rounded-tl-none text-slate-500 text-sm flex items-center gap-2 shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-slate-400 animate-bounce" />
-              <span className="w-2 h-2 rounded-full bg-slate-400 animate-bounce [animation-delay:0.2s]" />
-              <span className="w-2 h-2 rounded-full bg-slate-400 animate-bounce [animation-delay:0.4s]" />
-              <span className="ml-1 text-xs text-slate-500 font-medium">AI is reviewing your case facts...</span>
+            <div className="p-4 bg-white/95 backdrop-blur-xs border border-slate-300 rounded-2xl rounded-tl-none text-slate-600 text-sm flex items-center gap-2 shadow-sm font-medium">
+              <span className="w-2 h-2 rounded-full bg-slate-500 animate-bounce" />
+              <span className="w-2 h-2 rounded-full bg-slate-500 animate-bounce [animation-delay:0.2s]" />
+              <span className="w-2 h-2 rounded-full bg-slate-500 animate-bounce [animation-delay:0.4s]" />
+              <span className="ml-1 text-xs text-slate-600 font-medium">AI is reviewing your case facts...</span>
             </div>
           </div>
         )}
         <div ref={chatEndRef} />
       </div>
 
-      {/* Footer / Action Box */}
-      <div className="w-full max-w-3xl mx-auto space-y-3">
+      <div className="w-full max-w-3xl mx-auto space-y-3 relative z-10">
         {isReady && (
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-4 bg-slate-50 border border-slate-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm"
+            className="p-4 bg-white/95 backdrop-blur-xs border border-slate-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm"
           >
             <div className="flex items-center gap-2.5 text-xs sm:text-sm text-ashoka-navy font-bold text-left">
               <CheckCircle2 size={20} className="text-court-maroon shrink-0" />
@@ -216,7 +216,7 @@ export default function IntakeChatView() {
             <button
               onClick={handleProceedToClassification}
               disabled={classifying}
-              className="btn-primary cursor-pointer text-xs sm:text-sm py-2.5 px-5 bg-court-maroon hover:bg-[#701A75] text-white font-bold flex items-center justify-center gap-2 shadow-sm rounded-xl"
+              className="btn-primary cursor-pointer text-xs sm:text-sm py-2.5 px-5 bg-[#A32A02] hover:bg-[#138808] transition-colors text-white font-bold flex items-center justify-center gap-2 shadow-sm rounded-xl"
             >
               <span>{classifying ? "Classifying..." : "View Legal Classification"}</span>
               <ArrowRight size={15} />
@@ -224,7 +224,7 @@ export default function IntakeChatView() {
           </motion.div>
         )}
 
-        <form onSubmit={handleSend} className="p-2 flex items-end gap-2 shadow-sm bg-white rounded-2xl border border-slate-300 focus-within:border-ashoka-navy focus-within:ring-1 focus-within:ring-ashoka-navy transition-all">
+        <form onSubmit={handleSend} className="p-2 flex items-end gap-2 shadow-sm bg-white/95 backdrop-blur-xs rounded-2xl border border-slate-300 focus-within:border-ashoka-navy focus-within:ring-1 focus-within:ring-ashoka-navy transition-all">
           <textarea
             rows={2}
             value={input}
@@ -236,7 +236,7 @@ export default function IntakeChatView() {
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="btn-primary cursor-pointer p-3 rounded-xl disabled:opacity-50 bg-court-maroon text-white hover:bg-[#701A75] mb-0.5 shadow-sm"
+            className="btn-primary cursor-pointer p-3 rounded-xl disabled:opacity-50 bg-[#A32A02] hover:bg-[#138808] transition-colors text-white mb-0.5 shadow-sm"
           >
             <Send size={16} />
           </button>
