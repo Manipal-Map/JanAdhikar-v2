@@ -14,7 +14,7 @@ export default function Navbar() {
     { name: "Architecture", href: "/#comparison" },
     { name: "Workflow", href: "/#export-pipeline" },
     { name: "Jurisdiction", href: "/#the-law" },
-    { name: "Track Case", href: "/dashboard/track" },
+    { name: "Track Case", href: "/track" },
   ];
 
   const handleLaunch = () => {

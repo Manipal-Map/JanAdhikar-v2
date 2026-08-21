@@ -279,7 +279,7 @@ export default function RTIResultView() {
                   <ArrowLeft size={16} /> Back to Risk Analysis
                 </button>
                 <button
-                  onClick={() => router.push(`/dashboard/track?case_id=${caseId}`)}
+                  onClick={() => router.push(`/track?case_id=${caseId}`)}
                   className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-ashoka-navy hover:bg-[#1E293B] text-white font-bold text-sm transition-all shadow-md cursor-pointer w-full sm:w-auto"
                 >
                   <Activity size={16} className="text-emerald-400" />
