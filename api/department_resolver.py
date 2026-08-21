@@ -5,8 +5,7 @@ from .classifier import classifier
 
 class SmartDepartmentResolver:
     def __init__(self):
-        # --- UPDATED TO STABLE 8B MODEL ---
-        self.model = "llama3-8b-8192"
+        self.model = "openai/gpt-oss-120b"
 
     def _get_client(self):
         return classifier.client
