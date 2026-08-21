@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getCase, analyzePio } from '@/lib/api';
@@ -21,7 +21,8 @@ interface CaseMetrics {
   precedent_title?: string;
 }
 
-export default function TrackPage() {
+// FIX: Extracted inner content to isolate useSearchParams
+function TrackPageContent() {
   const searchParams = useSearchParams();
   const caseIdParam = searchParams.get('case_id') || '';
 
@@ -246,7 +247,7 @@ export default function TrackPage() {
 
                   <div className="pt-2 flex justify-end">
                     <Link
-                      href={`/rti/result?case_id=${caseData.case_id}&mode=appeal`}
+                      href={`/rti/appeal?case_id=${caseData.case_id}&mode=appeal`}
                       className="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs px-5 py-2.5 rounded-lg transition"
                     >
                       📄 Generate First Appeal Document (Sec 19(1))
@@ -259,5 +260,20 @@ export default function TrackPage() {
         )}
       </div>
     </div>
+  );
+}
+
+// FIX: Wrap the track page component in a Suspense boundary to satisfy Next.js build requirement
+export default function TrackPage() {
+  return (
+    <Suspense 
+      fallback={
+        <div className="min-h-screen bg-slate-950 text-slate-400 flex items-center justify-center p-6 font-mono text-sm">
+          Loading tracker environment...
+        </div>
+      }
+    >
+      <TrackPageContent />
+    </Suspense>
   );
 }
