@@ -1,37 +1,12 @@
 'use client';
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Scale, FileSearch, Loader2, CheckCircle2, HelpCircle, KeyRound, Copy, Download, Lock, RefreshCw, FolderOpen, Check, ArrowLeft, MessageSquare } from 'lucide-react'
+import { ArrowRight, FileSearch, Loader2, KeyRound, Copy, Download, Lock, RefreshCw, FolderOpen, Check, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import useCaseStore from '@/store/caseStore'
 import { initCase, getCase } from '@/lib/api'
-import CaseIdBadge from '@/components/dashboard/CaseIdBadge'
 import AudioRecorder from '@/components/dashboard/AudioRecorder'
-
-const ROUTE_DESCRIPTIONS = {
-  RTI: {
-    title: 'Right to Information (RTI) Application',
-    badge: 'Statutory RTI Filing',
-    icon: FileSearch,
-    description: 'You are requesting official government records, tender documents, inspection reports, or file movements under the RTI Act, 2005.',
-    actionText: 'Proceed to RTI Form & Draft',
-  },
-  'Rights/Grievance': {
-    title: 'Consumer / Administrative Grievance',
-    badge: 'Legal Dispute / Relief',
-    icon: Scale,
-    description: 'You are seeking dispute resolution, refunds, compensation, or action against service deficiency.',
-    actionText: 'Proceed to Grievance Notice',
-  },
-  Other: {
-    title: 'General or Out of Scope Query',
-    badge: 'Outside Platform Scope',
-    icon: HelpCircle,
-    description: 'This problem falls outside statutory RTI and administrative consumer grievance frameworks.',
-    actionText: 'View Resources',
-  }
-}
 
 export default function GatewayView() {
   const router = useRouter()
@@ -40,19 +15,16 @@ export default function GatewayView() {
   const [resumeMode, setResumeMode] = useState(false)
   const [localErr, setLocalErr] = useState<string | null>(null)
   
-  const [isConfirmNavigating, setIsConfirmNavigating] = useState(false)
   const [isResumeNavigating, setIsResumeNavigating] = useState(false)
   
   const [showPasskeyModal, setShowPasskeyModal] = useState(false)
   const [copied, setCopied] = useState(false)
   const [hasAgreed, setHasAgreed] = useState(false)
 
-  const { stage, setStage, caseId, setCaseId, classifyResult, setUserProblem, language, hydrateState } = useCaseStore()
+  const { stage, setStage, caseId, setCaseId, setUserProblem, language, hydrateState } = useCaseStore()
 
-  const isProcessing = stage === 'INITIALIZING' || showPasskeyModal || isConfirmNavigating || isResumeNavigating
+  const isProcessing = stage === 'INITIALIZING' || showPasskeyModal || isResumeNavigating
   
-  const isClassified = (stage === 'CLASSIFIED_CONFIRM' || isConfirmNavigating) && classifyResult
-
   const handleStartCase = async () => {
     if (!text.trim() || isProcessing) return
     setLocalErr(null)
@@ -74,6 +46,7 @@ export default function GatewayView() {
     if (!hasAgreed) return
     setShowPasskeyModal(false)
     setLocalErr(null)
+    // Directly push to the new universal AI Smart Form
     router.push('/dashboard/intake')
   }
 
@@ -113,10 +86,9 @@ export default function GatewayView() {
         router.push('/dashboard/rti/result')
       } else if (st === 'grievance_completed') {
         router.push('/dashboard/grievance/result')
-      } else if (rt === 'RTI') {
-        router.push('/dashboard/rti')
-      } else if (rt === 'Rights/Grievance') {
-        router.push('/dashboard/grievance')
+      } else if (rt === 'RTI' || rt === 'Rights/Grievance') {
+        // Drop them straight into the smart form context
+        router.push('/dashboard/intake')
       }
     } catch (err) {
       setIsResumeNavigating(false)
@@ -124,27 +96,6 @@ export default function GatewayView() {
       setStage('IDLE')
     }
   }
-
-  const handleConfirmRoute = () => {
-    if (!classifyResult) return
-    setIsConfirmNavigating(true) 
-
-    if (classifyResult.route === 'RTI') {
-      setStage('RTI_GATHERING')
-      router.push('/dashboard/rti')
-    }
-    else if (classifyResult.route === 'Rights/Grievance') {
-      setStage('GRIEVANCE_GATHERING')
-      router.push('/dashboard/grievance')
-    }
-    else {
-      setStage('OUT_OF_SCOPE')
-      router.push('/dashboard/out-of-scope')
-    }
-  }
-
-  const currentRouteMeta = classifyResult ? (ROUTE_DESCRIPTIONS[classifyResult.route as keyof typeof ROUTE_DESCRIPTIONS] || ROUTE_DESCRIPTIONS.Other) : null
-  const RouteIcon = currentRouteMeta?.icon || FileSearch
 
   return (
     <div 
@@ -186,7 +137,7 @@ export default function GatewayView() {
                 Save Your Private Case ID
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 mb-6 max-w-sm mx-auto">
-                Save this key before we open the AI Intake conversation. You will need it to reopen your case anytime without an account.
+                Save this key before we prepare your official legal form. You will need it to reopen your case anytime.
               </p>
 
               <div className="bg-[#FAF8F5] border border-slate-200 rounded-2xl p-6 shadow-inner mb-5">
@@ -249,7 +200,7 @@ export default function GatewayView() {
                 disabled={!hasAgreed}
                 className="btn-primary w-full justify-center text-sm py-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-court-maroon hover:bg-[#701A75] text-white flex items-center gap-2"
               >
-                <span>Continue to AI Intake Assistant</span>
+                <span>Generate Form & Continue</span>
                 <ArrowRight size={16} />
               </button>
             </motion.div>
@@ -258,50 +209,10 @@ export default function GatewayView() {
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
-        {stage === 'CLASSIFYING' ? (
-          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12 z-10">
-            <Loader2 size={40} className="animate-spin text-amber-300 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-white drop-shadow-sm">Hang on while we classify your case...</h2>
-          </motion.div>
-        ) : isClassified ? (
-          <motion.div key="confirm-screen" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-card p-8 shadow-xl border border-slate-200 max-w-xl w-full z-10 bg-white">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-slate-100 text-ashoka-navy border border-slate-200 flex items-center justify-center flex-shrink-0">
-                <RouteIcon size={24} />
-              </div>
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-court-maroon bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">{currentRouteMeta?.badge}</span>
-                <h2 className="text-xl font-extrabold text-ashoka-navy mt-1">{currentRouteMeta?.title}</h2>
-              </div>
-            </div>
-            
-            <div className="bg-[#FAF8F5] p-5 rounded-xl border border-slate-200 mb-6 space-y-3 text-left">
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">AI Legal Assessment & Summary</h4>
-                <p className="text-sm text-ashoka-navy mt-1 font-medium leading-relaxed">{classifyResult.reasoning}</p>
-              </div>
-              {classifyResult.sub_category && (
-                <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
-                  <span className="text-slate-500 font-semibold">Sub-Category:</span>
-                  <span className="font-mono font-bold text-ashoka-navy">{classifyResult.sub_category}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button onClick={handleConfirmRoute} disabled={isConfirmNavigating} className="btn-primary flex-1 justify-center py-3.5 cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white disabled:opacity-70">
-                {isConfirmNavigating ? <><Loader2 size={16} className="animate-spin" /> <span>Loading...</span></> : <><CheckCircle2 size={16} /><span>{currentRouteMeta?.actionText}</span></>}
-              </button>
-              <button onClick={() => router.push('/dashboard/intake')} className="btn-ghost flex-initial justify-center py-3.5 border border-slate-300 text-ashoka-navy hover:bg-slate-50 cursor-pointer">
-                <MessageSquare size={15} /> 
-                <span>Back to Chat</span>
-              </button>
-            </div>
-          </motion.div>
-        ) : (!resumeMode && !isResumeNavigating) ? (
+        {!resumeMode && !isResumeNavigating ? (
           <motion.div key="main" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-2xl text-center z-10">
             <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-3 tracking-tight drop-shadow-sm">What is your problem?</h1>
-            <p className="text-lg text-slate-300 mb-8 font-medium">Write it in your own words. Our AI assistant will guide you step by step.</p>
+            <p className="text-lg text-slate-300 mb-8 font-medium">Write it in your own words. Our AI assistant will automatically structure it.</p>
             
             <div className="bg-white border border-slate-300 rounded-3xl shadow-sm mb-6 text-left">
               <textarea
@@ -325,7 +236,7 @@ export default function GatewayView() {
               disabled={!text.trim() || stage === 'INITIALIZING'} 
               className="btn-primary w-full justify-center text-lg py-4 cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white flex items-center gap-2 shadow-md"
             >
-              {stage === 'INITIALIZING' ? <><Loader2 className="animate-spin" /> Generating Your Case ID...</> : <>Start Intake &amp; Analysis <ArrowRight size={20} /></>}
+              {stage === 'INITIALIZING' ? <><Loader2 className="animate-spin" /> Generating Your Case ID...</> : <>Start Analysis &amp; Form Fill <ArrowRight size={20} /></>}
             </button>
 
             <div className="mt-8 flex items-center justify-between px-2">
