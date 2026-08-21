@@ -17,7 +17,7 @@ const formatAIText = (text?: string) => {
   const pushList = () => {
     if (currentList.length > 0) {
       result.push(
-        <ul key={`list-${result.length}`} className="list-disc pl-5 mb-3 space-y-2 marker:text-slate-500">
+        <ul key={`list-${result.length}`} className="list-disc pl-5 mb-3 space-y-2 marker:text-slate-400">
           {currentList}
         </ul>
       );
@@ -29,7 +29,7 @@ const formatAIText = (text?: string) => {
     return str.split(/(\*\*.*?\*\*)/g).map((part, j) => {
       if (part.startsWith('**') && part.endsWith('**')) {
         return (
-          <strong key={j} className="font-extrabold text-white">
+          <strong key={j} className="font-extrabold text-ashoka-navy tracking-tight">
             {part.slice(2, -2)}
           </strong>
         );
@@ -50,14 +50,14 @@ const formatAIText = (text?: string) => {
     if (isBullet) {
       const content = isBullet[2];
       currentList.push(
-        <li key={`item-${i}`} className="leading-relaxed text-sm">
+        <li key={`item-${i}`} className="leading-relaxed text-sm text-slate-700 font-medium">
           {formatBold(content)}
         </li>
       );
     } else {
       pushList();
       result.push(
-        <div key={`line-${i}`} className="mb-2 last:mb-0 leading-relaxed text-sm">
+        <div key={`line-${i}`} className="mb-2 last:mb-0 leading-relaxed text-sm text-slate-700 font-medium">
           {formatBold(line)}
         </div>
       );
@@ -173,10 +173,10 @@ export default function IntakeFormView() {
         className="min-h-screen flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/bg.image.png')" }}
       >
-        <div className="bg-[#0F172A]/85 backdrop-blur-md p-8 rounded-3xl border border-white/10 shadow-2xl text-center space-y-3">
-          <Loader2 size={40} className="animate-spin text-white mx-auto" />
-          <h2 className="text-xl font-bold text-white tracking-tight">Analyzing Legal Merits...</h2>
-          <p className="text-slate-400 text-sm font-medium">Drafting statutory clauses, identifying jurisdiction, and computing fees.</p>
+        <div className="bg-white/95 backdrop-blur-md p-8 rounded-3xl border border-slate-200 shadow-xl text-center space-y-3">
+          <Loader2 size={40} className="animate-spin text-[#FF9933] mx-auto" />
+          <h2 className="text-xl font-extrabold text-ashoka-navy tracking-tight">Analyzing Legal Merits...</h2>
+          <p className="text-slate-500 text-sm font-medium">Drafting statutory clauses, identifying jurisdiction, and computing fees.</p>
         </div>
       </div>
     );
@@ -187,13 +187,13 @@ export default function IntakeFormView() {
 
   return (
     <div 
-      className="min-h-screen p-4 sm:p-6 lg:p-8 flex items-center justify-center font-sans bg-cover bg-center bg-no-repeat relative"
+      className="min-h-screen p-4 sm:p-6 lg:p-8 flex items-center justify-center font-sans bg-cover bg-center bg-no-repeat relative text-ashoka-navy"
       style={{ backgroundImage: "url('/bg.image.png')" }}
     >
       <div className="w-full max-w-3xl space-y-6 relative z-10">
         
         {!isOther && (
-          <div className="bg-[#0F172A]/80 backdrop-blur-md border border-slate-700/60 rounded-2xl p-4 shadow-sm flex items-center justify-between overflow-x-auto gap-2">
+          <div className="bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center justify-between overflow-x-auto gap-2">
             {[
               { num: 0, label: 'Assessment', icon: Scale },
               { num: 1, label: 'Applicant', icon: User },
@@ -205,20 +205,20 @@ export default function IntakeFormView() {
               return (
                 <div 
                   key={s.num} 
-                  className={`flex items-center gap-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
-                    active ? 'text-white' : done ? 'text-emerald-400' : 'text-slate-500'
+                  className={`flex items-center gap-2 text-xs sm:text-sm transition-all whitespace-nowrap font-sans tracking-tight font-bold ${
+                    active ? 'text-court-maroon' : done ? 'text-statutory-green' : 'text-slate-400'
                   }`}
                 >
-                  <div className={`font-sans tracking-tight w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold shrink-0 ${
+                  <div className={`font-sans tracking-tight w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[11px] sm:text-xs font-bold shrink-0 ${
                     active 
-                      ? 'bg-[#A32A02] text-white shadow-sm border border-[#A32A02]/50' 
+                      ? 'bg-court-maroon text-white shadow-sm border border-court-maroon/50' 
                       : done 
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
-                      : 'bg-slate-800 text-slate-500 border border-slate-700'
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
+                      : 'bg-slate-100 text-slate-500 border border-slate-200'
                   }`}>
                     {done ? '✓' : s.num}
                   </div>
-                  <span className="hidden sm:inline tracking-tight">{s.label}</span>
+                  <span className="hidden sm:inline font-sans tracking-tight">{s.label}</span>
                 </div>
               );
             })}
@@ -227,10 +227,10 @@ export default function IntakeFormView() {
 
         <div className="flex items-center justify-between px-2">
           <div>
-            <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${isOther ? 'bg-slate-800 text-slate-400 border-slate-700' : 'text-[#FF9933] bg-[#FF9933]/10 border-[#FF9933]/20'}`}>
+            <span className={`text-xs font-bold uppercase font-sans tracking-tight px-3 py-1 rounded-full border ${isOther ? 'bg-slate-100 text-slate-600 border-slate-200' : 'text-court-maroon bg-rose-50 border-rose-200'}`}>
               Route: {isOther ? 'Out of Platform Scope' : (isRTI ? 'Right to Information (RTI)' : 'Administrative Grievance')}
             </span>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-white mt-2 tracking-tight drop-shadow-md">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-ashoka-navy mt-2 tracking-tight drop-shadow-sm">
               {currentStep === 0 && 'Legal Route & Case Assessment'}
               {currentStep === 1 && 'Step 1: Your Contact Information'}
               {currentStep === 2 && 'Step 2: Review AI Legal Strategy'}
@@ -238,57 +238,57 @@ export default function IntakeFormView() {
             </h2>
           </div>
           {caseId && (
-            <span className="text-xs font-mono font-bold text-slate-300 bg-[#0F172A]/80 backdrop-blur-md border border-slate-700/60 px-3 py-1.5 rounded-xl shadow-xs">
+            <span className="text-xs font-mono font-bold text-slate-600 bg-white/95 backdrop-blur-md border border-slate-200 px-3 py-1.5 rounded-xl shadow-xs">
               #{caseId}
             </span>
           )}
         </div>
 
-        <div className="bg-[#0F172A]/85 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl text-left">
+        <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-slate-300 shadow-xl text-left">
           
           {currentStep === 0 && (
             <div className="space-y-6 animate-in fade-in duration-300">
-              <div className="p-6 bg-[#1E293B]/60 border border-slate-700 rounded-3xl flex flex-col gap-4 shadow-inner text-left">
+              <div className="p-6 bg-[#FAF8F5] border border-slate-200 rounded-3xl flex flex-col gap-4 shadow-inner text-left">
                 
-                <div className="flex flex-col gap-1 border-b border-slate-700/50 pb-5">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
+                <div className="flex flex-col gap-1 border-b border-slate-200 pb-5">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 font-sans">
                     AI Classification Result
                   </span>
-                  <h3 className={`font-black text-3xl sm:text-4xl tracking-tight ${isOther ? 'text-slate-300' : isRTI ? 'text-blue-300' : 'text-emerald-400'}`}>
+                  <h3 className={`font-black text-3xl sm:text-4xl tracking-tight ${isOther ? 'text-slate-700' : isRTI ? 'text-blue-700' : 'text-emerald-700'}`}>
                     {isOther ? 'Out of Scope / Other' : isRTI ? 'Right to Information (RTI)' : 'Formal Legal Grievance'}
                   </h3>
                   <div className="mt-2">
-                    <span className="text-sm font-bold text-[#FF9933] bg-[#FF9933]/10 px-3 py-1.5 rounded-lg inline-block border border-[#FF9933]/20">
+                    <span className="text-sm font-bold font-sans tracking-tight text-court-maroon bg-rose-50 px-3 py-1.5 rounded-lg inline-block border border-rose-200">
                       Category: {classifyResult?.sub_category}
                     </span>
                   </div>
                 </div>
 
                 <div className="pt-2">
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Detailed Legal Analysis</h4>
-                  <div className="text-sm font-medium text-slate-300 leading-relaxed">
+                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Detailed Legal Analysis</h4>
+                  <div className="text-sm font-medium text-slate-700 leading-relaxed">
                     {formatAIText(classifyResult?.reasoning)}
                   </div>
                 </div>
               </div>
 
               {isOther && (
-                <div className="p-6 bg-blue-950/30 border border-blue-900/50 rounded-3xl text-left shadow-sm">
-                  <h4 className="text-base font-bold text-blue-300 flex items-center gap-2 mb-4 pb-2 border-b border-blue-900/50">
-                    <Info size={20} className="text-blue-400"/> Recommended Action Plan For Your Case
+                <div className="p-6 bg-blue-50 border border-blue-200 rounded-3xl text-left shadow-sm">
+                  <h4 className="text-base font-bold text-blue-900 flex items-center gap-2 mb-4 pb-2 border-b border-blue-200 tracking-tight">
+                    <Info size={20} className="text-blue-700"/> Recommended Action Plan For Your Case
                   </h4>
-                  <div className="text-sm text-blue-200 leading-relaxed font-medium">
+                  <div className="text-sm text-blue-800 leading-relaxed font-medium">
                     {formatAIText(classifyResult?.specific_advice || 'This case falls outside RTI or Consumer/Administrative grievance jurisdictions. Please consult a local legal professional or the relevant authority for this specific issue.')}
                   </div>
                 </div>
               )}
 
-              <div className="pt-6 border-t border-slate-700/60 flex items-center justify-between">
-                <button onClick={() => { reset(); router.push('/'); }} className="btn-ghost py-3 px-5 border border-slate-700 text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 cursor-pointer">
+              <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
+                <button onClick={() => { reset(); router.push('/'); }} className="btn-ghost py-3 px-5 border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer font-sans tracking-tight font-bold">
                   <ArrowLeft size={16} /> Start New Case
                 </button>
                 {!isOther && (
-                  <button onClick={() => handleNextStep()} className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-[#A32A02] hover:bg-[#138808] transition-colors text-white rounded-xl shadow-md cursor-pointer font-bold">
+                  <button onClick={() => handleNextStep()} className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-[#A32A02] hover:bg-[#138808] transition-colors text-white rounded-xl shadow-md cursor-pointer font-bold tracking-tight">
                     Proceed to Form Fill <ArrowRight size={18} />
                   </button>
                 )}
@@ -298,89 +298,89 @@ export default function IntakeFormView() {
 
           {currentStep === 1 && (
             <form onSubmit={handleNextStep} className="space-y-5 animate-in fade-in duration-300">
-              <p className="text-xs text-slate-400 leading-relaxed mb-4 font-medium">
+              <p className="text-xs text-slate-600 leading-relaxed mb-4 font-medium">
                 Official applications require the physical correspondence identity of the citizen. The AI will handle the technical legal details in the next step.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wide">Your Full Name *</label>
+                  <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Your Full Name *</label>
                   <input
                     type="text"
                     required
                     value={localForm.applicant_name}
                     onChange={e => handleChange('applicant_name', e.target.value)}
                     placeholder="e.g. Rohan Sharma"
-                    className="w-full bg-[#1E293B]/80 border border-slate-600 rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#FF9933] text-sm"
+                    className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-ashoka-navy placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] text-sm font-medium transition-all"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wide">Phone / Contact Email *</label>
+                  <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Phone / Contact Email *</label>
                   <input
                     type="text"
                     required
                     value={localForm.applicant_contact}
                     onChange={e => handleChange('applicant_contact', e.target.value)}
                     placeholder="e.g. 9876543210 / rohan@email.com"
-                    className="w-full bg-[#1E293B]/80 border border-slate-600 rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#FF9933] text-sm"
+                    className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-ashoka-navy placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] text-sm font-medium transition-all"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wide">City / District *</label>
+                  <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">City / District *</label>
                   <input
                     type="text"
                     required
                     value={localForm.applicant_city}
                     onChange={e => handleChange('applicant_city', e.target.value)}
                     placeholder="e.g. Jaipur"
-                    className="w-full bg-[#1E293B]/80 border border-slate-600 rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#FF9933] text-sm"
+                    className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-ashoka-navy placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] text-sm font-medium transition-all"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wide">State / Union Territory *</label>
+                  <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">State / Union Territory *</label>
                   <input
                     type="text"
                     required
                     value={localForm.applicant_state}
                     onChange={e => handleChange('applicant_state', e.target.value)}
                     placeholder="e.g. Rajasthan"
-                    className="w-full bg-[#1E293B]/80 border border-slate-600 rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#FF9933] text-sm"
+                    className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-ashoka-navy placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] text-sm font-medium transition-all"
                   />
                 </div>
 
                 <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wide">Postal Address for Response *</label>
+                  <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Postal Address for Response *</label>
                   <input
                     type="text"
                     required
                     value={localForm.applicant_address}
                     onChange={e => handleChange('applicant_address', e.target.value)}
                     placeholder="e.g. House No. 42, Sector 3, Main Road"
-                    className="w-full bg-[#1E293B]/80 border border-slate-600 rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#FF9933] text-sm"
+                    className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-ashoka-navy placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] text-sm font-medium transition-all"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wide">PIN Code *</label>
+                  <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">PIN Code *</label>
                   <input
                     type="text"
                     required
                     value={localForm.applicant_pincode}
                     onChange={e => handleChange('applicant_pincode', e.target.value)}
                     placeholder="e.g. 302001"
-                    className="w-full bg-[#1E293B]/80 border border-slate-600 rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#FF9933] text-sm"
+                    className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-ashoka-navy placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] text-sm font-medium transition-all"
                   />
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-slate-700/60 flex items-center justify-between">
-                <button type="button" onClick={() => setCurrentStep(0)} className="btn-ghost py-3 px-5 border border-slate-700 text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 cursor-pointer">
+              <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
+                <button type="button" onClick={() => setCurrentStep(0)} className="btn-ghost py-3 px-5 border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer font-sans tracking-tight font-bold">
                   <ArrowLeft size={16} /> Back
                 </button>
-                <button type="submit" className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-[#A32A02] hover:bg-[#138808] transition-colors text-white rounded-xl shadow-md cursor-pointer font-bold">
+                <button type="submit" className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-[#A32A02] hover:bg-[#138808] transition-colors text-white rounded-xl shadow-md cursor-pointer font-bold tracking-tight">
                   Next: AI Legal Strategy <ArrowRight size={18} />
                 </button>
               </div>
@@ -389,27 +389,27 @@ export default function IntakeFormView() {
 
           {currentStep === 2 && (
             <form onSubmit={handleNextStep} className="space-y-6 animate-in fade-in duration-300">
-              <div className="p-4 bg-blue-950/30 border border-blue-900/50 rounded-2xl flex items-start gap-3 shadow-xs">
-                <Sparkles size={18} className="text-blue-400 mt-0.5 shrink-0" />
-                <p className="text-xs text-blue-200 font-medium leading-relaxed">
-                  <strong>AI Strategy Engine:</strong> We have automatically structured the technical legal clauses and target authority based on your problem. <br/><br/>
-                  <span className="font-bold text-white">Note: All fields below are optional.</span> If you are unsure about any specifics, leave them blank—the Legal Engine will automatically handle defaults.
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl flex items-start gap-3 shadow-sm">
+                <Sparkles size={18} className="text-blue-600 mt-0.5 shrink-0" />
+                <p className="text-xs text-blue-900 font-medium leading-relaxed">
+                  <strong className="text-ashoka-navy tracking-tight font-bold">AI Strategy Engine:</strong> We have automatically structured the technical legal clauses and target authority based on your problem. <br/><br/>
+                  <span className="font-bold text-ashoka-navy tracking-tight">Note: All fields below are optional.</span> If you are unsure about any specifics, leave them blank—the Legal Engine will automatically handle defaults.
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-[#1E293B]/60 p-3 rounded-xl border border-slate-700 flex items-center gap-3">
-                  <Banknote size={16} className="text-slate-400" />
+                <div className="bg-[#FAF8F5] p-3 rounded-xl border border-slate-300 flex items-center gap-3">
+                  <Banknote size={16} className="text-slate-500" />
                   <div>
-                    <span className="block text-[10px] font-bold text-slate-400 uppercase">Statutory Fee</span>
-                    <span className="text-sm font-bold text-white">{localForm.statutory_fee || (isRTI ? '₹10' : 'N/A')}</span>
+                    <span className="block text-[10px] font-bold text-slate-500 uppercase">Statutory Fee</span>
+                    <span className="text-sm font-bold text-ashoka-navy">{localForm.statutory_fee || (isRTI ? '₹10' : 'N/A')}</span>
                   </div>
                 </div>
-                <div className="bg-[#1E293B]/60 p-3 rounded-xl border border-slate-700 flex items-center gap-3">
-                  <Clock size={16} className="text-slate-400" />
+                <div className="bg-[#FAF8F5] p-3 rounded-xl border border-slate-300 flex items-center gap-3">
+                  <Clock size={16} className="text-slate-500" />
                   <div>
-                    <span className="block text-[10px] font-bold text-slate-400 uppercase">Mandated Response Time</span>
-                    <span className="text-sm font-bold text-white">{localForm.response_time || (isRTI ? '30 Days' : '15 Days')}</span>
+                    <span className="block text-[10px] font-bold text-slate-500 uppercase">Mandated Response Time</span>
+                    <span className="text-sm font-bold text-ashoka-navy">{localForm.response_time || (isRTI ? '30 Days' : '15 Days')}</span>
                   </div>
                 </div>
               </div>
@@ -417,46 +417,46 @@ export default function IntakeFormView() {
               {isRTI ? (
                 <div className="space-y-5">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide">Target Public Authority / Department</label>
+                    <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Target Public Authority / Department</label>
                     <input
                       type="text"
                       value={localForm.target_department}
                       onChange={e => handleChange('target_department', e.target.value)}
                       placeholder="e.g., Public Works Department / Unsure"
-                      className="w-full bg-[#1E293B]/80 border border-slate-600 rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#FF9933] text-sm font-semibold"
+                      className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-court-maroon placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] text-sm font-bold tracking-tight transition-all"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide">Certified Legal Queries Generated by AI</label>
+                    <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Certified Legal Queries Generated by AI</label>
                     <textarea
                       rows={4}
                       value={localForm.specific_records}
                       onChange={e => handleChange('specific_records', e.target.value)}
                       placeholder="Leave blank to let AI formulate the exact records requested."
-                      className="w-full bg-[#1E293B]/80 border border-slate-600 rounded-2xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#FF9933] text-sm resize-none leading-relaxed"
+                      className="w-full bg-[#FAF8F5] border border-slate-300 rounded-2xl p-3.5 text-ashoka-navy placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] text-sm resize-none leading-relaxed transition-all"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide">Time Period</label>
+                      <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Time Period</label>
                       <input
                         type="text"
                         value={localForm.time_period}
                         onChange={e => handleChange('time_period', e.target.value)}
                         placeholder="Leave blank if unsure"
-                        className="w-full bg-[#1E293B]/80 border border-slate-600 rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#FF9933] text-sm"
+                        className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-ashoka-navy placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] text-sm transition-all"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide">Application / File Ref (If Known)</label>
+                      <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Application / File Ref (If Known)</label>
                       <input
                         type="text"
                         value={localForm.file_or_work_no}
                         onChange={e => handleChange('file_or_work_no', e.target.value)}
                         placeholder="Leave blank if none"
-                        className="w-full bg-[#1E293B]/80 border border-slate-600 rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#FF9933] text-sm"
+                        className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-ashoka-navy placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] text-sm transition-all"
                       />
                     </div>
                   </div>
@@ -464,63 +464,63 @@ export default function IntakeFormView() {
               ) : (
                 <div className="space-y-5">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide">Opposing Party / Authority</label>
+                    <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Opposing Party / Authority</label>
                     <input
                       type="text"
                       value={localForm.target_department}
                       onChange={e => handleChange('target_department', e.target.value)}
                       placeholder="e.g., Landlord Name / Company / Unsure"
-                      className="w-full bg-[#1E293B]/80 border border-slate-600 rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#FF9933] text-sm font-semibold"
+                      className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-court-maroon placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] text-sm font-bold tracking-tight transition-all"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide">Statutory Relief Demanded</label>
+                    <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Statutory Relief Demanded</label>
                     <textarea
                       rows={3}
                       value={localForm.desired_relief}
                       onChange={e => handleChange('desired_relief', e.target.value)}
                       placeholder="Leave blank to let AI formulate standard relief based on law."
-                      className="w-full bg-[#1E293B]/80 border border-slate-600 rounded-2xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#FF9933] text-sm resize-none leading-relaxed"
+                      className="w-full bg-[#FAF8F5] border border-slate-300 rounded-2xl p-3.5 text-ashoka-navy placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] text-sm resize-none leading-relaxed transition-all"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide">Date of Incident</label>
+                      <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Date of Incident</label>
                       <input
                         type="text"
                         value={localForm.incident_date}
                         onChange={e => handleChange('incident_date', e.target.value)}
                         placeholder="Leave blank if ongoing"
-                        className="w-full bg-[#1E293B]/80 border border-slate-600 rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#FF9933] text-sm"
+                        className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-ashoka-navy placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] text-sm transition-all"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide">Financial Claim (₹)</label>
+                      <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Financial Claim (₹)</label>
                       <input
                         type="text"
                         value={localForm.financial_loss}
                         onChange={e => handleChange('financial_loss', e.target.value)}
                         placeholder="Leave blank if not applicable"
-                        className="w-full bg-[#1E293B]/80 border border-slate-600 rounded-xl p-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#FF9933] text-sm"
+                        className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-ashoka-navy placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] text-sm transition-all"
                       />
                     </div>
                   </div>
                 </div>
               )}
 
-              <div className="pt-6 border-t border-slate-700/60 flex items-center justify-between">
+              <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
                 <button
                   type="button"
                   onClick={() => setCurrentStep(1)}
-                  className="btn-ghost py-3 px-5 border border-slate-700 text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 cursor-pointer"
+                  className="btn-ghost py-3 px-5 border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer font-sans tracking-tight font-bold"
                 >
                   <ArrowLeft size={16} /> Back
                 </button>
                 <button
                   type="submit"
-                  className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-[#A32A02] hover:bg-[#138808] transition-colors text-white rounded-xl shadow-md cursor-pointer font-bold"
+                  className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-[#A32A02] hover:bg-[#138808] transition-colors text-white rounded-xl shadow-md cursor-pointer font-bold tracking-tight"
                 >
                   Proceed to Final Review <ArrowRight size={18} />
                 </button>
@@ -531,72 +531,72 @@ export default function IntakeFormView() {
           {currentStep === 3 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               
-              <div className="p-5 bg-amber-950/30 border border-amber-900/50 rounded-2xl flex items-start gap-4 shadow-sm">
-                <div className="p-2 bg-amber-900/50 rounded-full shrink-0 mt-0.5">
-                  <AlertCircle size={20} className="text-amber-400" />
+              <div className="p-5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-4 shadow-sm">
+                <div className="p-2 bg-amber-100 rounded-full shrink-0 mt-0.5">
+                  <AlertCircle size={20} className="text-amber-600" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-amber-400 uppercase tracking-wide mb-1">Important Legal Disclaimer</h4>
-                  <p className="text-xs sm:text-sm text-amber-200 leading-relaxed font-medium">
+                  <h4 className="text-sm font-bold text-amber-900 uppercase tracking-wide mb-1 font-sans">Important Legal Disclaimer</h4>
+                  <p className="text-xs sm:text-sm text-amber-800 leading-relaxed font-medium">
                     JanAdhikar is an AI-assisted legal drafting tool, <strong>not a law firm</strong>. 
                     By clicking confirm, the AI will generate your formal document based on the facts provided above. 
-                    <strong className="text-white"> You must personally verify all names, dates, amounts, and claims before officially filing or mailing this document.</strong>
+                    <strong className="text-ashoka-navy"> You must personally verify all names, dates, amounts, and claims before officially filing or mailing this document.</strong>
                   </p>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className="bg-[#1E293B]/60 p-5 rounded-2xl border border-slate-700 shadow-inner">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-700 mb-3">
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                      <User size={14} className="text-slate-400" /> Identity Record
+                <div className="bg-[#FAF8F5] p-5 rounded-2xl border border-slate-200 shadow-inner">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-200 mb-3">
+                    <h4 className="text-xs font-bold text-court-maroon uppercase tracking-wider flex items-center gap-1.5 font-sans">
+                      <User size={14} className="text-court-maroon" /> Identity Record
                     </h4>
-                    <button onClick={() => setCurrentStep(1)} className="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1">
+                    <button onClick={() => setCurrentStep(1)} className="text-xs font-bold text-slate-500 hover:text-ashoka-navy flex items-center gap-1 transition-colors">
                       <Edit3 size={12} /> Edit
                     </button>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                     <div>
-                      <span className="text-slate-400 font-bold block">NAME:</span>
-                      <span className="font-semibold text-slate-200">{localForm.applicant_name}</span>
+                      <span className="text-slate-500 font-bold block">NAME:</span>
+                      <span className="font-semibold text-ashoka-navy">{localForm.applicant_name}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 font-bold block">CONTACT:</span>
-                      <span className="font-semibold text-slate-200">{localForm.applicant_contact}</span>
+                      <span className="text-slate-500 font-bold block">CONTACT:</span>
+                      <span className="font-semibold text-ashoka-navy">{localForm.applicant_contact}</span>
                     </div>
                     <div className="sm:col-span-2">
-                      <span className="text-slate-400 font-bold block">POSTAL ADDRESS:</span>
-                      <span className="font-semibold text-slate-200">{localForm.applicant_address}, {localForm.applicant_city}, {localForm.applicant_state} - {localForm.applicant_pincode}</span>
+                      <span className="text-slate-500 font-bold block">POSTAL ADDRESS:</span>
+                      <span className="font-semibold text-ashoka-navy">{localForm.applicant_address}, {localForm.applicant_city}, {localForm.applicant_state} - {localForm.applicant_pincode}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-[#1E293B]/60 p-5 rounded-2xl border border-slate-700 shadow-inner">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-700 mb-3">
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                      <Building2 size={14} className="text-slate-400" /> Legal Specifications
+                <div className="bg-[#FAF8F5] p-5 rounded-2xl border border-slate-200 shadow-inner">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-200 mb-3">
+                    <h4 className="text-xs font-bold text-court-maroon uppercase tracking-wider flex items-center gap-1.5 font-sans">
+                      <Building2 size={14} className="text-court-maroon" /> Legal Specifications
                     </h4>
-                    <button onClick={() => setCurrentStep(2)} className="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1">
+                    <button onClick={() => setCurrentStep(2)} className="text-xs font-bold text-slate-500 hover:text-ashoka-navy flex items-center gap-1 transition-colors">
                       <Edit3 size={12} /> Edit
                     </button>
                   </div>
                   <div className="space-y-3 text-xs">
                     <div>
-                      <span className="text-slate-400 font-bold block">{isRTI ? 'PUBLIC AUTHORITY:' : 'OPPOSING PARTY:'}</span>
-                      <span className="font-semibold text-white text-sm">{localForm.target_department || 'Standard Default / As determined by Law'}</span>
+                      <span className="text-slate-500 font-bold block">{isRTI ? 'PUBLIC AUTHORITY:' : 'OPPOSING PARTY:'}</span>
+                      <span className="font-semibold text-ashoka-navy text-sm tracking-tight">{localForm.target_department || 'Standard Default / As determined by Law'}</span>
                     </div>
                     {isRTI ? (
                       <>
                         <div>
-                          <span className="text-slate-400 font-bold block">RECORDS SOUGHT:</span>
-                          <p className="font-medium text-slate-300 whitespace-pre-wrap leading-relaxed mt-1">{localForm.specific_records || 'Standard certified records mapping to query'}</p>
+                          <span className="text-slate-500 font-bold block">RECORDS SOUGHT:</span>
+                          <p className="font-medium text-slate-700 whitespace-pre-wrap leading-relaxed mt-1">{localForm.specific_records || 'Standard certified records mapping to query'}</p>
                         </div>
                       </>
                     ) : (
                       <>
                         <div>
-                          <span className="text-slate-400 font-bold block">REMEDY DEMANDED:</span>
-                          <p className="font-medium text-slate-300 leading-relaxed mt-1">{localForm.desired_relief || 'Standard statutory relief with interest'}</p>
+                          <span className="text-slate-500 font-bold block">REMEDY DEMANDED:</span>
+                          <p className="font-medium text-slate-700 leading-relaxed mt-1">{localForm.desired_relief || 'Standard statutory relief with interest'}</p>
                         </div>
                       </>
                     )}
@@ -604,12 +604,12 @@ export default function IntakeFormView() {
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-slate-700/60 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <button
                   type="button"
                   onClick={() => setCurrentStep(2)}
                   disabled={generating}
-                  className="btn-ghost py-3 px-5 border border-slate-700 text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 cursor-pointer w-full sm:w-auto justify-center"
+                  className="btn-ghost py-3 px-5 border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer w-full sm:w-auto justify-center font-sans tracking-tight font-bold"
                 >
                   <ArrowLeft size={16} /> Back
                 </button>
@@ -617,7 +617,7 @@ export default function IntakeFormView() {
                   type="button"
                   onClick={handleGenerate}
                   disabled={generating}
-                  className="btn-primary py-4 px-10 flex items-center justify-center gap-2 bg-[#A32A02] hover:bg-[#138808] transition-colors text-white rounded-xl shadow-md cursor-pointer font-bold w-full sm:w-auto"
+                  className="btn-primary py-4 px-10 flex items-center justify-center gap-2 bg-[#A32A02] hover:bg-[#138808] transition-colors text-white rounded-xl shadow-md cursor-pointer font-bold tracking-tight w-full sm:w-auto"
                 >
                   {generating ? (
                     <>
