@@ -87,7 +87,6 @@ export default function GatewayView() {
       } else if (st === 'grievance_completed') {
         router.push('/dashboard/grievance/result')
       } else if (rt === 'RTI' || rt === 'Rights/Grievance') {
-        // Drop them straight into the smart form context
         router.push('/dashboard/intake')
       }
     } catch (err) {
