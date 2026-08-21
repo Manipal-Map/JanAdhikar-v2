@@ -77,7 +77,7 @@ export default function RTIIntakePage() {
 
   return (
     <main 
-      className="min-h-screen py-12 px-4 sm:px-6 flex items-center justify-center bg-cover bg-center bg-no-repeat relative text-ashoka-navy font-sans tracking-tight"
+      className="min-h-screen py-12 px-4 sm:px-6 flex items-center justify-center bg-cover bg-center bg-no-repeat relative text-slate-200"
       style={{ backgroundImage: "url('/bg.image.png')" }}
     >
       <div className="max-w-2xl w-full space-y-6 relative z-10">
@@ -85,8 +85,8 @@ export default function RTIIntakePage() {
           <div className="inline-flex items-center justify-center p-3 bg-white/95 text-court-maroon rounded-2xl mb-2 shadow-sm border border-slate-300">
             <FileText size={24} />
           </div>
-          <h1 className="text-2xl font-extrabold text-ashoka-navy drop-shadow-sm tracking-tight">File an RTI Application</h1>
-          <p className="text-xs text-slate-600 font-medium drop-shadow-sm">
+          <h1 className="text-2xl font-extrabold text-white drop-shadow-sm tracking-tight">File an RTI Application</h1>
+          <p className="text-xs text-slate-200 font-medium drop-shadow-sm">
             Describe your grievance or information request below, or use voice input.
           </p>
         </div>
