@@ -22,14 +22,11 @@ import useCaseStore from '@/store/caseStore';
 import { classifyCase, rtiGenerate, grievanceGenerate } from '@/lib/api';
 
 // --- UTILITY FUNCTION TO FIX MESSY AI TEXT ---
-// Converts \n to actual line breaks and **text** to bold tags
 const formatAIText = (text?: string) => {
   if (!text) return null;
   return text.split('\n').map((line, i) => {
-    // Keep empty lines as visual spacing
     if (!line.trim()) return <div key={i} className="h-3" />;
     
-    // Split by markdown bold tags **
     const parts = line.split(/(\*\*.*?\*\*)/g);
     return (
       <div key={i} className="mb-2 last:mb-0">
@@ -60,13 +57,13 @@ export default function IntakeFormView() {
     setFormData, 
     setStage, 
     setRtiDraft, 
-    setGrievanceResult 
+    setGrievanceResult,
+    reset // Pulling in reset to clear state on new case
   } = useCaseStore();
 
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   
-  // 0 = Assessment, 1 = Applicant, 2 = AI Strategy, 3 = Confirmation
   const [currentStep, setCurrentStep] = useState<0 | 1 | 2 | 3>(0);
   const [localForm, setLocalForm] = useState<Record<string, any>>({});
 
@@ -175,7 +172,6 @@ export default function IntakeFormView() {
     <div className="gradient-bg min-h-screen p-4 sm:p-6 lg:p-8 flex items-center justify-center font-sans">
       <div className="w-full max-w-3xl space-y-6">
         
-        {/* Step Progression Bar (Hidden if Out of Scope) */}
         {!isOther && (
           <div className="bg-white border border-slate-300 rounded-2xl p-4 shadow-sm flex items-center justify-between overflow-x-auto gap-2">
             {[
@@ -209,7 +205,6 @@ export default function IntakeFormView() {
           </div>
         )}
 
-        {/* Case Info Header */}
         <div className="flex items-center justify-between px-2">
           <div>
             <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${isOther ? 'bg-slate-100 text-slate-600 border-slate-200' : 'text-court-maroon bg-rose-50 border-rose-200'}`}>
@@ -231,12 +226,11 @@ export default function IntakeFormView() {
 
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-300 shadow-sm text-left">
           
-          {/* STEP 0: LEGAL ASSESSMENT & EXPLANATION */}
+          {/* STEP 0: LEGAL ASSESSMENT (No Extracted Facts Box) */}
           {currentStep === 0 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="p-6 bg-[#FAF8F5] border border-slate-200 rounded-3xl flex flex-col gap-4 shadow-inner text-left">
                 
-                {/* MASSIVE CONCLUSION HEADER */}
                 <div className="flex flex-col gap-1 border-b border-slate-200 pb-5">
                   <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">
                     AI Classification Result
@@ -259,7 +253,8 @@ export default function IntakeFormView() {
                 </div>
               </div>
 
-              {isOther ? (
+              {/* ACTION PLAN IF OUT OF SCOPE */}
+              {isOther && (
                 <div className="p-6 bg-blue-50 border border-blue-200 rounded-3xl text-left shadow-sm">
                   <h4 className="text-base font-bold text-blue-900 flex items-center gap-2 mb-4 pb-2 border-b border-blue-200/60">
                     <Info size={20} className="text-blue-700"/> Recommended Action Plan For Your Case
@@ -268,24 +263,10 @@ export default function IntakeFormView() {
                     {formatAIText(classifyResult.specific_advice || 'This case falls outside RTI or Consumer/Administrative grievance jurisdictions. Please consult a local legal professional or the relevant authority for this specific issue.')}
                   </div>
                 </div>
-              ) : (
-                <div className="p-6 bg-white border border-slate-200 rounded-3xl text-left shadow-sm">
-                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-5 flex items-center gap-2">
-                    <Sparkles size={16} className="text-emerald-600"/> Facts Extracted By AI Engine
-                  </h4>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-5 gap-x-4">
-                    {Object.entries(localForm).filter(([k,v]) => v && typeof v === 'string').map(([k,v]) => (
-                      <div key={k}>
-                        <span className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{k.replace(/_/g, ' ')}</span>
-                        <span className="block text-xs font-semibold text-ashoka-navy truncate pr-2" title={v as string}>{v as string}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               )}
 
               <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
-                <button onClick={() => { setStage('IDLE'); router.push('/'); }} className="btn-ghost py-3 px-5 border border-slate-300 cursor-pointer">
+                <button onClick={() => { reset(); router.push('/'); }} className="btn-ghost py-3 px-5 border border-slate-300 cursor-pointer">
                   <ArrowLeft size={16} /> Start New Case
                 </button>
                 {!isOther && (
@@ -297,7 +278,7 @@ export default function IntakeFormView() {
             </div>
           )}
 
-          {/* STEP 1: APPLICANT DETAILS ONLY */}
+          {/* STEP 1: APPLICANT DETAILS */}
           {currentStep === 1 && (
             <form onSubmit={handleNextStep} className="space-y-5 animate-in fade-in duration-300">
               <p className="text-xs text-slate-500 leading-relaxed mb-4 font-medium">
@@ -535,7 +516,6 @@ export default function IntakeFormView() {
           {currentStep === 3 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               
-              {/* HIGH VISIBILITY DISCLAIMER */}
               <div className="p-5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-4 shadow-sm">
                 <div className="p-2 bg-amber-100 rounded-full shrink-0 mt-0.5">
                   <AlertCircle size={20} className="text-amber-700" />
