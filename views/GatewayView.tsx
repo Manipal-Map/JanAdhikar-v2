@@ -103,13 +103,13 @@ export default function GatewayView() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-cover bg-center bg-no-repeat text-slate-200 font-sans tracking-tight"
+      className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-cover bg-center bg-no-repeat font-sans"
       style={{ backgroundImage: "url('/bg.image.png')" }}
     >
       <div className="absolute top-6 left-6 z-20">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/95 backdrop-blur-sm border border-slate-300 text-slate-700 text-xs font-bold shadow-sm hover:text-ashoka-navy hover:bg-slate-50 transition cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/95 backdrop-blur-sm border border-slate-300 text-slate-700 text-xs font-bold shadow-sm hover:text-ashoka-navy hover:bg-slate-50 transition cursor-pointer tracking-tight"
         >
           <ArrowLeft size={14} />
           <span>Back to Landing</span>
@@ -122,7 +122,7 @@ export default function GatewayView() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-ashoka-navy/60 backdrop-blur-md p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-ashoka-navy/60 backdrop-blur-sm p-4"
           >
             <motion.div
               initial={{ scale: 0.95, y: 20 }}
@@ -132,7 +132,7 @@ export default function GatewayView() {
             >
               <div className="absolute top-0 left-0 w-full h-1.5 bg-court-maroon"></div>
               
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-ashoka-navy border border-slate-200 rounded-full text-xs font-bold mb-4 shadow-sm">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-ashoka-navy border border-slate-200 rounded-full text-xs font-bold mb-4 shadow-sm tracking-tight">
                 <KeyRound size={13} />
                 <span>Case Passkey Created</span>
               </div>
@@ -156,7 +156,7 @@ export default function GatewayView() {
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
                   <button 
                     onClick={handleCopyId}
-                    className="w-full sm:w-auto flex-1 bg-[#A32A02] hover:bg-[#138808] text-white font-bold py-2.5 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-xs cursor-pointer tracking-tight"
+                    className="w-full sm:w-auto flex-1 bg-[#A32A02] hover:bg-[#138808] text-white font-bold py-2.5 px-4 rounded-xl transition-colors shadow-md flex items-center justify-center gap-2 text-xs cursor-pointer tracking-tight"
                   >
                     {copied ? <Check size={15} /> : <Copy size={15} />}
                     {copied ? 'Copied!' : 'Copy Case ID'}
@@ -164,7 +164,7 @@ export default function GatewayView() {
 
                   <button 
                     onClick={handleDownloadTxt}
-                    className="w-full sm:w-auto flex-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-xs cursor-pointer tracking-tight"
+                    className="w-full sm:w-auto flex-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold py-2.5 px-4 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2 text-xs cursor-pointer tracking-tight"
                   >
                     <Download size={15} className="text-slate-500" />
                     <span>Download .txt Key</span>
@@ -244,14 +244,14 @@ export default function GatewayView() {
             </button>
 
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 px-2">
-              <button onClick={() => setResumeMode(true)} className="text-slate-200 font-bold text-sm hover:text-white transition cursor-pointer flex items-center gap-1.5 drop-shadow-sm">
+              <button onClick={() => setResumeMode(true)} className="text-white font-bold text-sm hover:text-blue-200 transition cursor-pointer flex items-center gap-1.5 drop-shadow-sm">
                 <FolderOpen size={16} /> Resume Draft
               </button>
-              <span className="hidden sm:block text-slate-400/50">•</span>
-              <Link href="/track" className="text-slate-200 font-bold text-sm hover:text-white transition cursor-pointer flex items-center gap-1.5 drop-shadow-sm">
+              <span className="hidden sm:block text-slate-300">•</span>
+              <Link href="/track" className="text-white font-bold text-sm hover:text-emerald-300 transition cursor-pointer flex items-center gap-1.5 drop-shadow-sm">
                 <Activity size={16} /> Track Filed Case
               </Link>
-              <span className="hidden sm:block text-slate-400/50">•</span>
+              <span className="hidden sm:block text-slate-300">•</span>
               <button onClick={() => window.location.reload()} className="text-slate-300 flex items-center gap-1.5 text-sm font-medium hover:text-white transition cursor-pointer drop-shadow-sm">
                 <RefreshCw size={14}/> Reset Form
               </button>
@@ -281,8 +281,8 @@ export default function GatewayView() {
             </button>
             
             <div className="flex items-center justify-between border-t border-slate-200 pt-6">
-              <button onClick={() => setResumeMode(false)} className="text-slate-600 font-bold text-sm hover:text-ashoka-navy transition cursor-pointer">Start a new case instead</button>
-              <button onClick={() => window.location.reload()} className="text-slate-400 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy transition cursor-pointer"><RefreshCw size={14}/> Reset Form</button>
+              <button onClick={() => setResumeMode(false)} className="text-slate-600 font-bold text-sm hover:text-ashoka-navy transition cursor-pointer tracking-tight">Start a new case instead</button>
+              <button onClick={() => window.location.reload()} className="text-slate-400 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy transition cursor-pointer tracking-tight"><RefreshCw size={14}/> Reset Form</button>
             </div>
           </motion.div>
         )}
