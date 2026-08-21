@@ -288,3 +288,15 @@ def get_case_state(case_id: str):
     if not case_data:
         raise HTTPException(status_code=404, detail="Case ID not found.")
     return {"case_id": case_id, "data": case_data}
+
+@app.get("/api/debug/supabase")
+def debug_supabase():
+    from case_manager import case_manager
+    import os
+    return {
+        "use_supabase": case_manager.use_supabase,
+        "has_url_env": bool(os.environ.get("SUPABASE_URL")),
+        "has_key_env": bool(os.environ.get("SUPABASE_KEY")),
+        "url_prefix": os.environ.get("SUPABASE_URL", "")[:20],
+        "memory_case_count": len(case_manager._memory_cases),
+    }
