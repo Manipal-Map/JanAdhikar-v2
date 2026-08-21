@@ -20,7 +20,6 @@ import { grievanceGenerate } from '@/lib/api';
 
 export default function GrievanceFormView() {
   const router = useRouter();
-  // FIXED: Changed `setDraft` to `setGrievanceResult` which actually exists in the store
   const { caseId, userProblem, formData, setFormData, classifyResult, setGrievanceResult, language, setStage } = useCaseStore();
   
   const [loading, setLoading] = useState(false);
@@ -48,12 +47,8 @@ export default function GrievanceFormView() {
         }
       };
 
-      // Call the API
       const result = await grievanceGenerate(payload);
-      
-      // FIXED: Save the entire generated package using the correct Zustand store function
       setGrievanceResult(result);
-      
       setStage('GRIEVANCE_COMPLETED');
       router.push('/dashboard/grievance/result');
       
@@ -66,15 +61,18 @@ export default function GrievanceFormView() {
   };
 
   return (
-    <div className="gradient-bg min-h-screen bg-[#FAF8F5] p-4 sm:p-6 lg:p-8 font-sans selection:bg-[#881337] selection:text-white flex items-center justify-center">
-      <div className="w-full max-w-3xl space-y-6">
+    <div 
+      className="min-h-screen p-4 sm:p-6 lg:p-8 font-sans selection:bg-[#881337] selection:text-white flex items-center justify-center bg-cover bg-center bg-no-repeat relative"
+      style={{ backgroundImage: "url('/bg.image.png')" }}
+    >
+      <div className="w-full max-w-3xl space-y-6 relative z-10">
         
         {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 bg-white/90 backdrop-blur-xs p-4 rounded-2xl border border-slate-300 shadow-xs">
           <div className="flex items-center gap-3">
             <button 
               onClick={() => router.push('/dashboard')}
-              className="p-2.5 rounded-xl bg-white border border-slate-300 text-slate-600 hover:text-ashoka-navy hover:bg-slate-50 transition shadow-sm cursor-pointer"
+              className="p-2.5 rounded-xl bg-white border border-slate-300 text-slate-700 hover:text-ashoka-navy hover:bg-slate-50 transition shadow-sm cursor-pointer"
             >
               <ArrowLeft size={18} />
             </button>
@@ -85,7 +83,7 @@ export default function GrievanceFormView() {
                   Grievance & Relief Setup
                 </h1>
               </div>
-              <p className="text-sm text-slate-500 mt-1 font-medium">
+              <p className="text-sm text-slate-600 mt-1 font-medium">
                 Review your details before generating the legal notice.
               </p>
             </div>
@@ -104,7 +102,7 @@ export default function GrievanceFormView() {
           className="space-y-6"
         >
           {/* Section 1: Complainant Details */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#b8c2cc] shadow-sm">
+          <div className="bg-white/95 backdrop-blur-xs rounded-3xl p-6 sm:p-8 border border-slate-300 shadow-md">
             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2">
               <User size={16} className="text-court-maroon" />
               1. Complainant Details
@@ -137,7 +135,7 @@ export default function GrievanceFormView() {
               <div className="space-y-2 sm:col-span-2 text-left">
                 <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">City / District</label>
                 <div className="relative">
-                  <MapPin size={16} className="absolute left-3.5 top-3.5 text-slate-400" />
+                  <MapPin size={16} className="absolute left-3.5 top-3.5 text-slate-500" />
                   <input 
                     type="text"
                     required
@@ -152,7 +150,7 @@ export default function GrievanceFormView() {
           </div>
 
           {/* Section 2: Respondent / Target Authority */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#b8c2cc] shadow-sm">
+          <div className="bg-white/95 backdrop-blur-xs rounded-3xl p-6 sm:p-8 border border-slate-300 shadow-md">
             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2">
               <Building2 size={16} className="text-court-maroon" />
               2. Respondent Details
@@ -168,21 +166,21 @@ export default function GrievanceFormView() {
                 placeholder="e.g. Municipal Corporation / E-Commerce Platform"
                 className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-sm text-ashoka-navy font-medium placeholder:text-slate-400 focus:outline-none focus:border-court-maroon focus:ring-1 focus:ring-court-maroon transition-all"
               />
-              <p className="text-xs text-slate-500 mt-1.5 font-medium">
+              <p className="text-xs text-slate-600 mt-1.5 font-medium">
                 The AI will use this to direct your legal notice to the correct authority.
               </p>
             </div>
           </div>
 
           {/* Section 3: Evidence & Documents */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#b8c2cc] shadow-sm">
+          <div className="bg-white/95 backdrop-blur-xs rounded-3xl p-6 sm:p-8 border border-slate-300 shadow-md">
             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2">
               <FileText size={16} className="text-court-maroon" />
               3. Evidence & Proofs (Optional)
             </h2>
             
-            <label className="border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 transition-colors rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer group text-center">
-              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 mb-3 group-hover:scale-110 transition-transform">
+            <label className="border-2 border-dashed border-slate-300 bg-white hover:bg-slate-50 transition-colors rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer group text-center shadow-xs">
+              <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center shadow-sm border border-slate-200 mb-3 group-hover:scale-110 transition-transform">
                 <Upload size={20} className="text-ashoka-navy" />
               </div>
               <span className="text-sm font-bold text-ashoka-navy">Click to upload files</span>
@@ -208,7 +206,6 @@ export default function GrievanceFormView() {
             )}
           </div>
 
-          {/* Error Message */}
           {error && (
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
@@ -220,12 +217,11 @@ export default function GrievanceFormView() {
             </motion.div>
           )}
 
-          {/* Submit Action */}
           <div className="pt-2">
             <button 
               type="submit" 
               disabled={loading}
-              className="btn-primary w-full justify-center text-lg py-4 cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white disabled:opacity-70 shadow-md rounded-2xl flex items-center gap-2 transition-all font-bold"
+              className="btn-primary w-full justify-center text-lg py-4 cursor-pointer bg-[#A32A02] hover:bg-[#138808] transition-colors text-white disabled:opacity-70 shadow-md rounded-2xl flex items-center gap-2 font-bold"
             >
               {loading ? (
                 <>
@@ -239,7 +235,7 @@ export default function GrievanceFormView() {
                 </>
               )}
             </button>
-            <p className="text-center text-xs text-slate-500 mt-4 font-medium">
+            <p className="text-center text-xs text-slate-600 mt-4 font-medium">
               You will be able to review and edit the draft on the next page before downloading.
             </p>
           </div>
