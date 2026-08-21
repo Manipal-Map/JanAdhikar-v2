@@ -2,7 +2,7 @@ import os
 import json
 from typing import Dict, Any
 from groq import Groq
-from .prompts import CLASSIFIER_SYSTEM_PROMPT, FEW_SHOT_EXAMPLES, DYNAMIC_FORM_SCHEMAS
+from .prompts import CLASSIFIER_SYSTEM_PROMPT, DYNAMIC_FORM_SCHEMAS
 
 class RouteClassifier:
     def __init__(self):
