@@ -14,7 +14,7 @@ from .outcome_predictor import outcome_engine
 from .department_resolver import department_resolver
 from .rti_pdf_generator import generate_rti_pdf, generate_generic_pdf
 from .grievance_resolver import grievance_resolver
-from .intake_chat import router as intake_router  # Newly added AI Intake & KYC router
+from .intake_chat import router as intake_router  # AI Intake & KYC router
 
 app = FastAPI(title="CivicRoute AI API", version="2.0")
 
@@ -26,7 +26,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include the AI Intake chat router for pre-screening & conversational KYC
+# Include the AI Intake chat router for conversational pre-screening & KYC
 app.include_router(intake_router)
 
 class GeneratePDFRequest(BaseModel):
@@ -69,7 +69,7 @@ def health_check():
     return {
         "status": "ok", 
         "system": "CivicRoute Backend Active",
-        "database_connected": case_manager.is_connected
+        "database_connected": getattr(case_manager, "is_connected", True)
     }
 
 @app.post("/api/case/init", response_model=CaseInitResponse)
