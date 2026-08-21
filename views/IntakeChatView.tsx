@@ -37,7 +37,7 @@ export default function IntakeChatView() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/intake/chat', {
+      const res = await fetch('https://jan-adhikar-backend.vercel.app/api/intake/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
