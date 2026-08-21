@@ -15,10 +15,38 @@ import {
   Clock,
   Banknote,
   Scale,
-  Info
+  Info,
+  AlertCircle
 } from 'lucide-react';
 import useCaseStore from '@/store/caseStore';
 import { classifyCase, rtiGenerate, grievanceGenerate } from '@/lib/api';
+
+// --- UTILITY FUNCTION TO FIX MESSY AI TEXT ---
+// Converts \n to actual line breaks and **text** to bold tags
+const formatAIText = (text?: string) => {
+  if (!text) return null;
+  return text.split('\n').map((line, i) => {
+    // Keep empty lines as visual spacing
+    if (!line.trim()) return <div key={i} className="h-3" />;
+    
+    // Split by markdown bold tags **
+    const parts = line.split(/(\*\*.*?\*\*)/g);
+    return (
+      <div key={i} className="mb-2 last:mb-0">
+        {parts.map((part, j) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return (
+              <strong key={j} className="font-extrabold text-slate-900">
+                {part.slice(2, -2)}
+              </strong>
+            );
+          }
+          return <span key={j}>{part}</span>;
+        })}
+      </div>
+    );
+  });
+};
 
 export default function IntakeFormView() {
   const router = useRouter();
@@ -206,38 +234,49 @@ export default function IntakeFormView() {
           {/* STEP 0: LEGAL ASSESSMENT & EXPLANATION */}
           {currentStep === 0 && (
             <div className="space-y-6 animate-in fade-in duration-300">
-              <div className="p-5 bg-[#FAF8F5] border border-slate-200 rounded-2xl flex flex-col gap-4 shadow-inner text-left">
-                <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
-                  <Scale className="text-court-maroon" size={24} />
-                  <div>
-                    <h3 className="font-bold text-ashoka-navy text-lg">Case Classification & Analysis</h3>
-                    <p className="text-xs font-medium text-slate-500 mt-0.5">Sub-category: {classifyResult.sub_category}</p>
+              <div className="p-6 bg-[#FAF8F5] border border-slate-200 rounded-3xl flex flex-col gap-4 shadow-inner text-left">
+                
+                {/* MASSIVE CONCLUSION HEADER */}
+                <div className="flex flex-col gap-1 border-b border-slate-200 pb-5">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">
+                    AI Classification Result
+                  </span>
+                  <h3 className={`font-black text-3xl sm:text-4xl tracking-tight ${isOther ? 'text-slate-700' : isRTI ? 'text-blue-700' : 'text-emerald-700'}`}>
+                    {isOther ? 'Out of Scope / Other' : isRTI ? 'Right to Information (RTI)' : 'Formal Legal Grievance'}
+                  </h3>
+                  <div className="mt-2">
+                    <span className="text-sm font-bold text-court-maroon bg-court-maroon/10 px-3 py-1.5 rounded-lg inline-block border border-court-maroon/20">
+                      Category: {classifyResult.sub_category}
+                    </span>
                   </div>
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Detailed Legal Description</h4>
-                  <p className="text-sm font-medium text-slate-700 leading-relaxed">{classifyResult.reasoning}</p>
+
+                <div className="pt-2">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Detailed Legal Analysis</h4>
+                  <div className="text-sm font-medium text-slate-700 leading-relaxed">
+                    {formatAIText(classifyResult.reasoning)}
+                  </div>
                 </div>
               </div>
 
               {isOther ? (
-                <div className="p-5 bg-blue-50 border border-blue-200 rounded-2xl text-left shadow-sm">
-                  <h4 className="text-sm font-bold text-blue-900 flex items-center gap-2 mb-3">
-                    <Info size={18} className="text-blue-700"/> Guidance For Your Specific Case
+                <div className="p-6 bg-blue-50 border border-blue-200 rounded-3xl text-left shadow-sm">
+                  <h4 className="text-base font-bold text-blue-900 flex items-center gap-2 mb-4 pb-2 border-b border-blue-200/60">
+                    <Info size={20} className="text-blue-700"/> Recommended Action Plan For Your Case
                   </h4>
-                  <p className="text-sm text-blue-800 leading-relaxed whitespace-pre-wrap font-medium">
-                    {classifyResult.specific_advice || 'This case falls outside RTI or Consumer/Administrative grievance jurisdictions. Please consult a local legal professional or the relevant authority for this specific issue.'}
-                  </p>
+                  <div className="text-sm text-blue-900 leading-relaxed font-medium">
+                    {formatAIText(classifyResult.specific_advice || 'This case falls outside RTI or Consumer/Administrative grievance jurisdictions. Please consult a local legal professional or the relevant authority for this specific issue.')}
+                  </div>
                 </div>
               ) : (
-                <div className="p-5 bg-white border border-slate-200 rounded-2xl text-left shadow-sm">
-                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <Sparkles size={14} className="text-emerald-600"/> Facts Extracted By AI Engine
+                <div className="p-6 bg-white border border-slate-200 rounded-3xl text-left shadow-sm">
+                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-5 flex items-center gap-2">
+                    <Sparkles size={16} className="text-emerald-600"/> Facts Extracted By AI Engine
                   </h4>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-5 gap-x-4">
                     {Object.entries(localForm).filter(([k,v]) => v && typeof v === 'string').map(([k,v]) => (
                       <div key={k}>
-                        <span className="block text-[10px] font-bold text-slate-400 uppercase">{k.replace(/_/g, ' ')}</span>
+                        <span className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{k.replace(/_/g, ' ')}</span>
                         <span className="block text-xs font-semibold text-ashoka-navy truncate pr-2" title={v as string}>{v as string}</span>
                       </div>
                     ))}
@@ -475,10 +514,17 @@ export default function IntakeFormView() {
               )}
 
               <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
-                <button type="button" onClick={() => setCurrentStep(1)} className="btn-ghost py-3 px-5 border border-slate-300 cursor-pointer">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(1)}
+                  className="btn-ghost py-3 px-5 border border-slate-300 cursor-pointer"
+                >
                   <ArrowLeft size={16} /> Back
                 </button>
-                <button type="submit" className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-court-maroon hover:bg-[#701A75] text-white rounded-xl shadow-md cursor-pointer font-bold">
+                <button
+                  type="submit"
+                  className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-court-maroon hover:bg-[#701A75] text-white rounded-xl shadow-md cursor-pointer font-bold"
+                >
                   Proceed to Final Review <ArrowRight size={18} />
                 </button>
               </div>
@@ -488,11 +534,20 @@ export default function IntakeFormView() {
           {/* STEP 3: FINAL REVIEW & CONFIRMATION */}
           {currentStep === 3 && (
             <div className="space-y-6 animate-in fade-in duration-300">
-              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start gap-3">
-                <ShieldCheck size={20} className="text-emerald-700 mt-0.5 shrink-0" />
-                <p className="text-xs text-emerald-950 leading-relaxed font-medium">
-                  <strong>Ready for Document Generation:</strong> We have mapped the required provisions. Confirming this will generate the legally binding court-ready format.
-                </p>
+              
+              {/* HIGH VISIBILITY DISCLAIMER */}
+              <div className="p-5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-4 shadow-sm">
+                <div className="p-2 bg-amber-100 rounded-full shrink-0 mt-0.5">
+                  <AlertCircle size={20} className="text-amber-700" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-amber-900 uppercase tracking-wide mb-1">Important Legal Disclaimer</h4>
+                  <p className="text-xs sm:text-sm text-amber-800 leading-relaxed font-medium">
+                    JanAdhikar is an AI-assisted legal drafting tool, <strong>not a law firm</strong>. 
+                    By clicking confirm, the AI will generate your formal document based on the facts provided above. 
+                    <strong> You must personally verify all names, dates, amounts, and claims before officially filing or mailing this document.</strong>
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-4">
@@ -555,10 +610,20 @@ export default function IntakeFormView() {
               </div>
 
               <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <button type="button" onClick={() => setCurrentStep(2)} disabled={generating} className="btn-ghost py-3 px-5 border border-slate-300 cursor-pointer w-full sm:w-auto justify-center">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(2)}
+                  disabled={generating}
+                  className="btn-ghost py-3 px-5 border border-slate-300 cursor-pointer w-full sm:w-auto justify-center"
+                >
                   <ArrowLeft size={16} /> Back
                 </button>
-                <button type="button" onClick={handleGenerate} disabled={generating} className="btn-primary py-4 px-10 flex items-center justify-center gap-2 bg-court-maroon hover:bg-[#701A75] text-white rounded-xl shadow-md cursor-pointer font-bold w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={handleGenerate}
+                  disabled={generating}
+                  className="btn-primary py-4 px-10 flex items-center justify-center gap-2 bg-court-maroon hover:bg-[#701A75] text-white rounded-xl shadow-md cursor-pointer font-bold w-full sm:w-auto"
+                >
                   {generating ? (
                     <>
                       <Loader2 size={18} className="animate-spin" />
