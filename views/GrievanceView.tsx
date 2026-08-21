@@ -11,8 +11,8 @@ import {
   Building2, 
   ArrowRight, 
   Loader2, 
-  CheckCircle,  // Fixed Lucide import
-  TriangleAlert, // Fixed Lucide import
+  CheckCircle,
+  TriangleAlert,
   ArrowLeft
 } from 'lucide-react';
 import useCaseStore from '@/store/caseStore';
@@ -20,7 +20,8 @@ import { grievanceGenerate } from '@/lib/api';
 
 export default function GrievanceFormView() {
   const router = useRouter();
-  const { caseId, userProblem, formData, setFormData, classifyResult, setDraft, language, setStage } = useCaseStore();
+  // FIXED: Changed `setDraft` to `setGrievanceResult` which actually exists in the store
+  const { caseId, userProblem, formData, setFormData, classifyResult, setGrievanceResult, language, setStage } = useCaseStore();
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,15 +48,17 @@ export default function GrievanceFormView() {
         }
       };
 
+      // Call the API
       const result = await grievanceGenerate(payload);
       
-      setDraft(result.demand_notice_draft || result.draft || "Draft generation successful.");
+      // FIXED: Save the entire generated package using the correct Zustand store function
+      setGrievanceResult(result);
       
       setStage('GRIEVANCE_COMPLETED');
       router.push('/dashboard/grievance/result');
       
     } catch (err: any) {
-      console.error(err);
+      console.error("Grievance Generation Error:", err);
       setError(err?.response?.data?.detail || "Failed to generate grievance. Please try again.");
     } finally {
       setLoading(false);
