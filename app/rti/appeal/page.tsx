@@ -41,18 +41,18 @@ function FirstAppealContent() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 relative z-10">
         <Loader2 className="w-8 h-8 animate-spin text-[#FF9933]" />
-        <p className="text-xs text-slate-400 font-mono">Loading First Appeal appellate data...</p>
+        <p className="text-xs text-slate-500 font-mono">Loading First Appeal appellate data...</p>
       </div>
     );
   }
 
   if (!caseId || !caseData) {
     return (
-      <div className="max-w-md mx-auto my-12 p-6 bg-[#0F172A]/85 backdrop-blur-md border border-white/10 rounded-3xl text-center space-y-3 shadow-2xl relative z-10">
+      <div className="max-w-md mx-auto my-12 p-6 bg-white/95 backdrop-blur-md border border-slate-300 rounded-3xl text-center space-y-3 shadow-xl relative z-10">
         <ShieldAlert className="w-8 h-8 text-rose-500 mx-auto" />
-        <h3 className="text-sm font-extrabold text-white tracking-tight">Case Not Found</h3>
-        <p className="text-xs text-slate-400 font-medium">
-          Please provide a valid <code className="text-slate-300">case_id</code> parameter to generate a First Appeal.
+        <h3 className="text-sm font-extrabold text-ashoka-navy tracking-tight">Case Not Found</h3>
+        <p className="text-xs text-slate-500 font-medium">
+          Please provide a valid <code className="text-slate-600 bg-slate-100 px-1 rounded">case_id</code> parameter to generate a First Appeal.
         </p>
       </div>
     );
@@ -60,22 +60,22 @@ function FirstAppealContent() {
 
   return (
     <main className="max-w-4xl mx-auto py-10 px-4 space-y-6 relative z-10">
-      <div className="flex items-center justify-between border-b border-slate-700/60 pb-4">
+      <div className="flex items-center justify-between border-b border-slate-300 pb-4">
         <div>
-          <span className="text-xs font-mono font-bold text-[#FF9933] uppercase tracking-widest">
+          <span className="text-xs font-mono font-bold text-court-maroon bg-rose-50 px-3 py-1 rounded-full border border-rose-200 uppercase tracking-widest">
             Section 19(1) Appellate Studio
           </span>
-          <h1 className="text-2xl font-extrabold text-white mt-0.5 tracking-tight drop-shadow-md">
+          <h1 className="text-2xl font-extrabold text-ashoka-navy mt-2 tracking-tight drop-shadow-sm">
             First Appeal Generation
           </h1>
         </div>
-        <span className="text-xs font-mono font-bold bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-xl text-slate-300">
+        <span className="text-xs font-mono font-bold bg-white border border-slate-300 px-3 py-1.5 rounded-xl text-slate-600 shadow-sm">
           Case ID: {caseId}
         </span>
       </div>
 
-      <div className="bg-[#0F172A]/85 backdrop-blur-md border border-white/10 rounded-3xl p-6 shadow-2xl space-y-4">
-        <p className="text-xs text-blue-100 leading-relaxed font-medium">
+      <div className="bg-white/95 backdrop-blur-md border border-slate-300 rounded-3xl p-6 shadow-xl space-y-4">
+        <p className="text-xs text-slate-600 leading-relaxed font-medium">
           Since the PIO has failed to provide satisfactory information or has invoked an invalid exemption clause, you are statutorily entitled to file a First Appeal before the First Appellate Authority (FAA) within 30 days.
         </p>
 
@@ -86,8 +86,8 @@ function FirstAppealContent() {
             caseId={caseId}
           />
         ) : (
-          <div className="p-8 text-center bg-[#1E293B]/60 rounded-2xl border border-dashed border-slate-600 space-y-3">
-            <p className="text-xs text-slate-400 font-medium">No appeal draft generated for this case yet.</p>
+          <div className="p-8 text-center bg-[#FAF8F5] rounded-2xl border border-dashed border-slate-300 space-y-3">
+            <p className="text-xs text-slate-500 font-medium">No appeal draft generated for this case yet.</p>
             <button
               onClick={() => setAppealDraft(`BEFORE THE FIRST APPELLATE AUTHORITY\nCase ID: ${caseId}\n\n1. Appellant Details...\n2. Grievance Summary...\n3. Prayer for Relief...`)}
               type="button"
@@ -105,14 +105,14 @@ function FirstAppealContent() {
 export default function FirstAppealPage() {
   return (
     <div 
-      className="min-h-screen flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat relative text-slate-200 font-sans"
+      className="min-h-screen flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat relative text-ashoka-navy font-sans"
       style={{ backgroundImage: "url('/bg.image.png')" }}
     >
       <Suspense
         fallback={
           <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 relative z-10">
             <Loader2 className="w-8 h-8 animate-spin text-[#FF9933]" />
-            <p className="text-xs text-slate-400 font-mono">Loading First Appeal appellate data...</p>
+            <p className="text-xs text-slate-500 font-mono">Loading First Appeal appellate data...</p>
           </div>
         }
       >
