@@ -143,6 +143,11 @@ export default function Landing() {
   const router = useRouter();
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.history.scrollRestoration = "manual";
+      window.scrollTo(0, 0);
+    }
+
     const navigation = performance.getEntriesByType(
       "navigation"
     )[0] as PerformanceNavigationTiming;
@@ -299,6 +304,27 @@ __________________________
         .jn-nav-link:hover::after {
           transform: scaleX(1);
         }
+
+        @keyframes fade-in-up {
+          0% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fade-in-up {
+          opacity: 0;
+          animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
       `}</style>
 
       {/* MAIN */}
@@ -317,7 +343,7 @@ __________________________
             <img
               src="/lady justice.png"
               alt="Indian Lady of Justice"
-              className="h-[460px] 2xl:h-[520px] w-auto object-contain opacity-95 transition-transform duration-500 hover:scale-[1.02]"
+              className="h-[460px] 2xl:h-[520px] w-auto object-contain opacity-95 transition-transform duration-500 hover:scale-[1.02] animate-fade-in-up delay-300"
               style={{
                 filter: "drop-shadow(0 12px 24px rgba(140,90,20,0.22))",
               }}
@@ -325,7 +351,7 @@ __________________________
           </div>
 
           <div className="relative z-10 w-full max-w-4xl mx-auto text-center flex flex-col items-center my-0 py-4">
-            <h1 className="text-5xl sm:text-6xl xl:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.08] max-w-3xl">
+            <h1 className="animate-fade-in-up text-5xl sm:text-6xl xl:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.08] max-w-3xl">
   Claim Your Civic Rights.{" "}
   <span className="relative inline-block text-[#A32A02]">
     Zero Bureaucracy!
@@ -355,13 +381,13 @@ __________________________
   </span>
 </h1>
 
-            <p className="mt-6 text-lg sm:text-xl text-slate-600 max-w-2xl leading-relaxed">
+            <p className="animate-fade-in-up delay-100 mt-6 text-lg sm:text-xl text-slate-600 max-w-2xl leading-relaxed">
               An autonomous, local-first legal engine that helps turn everyday
               civic problems into structured RTI applications, grievance
               routes, and statutory appeals. No legal jargon required.
             </p>
 
-            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4 w-full px-4 sm:px-0">
+            <div className="animate-fade-in-up delay-200 mt-8 flex flex-col sm:flex-row justify-center gap-4 w-full px-4 sm:px-0">
               <button
   onClick={handleStartIntake}
   className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-[#A32A02] hover:bg-[#138808] transition-colors font-bold text-base text-white tracking-tight shadow-md group cursor-pointer"
