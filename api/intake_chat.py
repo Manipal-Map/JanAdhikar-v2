@@ -39,28 +39,17 @@ You must respond ONLY in valid JSON format matching this exact schema:
 """
 
 def extract_json_from_text(text: str) -> dict:
-    """Safely extracts JSON from a string even if it's wrapped in markdown or conversational text."""
     try:
-        # First try direct parse
         return json.loads(text)
     except json.JSONDecodeError:
-        # Try to find JSON block wrapped in triple backticks
         json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
         if json_match:
-            try:
-                return json.loads(json_match.group(1))
-            except json.JSONDecodeError:
-                pass
-        
-        # Try to find anything that looks like a JSON object
+            try: return json.loads(json_match.group(1))
+            except json.JSONDecodeError: pass
         json_match = re.search(r'(\{.*\})', text, re.DOTALL)
         if json_match:
-            try:
-                return json.loads(json_match.group(1))
-            except json.JSONDecodeError:
-                pass
-                
-        # Ultimate fallback if everything fails
+            try: return json.loads(json_match.group(1))
+            except json.JSONDecodeError: pass
         return {
             "assistant_reply": "I am processing your details, but encountered a formatting hiccup. Could you please clarify your city and the main issue again?",
             "is_ready_to_proceed": False,
@@ -84,7 +73,7 @@ def intake_chat(payload: IntakeMessage):
         messages.append({"role": "user", "content": payload.message})
 
         response = client.chat.completions.create(
-            model="llama-3.1-70b-versatile",
+            model="llama-3.1-70b-versatile", 
             messages=messages,
             temperature=0.2,
             response_format={"type": "json_object"}
@@ -93,7 +82,6 @@ def intake_chat(payload: IntakeMessage):
         raw_content = response.choices[0].message.content.strip()
         result = extract_json_from_text(raw_content)
         
-        # Ensure we don't lose previously extracted data
         if payload.current_extracted_data:
             merged_data = {**payload.current_extracted_data, **result.get("extracted_data", {})}
             result["extracted_data"] = merged_data
@@ -102,7 +90,6 @@ def intake_chat(payload: IntakeMessage):
         
     except Exception as e:
         print(f"Intake Chat Exception: {str(e)}")
-        # Instead of crashing with 500, return a graceful fallback response
         return {
             "assistant_reply": "I apologize, our secure legal network experienced a slight delay. Please continue telling me about your problem.",
             "is_ready_to_proceed": False,
