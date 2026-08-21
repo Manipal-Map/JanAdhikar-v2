@@ -134,7 +134,7 @@ export default function IntakeChatView() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 bg-cover bg-center bg-no-repeat relative text-ashoka-navy font-sans"
+      className="min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 bg-cover bg-center bg-no-repeat relative font-sans"
       style={{ backgroundImage: "url('/bg.image.png')" }}
     >
       <div className="w-full max-w-3xl mx-auto flex items-center justify-between py-3 border-b border-slate-300 mb-4 bg-white/95 backdrop-blur-sm px-4 rounded-2xl shadow-sm relative z-10">
@@ -172,7 +172,7 @@ export default function IntakeChatView() {
             className={`flex items-start gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
           >
             <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm border ${
-              msg.role === 'user' ? 'bg-[#A32A02] text-white border-[#A32A02]/50' : 'bg-slate-100 text-slate-600 border-slate-300'
+              msg.role === 'user' ? 'bg-[#A32A02] text-white border-[#A32A02]/50' : 'bg-white text-slate-600 border-slate-300'
             }`}>
               {msg.role === 'user' ? <User size={15} /> : <Bot size={15} />}
             </div>
@@ -188,7 +188,7 @@ export default function IntakeChatView() {
 
         {loading && (
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 border border-slate-300 flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 rounded-full bg-white text-slate-600 border border-slate-300 flex items-center justify-center shadow-sm">
               <Bot size={15} />
             </div>
             <div className="p-4 bg-white/95 backdrop-blur-sm border border-slate-300 rounded-2xl rounded-tl-none text-slate-500 text-sm flex items-center gap-2 shadow-sm font-medium">
@@ -236,7 +236,7 @@ export default function IntakeChatView() {
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="btn-primary cursor-pointer p-3 rounded-xl disabled:opacity-50 bg-[#A32A02] text-white hover:bg-[#138808] transition-colors mb-0.5 shadow-sm"
+            className="btn-primary cursor-pointer p-3 rounded-xl disabled:opacity-50 bg-[#A32A02] text-white hover:bg-[#138808] transition-colors mb-0.5 shadow-md"
           >
             <Send size={16} />
           </button>
