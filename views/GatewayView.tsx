@@ -1,11 +1,11 @@
 'use client';
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Sparkles, ArrowRight, Scale, FileSearch, Loader2, AlertCircle, CheckCircle2, RotateCcw, HelpCircle, Globe, KeyRound, Copy, Download, Lock, RefreshCw, FolderOpen, Check, ArrowLeft } from 'lucide-react'
+import { ArrowRight, Scale, FileSearch, Loader2, CheckCircle2, RotateCcw, HelpCircle, KeyRound, Copy, Download, Lock, RefreshCw, FolderOpen, Check, ArrowLeft, MessageSquare } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import useCaseStore from '@/store/caseStore'
-import { initCase, classifyCase, getCase } from '@/lib/api'
+import { initCase, getCase } from '@/lib/api'
 import CaseIdBadge from '@/components/dashboard/CaseIdBadge'
 import AudioRecorder from '@/components/dashboard/AudioRecorder'
 
@@ -15,14 +15,14 @@ const ROUTE_DESCRIPTIONS = {
     badge: 'Statutory RTI Filing',
     icon: FileSearch,
     description: 'You are requesting official government records, tender documents, inspection reports, or file movements under the RTI Act, 2005.',
-    actionText: 'Proceed to RTI',
+    actionText: 'Proceed to RTI Form & Draft',
   },
   'Rights/Grievance': {
     title: 'Consumer / Administrative Grievance',
     badge: 'Legal Dispute / Relief',
     icon: Scale,
     description: 'You are seeking dispute resolution, refunds, compensation, or action against service deficiency.',
-    actionText: 'Generate Legal Notice',
+    actionText: 'Proceed to Grievance Notice',
   },
   Other: {
     title: 'General or Out of Scope Query',
@@ -38,23 +38,23 @@ export default function GatewayView() {
   const [text, setText] = useState('')
   const [passkey, setPasskey] = useState('')
   const [resumeMode, setResumeMode] = useState(false)
-  const [localErr, setLocalErr] = useState(null)
+  const [localErr, setLocalErr] = useState<string | null>(null)
   
   // Modal State & Agreement Checkbox State
   const [showPasskeyModal, setShowPasskeyModal] = useState(false)
   const [copied, setCopied] = useState(false)
   const [hasAgreed, setHasAgreed] = useState(false)
 
-  const { stage, setStage, caseId, setCaseId, classifyResult, setClassifyResult, setUserProblem, language, setLanguage, hydrateState } = useCaseStore()
+  const { stage, setStage, caseId, setCaseId, classifyResult, setUserProblem, language, hydrateState } = useCaseStore()
 
-  const isProcessing = stage === 'INITIALIZING' || stage === 'CLASSIFYING' || showPasskeyModal
+  const isProcessing = stage === 'INITIALIZING' || showPasskeyModal
   const isClassified = stage === 'CLASSIFIED_CONFIRM' && classifyResult
 
-  // STEP 1: Initialize case and trigger the pop-up modal
+  // STEP 1: Initialize case and trigger the Passkey modal
   const handleStartCase = async () => {
     if (!text.trim() || isProcessing) return
     setLocalErr(null)
-    setHasAgreed(false) // Reset agreement state for the new case
+    setHasAgreed(false)
     try {
       setStage('INITIALIZING')
       const { case_id } = await initCase()
@@ -62,36 +62,30 @@ export default function GatewayView() {
       setUserProblem(text.trim())
       setStage('IDLE')
       setShowPasskeyModal(true)
-    } catch (err) {
+    } catch (err: any) {
       setLocalErr(err?.response?.data?.detail || err.message || 'Something went wrong.')
       setStage('IDLE')
     }
   }
 
-  // STEP 2: Triggered when user clicks "Continue to AI Classification" inside the modal
-  const handleProceedToAI = async () => {
+  // STEP 2: After user saves passkey, route directly to the AI Intake Chat
+  const handleProceedToIntake = () => {
     if (!hasAgreed) return
     setShowPasskeyModal(false)
     setLocalErr(null)
-    try {
-      setStage('CLASSIFYING')
-      const result = await classifyCase(caseId, text.trim(), language)
-      setClassifyResult(result)
-      setStage('CLASSIFIED_CONFIRM')
-    } catch (err) {
-      setLocalErr(err?.response?.data?.detail || err.message || 'Something went wrong during classification.')
-      setStage('IDLE')
-      setShowPasskeyModal(true)
-    }
+    router.push('/dashboard/intake')
   }
 
   const handleCopyId = () => {
-    navigator.clipboard.writeText(caseId)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    if (caseId) {
+      navigator.clipboard.writeText(caseId)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
   }
 
   const handleDownloadTxt = () => {
+    if (!caseId) return
     const element = document.createElement("a")
     const file = new Blob([`JanAdhikar Private Case ID: ${caseId}\nKeep this key safe to resume your case anytime.`], {type: 'text/plain'})
     element.href = URL.createObjectURL(file)
@@ -142,7 +136,7 @@ export default function GatewayView() {
     }
   }
 
-  const currentRouteMeta = classifyResult ? (ROUTE_DESCRIPTIONS[classifyResult.route] || ROUTE_DESCRIPTIONS.Other) : null
+  const currentRouteMeta = classifyResult ? (ROUTE_DESCRIPTIONS[classifyResult.route as keyof typeof ROUTE_DESCRIPTIONS] || ROUTE_DESCRIPTIONS.Other) : null
   const RouteIcon = currentRouteMeta?.icon || FileSearch
 
   return (
@@ -180,14 +174,14 @@ export default function GatewayView() {
               
               <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-semibold mb-4 shadow-sm">
                 <KeyRound size={13} />
-                <span>Case Registered Locally</span>
+                <span>Case Passkey Created</span>
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-extrabold text-ashoka-navy mb-2 tracking-tight">
                 Save Your Private Case ID
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 mb-6 max-w-sm mx-auto">
-                Save this 10-character code before we identify your route. You will need it to reopen your case anytime without an account.
+                Save this key before we open the AI Intake conversation. You will need it to reopen your case anytime without an account.
               </p>
 
               <div className="bg-slate-50/70 border border-[#b8c2cc]/60 rounded-2xl p-6 shadow-inner mb-5">
@@ -225,12 +219,11 @@ export default function GatewayView() {
                 <div>
                   <h4 className="text-[11px] font-bold text-slate-900 uppercase tracking-wide mb-0.5">Zero-Account Privacy:</h4>
                   <p className="text-[11px] text-slate-500 leading-relaxed">
-                    Take a quick screenshot or write it down. Your case is encrypted in this browser and never linked to your phone number or email.
+                    Take a quick screenshot or write it down. Your case is stored locally and never linked to your phone number or email.
                   </p>
                 </div>
               </div>
 
-              {/* --- UPDATED PASSKEY AGREEMENT CHECKBOX --- */}
               <div className="flex items-start gap-2.5 mb-5 bg-[#FAF8F5] p-3.5 rounded-2xl border border-slate-200 text-left">
                 <input
                   type="checkbox"
@@ -240,35 +233,29 @@ export default function GatewayView() {
                   className="mt-0.5 w-4 h-4 text-court-maroon border-slate-300 rounded focus:ring-court-maroon cursor-pointer flex-shrink-0"
                 />
                 <label htmlFor="modal-agreement" className="text-xs text-slate-700 font-medium cursor-pointer leading-relaxed select-none">
-                  I acknowledge that this <strong className="text-ashoka-navy">Passkey is solely responsible for retrieving my case data</strong> later, and I confirm I have safely saved or copied it.
+                  I acknowledge that this <strong className="text-ashoka-navy">Passkey is solely responsible for retrieving my case data</strong>, and I confirm I have safely saved it.
                 </label>
               </div>
 
               {localErr && <div className="p-3 bg-red-50 text-red-700 text-xs rounded-xl mb-4 text-left">{localErr}</div>}
 
               <button 
-                onClick={handleProceedToAI} 
-                disabled={stage === 'CLASSIFYING' || !hasAgreed}
-                className="btn-primary w-full justify-center text-sm py-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleProceedToIntake} 
+                disabled={!hasAgreed}
+                className="btn-primary w-full justify-center text-sm py-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-court-maroon hover:bg-[#701A75] text-white flex items-center gap-2"
               >
-                {stage === 'CLASSIFYING' ? <><Loader2 size={16} className="animate-spin" /> Analyzing Legal Route...</> : <><span>Please Proceed!</span><ArrowRight size={16} /></>}
+                <span>Continue to AI Intake Assistant</span>
+                <ArrowRight size={16} />
               </button>
-
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-      {/* ──────────────────────────────────── */}
 
+      {/* ── MAIN CONTAINER / ROUTE CLASSIFICATION CONFIRMATION ── */}
       <AnimatePresence mode="wait">
-        {stage === 'CLASSIFYING' ? (
-          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12 z-10">
-            <Loader2 size={40} className="animate-spin text-court-maroon mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-ashoka-navy">Hang on while we look at your case...</h2>
-          </motion.div>
-        ) : isClassified ? (
-          
-          /* --- ROUTE CONFIRMATION SCREEN --- */
+        {isClassified ? (
+          /* --- ROUTE CONFIRMATION SCREEN (Shown after AI Intake completes) --- */
           <motion.div key="confirm-screen" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-card p-8 shadow-xl border border-slate-200 max-w-xl w-full z-10">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-2xl bg-court-maroon/10 text-court-maroon flex items-center justify-center flex-shrink-0">
@@ -279,27 +266,36 @@ export default function GatewayView() {
                 <h2 className="text-xl font-extrabold text-ashoka-navy mt-1">{currentRouteMeta?.title}</h2>
               </div>
             </div>
-            <div className="bg-[#FAF8F5] p-5 rounded-xl border border-slate-200 mb-6 space-y-3">
+            
+            <div className="bg-[#FAF8F5] p-5 rounded-xl border border-slate-200 mb-6 space-y-3 text-left">
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Why this route?</h4>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">AI Legal Assessment & Summary</h4>
                 <p className="text-sm text-ashoka-navy mt-1 font-medium leading-relaxed">{classifyResult.reasoning}</p>
               </div>
+              {classifyResult.sub_category && (
+                <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
+                  <span className="text-slate-500 font-semibold">Sub-Category:</span>
+                  <span className="font-mono font-bold text-court-maroon">{classifyResult.sub_category}</span>
+                </div>
+              )}
             </div>
+
             <div className="flex flex-col sm:flex-row gap-3">
-              <button onClick={handleConfirmRoute} className="btn-primary flex-1 justify-center py-3 cursor-pointer">
-                <CheckCircle2 size={16} />{currentRouteMeta?.actionText}
+              <button onClick={handleConfirmRoute} className="btn-primary flex-1 justify-center py-3.5 cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white">
+                <CheckCircle2 size={16} />
+                <span>{currentRouteMeta?.actionText}</span>
               </button>
-              <button onClick={() => setStage('IDLE')} className="btn-ghost flex-initial justify-center py-3 border border-slate-200 cursor-pointer">
-                <RotateCcw size={15} /> Rephrase Problem
+              <button onClick={() => router.push('/dashboard/intake')} className="btn-ghost flex-initial justify-center py-3.5 border border-slate-300 cursor-pointer">
+                <MessageSquare size={15} /> 
+                <span>Back to Chat</span>
               </button>
             </div>
           </motion.div>
         ) : !resumeMode ? (
-          
           /* --- MAIN INPUT SCREEN --- */
           <motion.div key="main" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-2xl text-center z-10">
             <h1 className="text-4xl sm:text-5xl font-extrabold text-ashoka-navy mb-3 tracking-tight">What is your problem?</h1>
-            <p className="text-lg text-slate-500 mb-8">Write it in your own words. Our AI will figure out the rest.</p>
+            <p className="text-lg text-slate-500 mb-8">Write it in your own words. Our AI assistant will guide you step by step.</p>
             
             <div className="bg-white border border-[#b8c2cc] rounded-3xl shadow-sm mb-6 text-left">
               <textarea
@@ -307,7 +303,7 @@ export default function GatewayView() {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 disabled={stage === 'INITIALIZING'}
-                placeholder="e.g. My pension has not come for 3 months. My landlord refuses to return my deposit..."
+                placeholder="e.g. My pension has not come for 3 months. My landlord refuses to return my deposit. The road in our ward is uncarpeted..."
                 className="w-full bg-transparent p-6 text-lg text-ashoka-navy placeholder-slate-400 focus:outline-none resize-none rounded-t-3xl"
               />
               <div className="flex items-center justify-between px-6 pb-5">
@@ -318,17 +314,20 @@ export default function GatewayView() {
 
             {localErr && <div className="p-3 bg-red-50 text-red-700 text-sm rounded-xl mb-4 text-left">{localErr}</div>}
 
-            <button onClick={handleStartCase} disabled={!text.trim() || stage === 'INITIALIZING'} className="btn-primary w-full justify-center text-lg py-4 cursor-pointer">
-              {stage === 'INITIALIZING' ? <><Loader2 className="animate-spin" /> Generating Your Case ID...</> : <>Analyse my problem <ArrowRight size={20} /></>}
+            <button 
+              onClick={handleStartCase} 
+              disabled={!text.trim() || stage === 'INITIALIZING'} 
+              className="btn-primary w-full justify-center text-lg py-4 cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white flex items-center gap-2"
+            >
+              {stage === 'INITIALIZING' ? <><Loader2 className="animate-spin" /> Generating Your Case ID...</> : <>Start Intake &amp; Analysis <ArrowRight size={20} /></>}
             </button>
 
             <div className="mt-8 flex items-center justify-between px-2">
-              <button onClick={() => setResumeMode(true)} className="text-court-maroon font-semibold text-sm hover:underline cursor-pointer">Resume your case</button>
+              <button onClick={() => setResumeMode(true)} className="text-court-maroon font-semibold text-sm hover:underline cursor-pointer">Resume existing case</button>
               <button onClick={() => window.location.reload()} className="text-slate-500 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy cursor-pointer"><RefreshCw size={14}/> Reset Demos</button>
             </div>
           </motion.div>
         ) : (
-          
           /* --- RESUME CASE SCREEN --- */
           <motion.div key="resume" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="w-full max-w-lg bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center z-10">
             <div className="w-14 h-14 bg-rose-50 text-court-maroon rounded-2xl flex items-center justify-center mx-auto mb-6 border border-rose-100">
@@ -341,19 +340,19 @@ export default function GatewayView() {
               type="text" 
               value={passkey} 
               onChange={(e) => setPasskey(e.target.value.toUpperCase())}
-              placeholder="E.G. JA-26-8F4K2"
+              placeholder="E.G. CR-88FA-992B"
               className="w-full text-center bg-slate-50 border border-slate-200 rounded-xl p-4 text-lg font-mono tracking-widest uppercase mb-6 placeholder:text-slate-300 focus:ring-2 focus:ring-court-maroon/20 focus:border-court-maroon"
             />
             
             {localErr && <div className="p-3 bg-red-50 text-red-700 text-sm rounded-xl mb-4 text-left">{localErr}</div>}
 
-            <button onClick={handleResume} disabled={!passkey.trim() || stage === 'INITIALIZING'} className="btn-primary w-full justify-center text-lg py-4 mb-8 shadow-lg cursor-pointer">
+            <button onClick={handleResume} disabled={!passkey.trim() || stage === 'INITIALIZING'} className="btn-primary w-full justify-center text-lg py-4 mb-8 shadow-lg cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white">
               {stage === 'INITIALIZING' ? <Loader2 className="animate-spin" /> : <>Open case <ArrowRight size={20} /></>}
             </button>
             
             <div className="flex items-center justify-between border-t border-slate-100 pt-6">
               <button onClick={() => setResumeMode(false)} className="text-court-maroon font-semibold text-sm hover:underline cursor-pointer">Start a new case instead</button>
-              <button onClick={() => window.location.reload()} className="text-slate-500 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy cursor-pointer"><RefreshCw size={14}/> Reset Demos</button>
+              <button onClick={() => window.location.reload()} className="text-slate-500 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy cursor-pointer"><RefreshCw size={14}/> Reset</button>
             </div>
           </motion.div>
         )}
