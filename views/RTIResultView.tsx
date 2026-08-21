@@ -270,21 +270,18 @@ export default function RTIResultView() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-2">
+              <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-slate-200 mt-6 gap-3">
                 <button
                   onClick={() => setSubStep(1)}
-                  className="btn-ghost text-sm cursor-pointer"
+                  className="btn-ghost text-sm cursor-pointer w-full sm:w-auto justify-center"
                 >
                   <ArrowLeft size={16} /> Back to Risk Analysis
                 </button>
                 <button
-                  onClick={() => {
-                    setStage('IDLE');
-                    router.push('/');
-                  }}
-                  className="btn-ghost text-sm border-slate-300 cursor-pointer"
+                  onClick={() => router.push(`/dashboard/track?case_id=${caseId}`)}
+                  className="btn-primary text-sm py-3.5 px-6 cursor-pointer w-full sm:w-auto justify-center bg-ashoka-navy hover:bg-slate-800 border-none shadow-md"
                 >
-                  Start New Case (Home)
+                  Track SLA & Appeals <ArrowRight size={16} />
                 </button>
               </div>
             </div>
