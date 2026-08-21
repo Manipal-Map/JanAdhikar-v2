@@ -59,19 +59,19 @@ class CaseManager:
     def get_case(self, case_id: str) -> Optional[Dict[str, Any]]:
         if not case_id:
             return None
+        clean_id = case_id.strip().upper()
 
         if self.use_supabase:
             try:
-                response = self.supabase.table("cases").select("data").eq("id", case_id).execute()
+                response = self.supabase.table("cases").select("data").eq("id", clean_id).execute()
                 if response.data and len(response.data) > 0:
                     return response.data[0]["data"]
-                return None  # Strictly return None if case is not present in Supabase
+                return None  
             except Exception as e:
-                logger.error(f"Supabase SELECT Error for case {case_id}: {e}")
+                logger.error(f"Supabase SELECT Error for case {clean_id}: {e}")
                 raise RuntimeError(f"Database read failure: {e}") from e
 
-        return self._memory_cases.get(case_id)
-
+        return self._memory_cases.get(clean_id)
     def update_case(self, case_id: str, updates: Dict[str, Any]) -> None:
         if not case_id:
             return
