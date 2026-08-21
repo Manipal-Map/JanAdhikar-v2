@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { getCase, analyzePio } from '@/lib/api';
 
 interface CaseMetrics {
   case_id: string;
@@ -34,14 +35,13 @@ export default function TrackPage() {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
 
-  const fetchCase = async (id: string) => {
+  const fetchCaseDetails = async (id: string) => {
     if (!id.trim()) return;
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/case?case_id=${encodeURIComponent(id)}`);
-      if (!res.ok) throw new Error('Case not found');
-      const data = await res.json();
+      const data = await getCase(id);
+      if (!data) throw new Error('Case not found');
       setCaseData(data);
       if (data.pio_response_text) {
         setPioInputText(data.pio_response_text);
@@ -56,28 +56,26 @@ export default function TrackPage() {
 
   useEffect(() => {
     if (caseIdParam) {
-      fetchCase(caseIdParam);
+      fetchCaseDetails(caseIdParam);
     }
   }, [caseIdParam]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchCase(inputCaseId);
+    fetchCaseDetails(inputCaseId);
   };
 
   const handleAnalyzePIO = async (overrideText?: string) => {
     const textToAnalyze = overrideText !== undefined ? overrideText : pioInputText;
+    const currentCaseId = caseData?.case_id || inputCaseId;
+    if (!currentCaseId) return;
+
     setAnalyzing(true);
     try {
-      const res = await fetch('/api/analyze_pio', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ case_id: caseData?.case_id || inputCaseId, pio_text: textToAnalyze }),
-      });
-      const data = await res.json();
+      const data = await analyzePio(currentCaseId, textToAnalyze);
       setAnalysisResult(data);
       // Refresh case metrics
-      fetchCase(caseData?.case_id || inputCaseId);
+      await fetchCaseDetails(currentCaseId);
     } catch (err) {
       console.error('PIO Analysis Error:', err);
     } finally {
@@ -111,7 +109,7 @@ export default function TrackPage() {
             <button
               type="submit"
               disabled={loading}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm px-4 py-2 rounded-lg transition"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm px-4 py-2 rounded-lg transition cursor-pointer disabled:opacity-50"
             >
               {loading ? 'Fetching...' : 'Track'}
             </button>
@@ -134,10 +132,10 @@ export default function TrackPage() {
                   Current Case Status
                 </span>
                 <div className="text-xl font-bold text-emerald-400">
-                  {caseData.computed_status.replace(/_/g, ' ')}
+                  {caseData.computed_status?.replace(/_/g, ' ') || 'Active'}
                 </div>
                 <p className="text-xs text-slate-400">
-                  Filed on: {new Date(caseData.filing_date).toLocaleDateString()}
+                  Filed on: {caseData.filing_date ? new Date(caseData.filing_date).toLocaleDateString() : 'N/A'}
                 </p>
               </div>
 
@@ -151,7 +149,7 @@ export default function TrackPage() {
                     <span className="text-rose-400">Overdue by {caseData.days_overdue} Day(s)</span>
                   ) : (
                     <span className="text-amber-400">
-                      Due: {new Date(caseData.response_due_date).toLocaleDateString()}
+                      Due: {caseData.response_due_date ? new Date(caseData.response_due_date).toLocaleDateString() : 'N/A'}
                     </span>
                   )}
                 </div>
@@ -161,21 +159,21 @@ export default function TrackPage() {
               {/* Section 20 Penalty Box */}
               <div
                 className={`border rounded-xl p-5 space-y-2 ${
-                  caseData.section_20_penalty_inr > 0
+                  (caseData.section_20_penalty_inr || 0) > 0
                     ? 'bg-rose-950/30 border-rose-800/80'
                     : 'bg-slate-900/80 border-slate-800'
                 }`}
               >
                 <span className="text-xs font-semibold uppercase text-rose-400 tracking-wider flex items-center justify-between">
                   Section 20 Penalty Accrued
-                  {caseData.section_20_penalty_inr > 0 && (
+                  {(caseData.section_20_penalty_inr || 0) > 0 && (
                     <span className="text-[10px] bg-rose-900/80 text-rose-200 px-2 py-0.5 rounded-full">
                       ₹250 / Day
                     </span>
                   )}
                 </span>
                 <div className="text-2xl font-black text-rose-300">
-                  ₹{caseData.section_20_penalty_inr.toLocaleString('en-IN')}
+                  ₹{(caseData.section_20_penalty_inr || 0).toLocaleString('en-IN')}
                 </div>
                 <p className="text-xs text-slate-400">
                   Personal statutory liability owed by the PIO
@@ -198,7 +196,7 @@ export default function TrackPage() {
                     setPioInputText('');
                     handleAnalyzePIO('');
                   }}
-                  className="bg-amber-900/40 hover:bg-amber-900/60 border border-amber-700/50 text-amber-300 text-xs px-3 py-2 rounded-lg transition self-start sm:self-auto"
+                  className="bg-amber-900/40 hover:bg-amber-900/60 border border-amber-700/50 text-amber-300 text-xs px-3 py-2 rounded-lg transition self-start sm:self-auto cursor-pointer"
                 >
                   ⚡ Mark Deemed Refusal (No Reply)
                 </button>
@@ -218,9 +216,9 @@ export default function TrackPage() {
                     type="button"
                     onClick={() => handleAnalyzePIO()}
                     disabled={analyzing}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition flex items-center gap-2"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
                   >
-                    {analyzing ? 'Analyzing with Groq...' : '🔍 Analyze PIO Reply'}
+                    {analyzing ? 'Analyzing with AI...' : '🔍 Analyze PIO Reply'}
                   </button>
                 </div>
               </div>
@@ -248,7 +246,7 @@ export default function TrackPage() {
 
                   <div className="pt-2 flex justify-end">
                     <Link
-                      href={`/dashboard/rti/result?case_id=${caseData.case_id}&mode=appeal`}
+                      href={`/rti/result?case_id=${caseData.case_id}&mode=appeal`}
                       className="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs px-5 py-2.5 rounded-lg transition"
                     >
                       📄 Generate First Appeal Document (Sec 19(1))
