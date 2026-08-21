@@ -14,8 +14,8 @@ import {
   Gavel,
   HardDrive,
   FileCheck,
-  TriangleAlert, // Replaced AlertTriangle
-  CircleX,       // Replaced XCircle
+  TriangleAlert,
+  CircleX,
   Copy,
   Check,
   BookOpen,
@@ -27,7 +27,7 @@ import {
   X,
   Printer,
   Download,
-  CheckCircle,   // Replaced CheckCircle2
+  CheckCircle,
 } from "lucide-react";
 
 interface ConsolePreset {
@@ -347,14 +347,21 @@ __________________________
               routes, and statutory appeals. No legal jargon required.
             </p>
 
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
               <button
                 onClick={handleStartIntake}
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-xl btn-maroon-solid font-bold text-base tracking-tight shadow-md group cursor-pointer"
+                className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl btn-maroon-solid font-bold text-base tracking-tight shadow-md group cursor-pointer"
               >
                 <Gavel className="w-5 h-5 text-amber-200 shrink-0" />
                 <span>Launch Janअधिकार</span>
                 <ChevronRight className="w-5 h-5 text-slate-200 group-hover:translate-x-0.5 transition-transform shrink-0" />
+              </button>
+              <button
+                onClick={() => router.push('/dashboard/track')}
+                className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-white text-ashoka-navy border border-slate-200 font-bold text-base tracking-tight shadow-sm hover:bg-slate-50 transition cursor-pointer"
+              >
+                <Activity className="w-5 h-5 text-emerald-600 shrink-0" />
+                <span>Track Filed Case</span>
               </button>
             </div>
           </div>
