@@ -77,29 +77,29 @@ export default function RTIIntakePage() {
 
   return (
     <main 
-      className="min-h-screen py-12 px-4 sm:px-6 flex items-center justify-center bg-cover bg-center bg-no-repeat relative text-slate-200"
+      className="min-h-screen py-12 px-4 sm:px-6 flex items-center justify-center bg-cover bg-center bg-no-repeat relative text-ashoka-navy font-sans tracking-tight"
       style={{ backgroundImage: "url('/bg.image.png')" }}
     >
       <div className="max-w-2xl w-full space-y-6 relative z-10">
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center p-3 bg-slate-800 text-white rounded-2xl mb-2 shadow-sm border border-slate-700">
+          <div className="inline-flex items-center justify-center p-3 bg-white/95 text-court-maroon rounded-2xl mb-2 shadow-sm border border-slate-300">
             <FileText size={24} />
           </div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight drop-shadow-md">File an RTI Application</h1>
-          <p className="text-xs text-blue-100 font-medium drop-shadow-sm">
+          <h1 className="text-2xl font-extrabold text-ashoka-navy drop-shadow-sm tracking-tight">File an RTI Application</h1>
+          <p className="text-xs text-slate-600 font-medium drop-shadow-sm">
             Describe your grievance or information request below, or use voice input.
           </p>
         </div>
 
-        <div className="bg-[#0F172A]/85 backdrop-blur-md border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-4">
+        <div className="bg-white/95 backdrop-blur-sm border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-xl space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-ashoka-navy uppercase tracking-wider mb-2">
               Select Language
             </label>
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="w-full p-3 text-xs bg-[#1E293B]/60 border border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FF9933] text-white font-medium"
+              className="w-full p-3 text-xs bg-[#FAF8F5] border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FF9933] text-ashoka-navy font-medium"
             >
               <option value="en">English</option>
               <option value="hi">Hindi (हिन्दी)</option>
@@ -107,7 +107,7 @@ export default function RTIIntakePage() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-ashoka-navy uppercase tracking-wider mb-2">
               Describe Your Issue / Information Request
             </label>
             <textarea
@@ -115,7 +115,7 @@ export default function RTIIntakePage() {
               onChange={(e) => setProblemText(e.target.value)}
               placeholder="E.G., I applied for my passport 3 months ago at the regional office, but haven't received any updates..."
               rows={6}
-              className="w-full p-4 text-xs font-mono bg-[#1E293B]/60 border border-slate-600 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#FF9933] leading-relaxed text-white placeholder-slate-500"
+              className="w-full p-4 text-xs font-mono bg-[#FAF8F5] border border-slate-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#FF9933] leading-relaxed text-ashoka-navy placeholder-slate-400"
             />
           </div>
 
@@ -124,7 +124,7 @@ export default function RTIIntakePage() {
               onClick={() => handleSubmit(problemText)}
               disabled={loading || !problemText.trim()}
               type="button"
-              className="flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold text-white bg-[#A32A02] hover:bg-[#138808] transition-colors rounded-xl shadow-sm disabled:opacity-50 cursor-pointer"
+              className="flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold text-white bg-[#A32A02] hover:bg-[#138808] transition-colors rounded-xl shadow-md disabled:opacity-50 cursor-pointer tracking-tight font-sans"
             >
               {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
               {loading ? 'Processing Application...' : 'Generate RTI Application'}
@@ -134,10 +134,10 @@ export default function RTIIntakePage() {
               onClick={recording ? stopRecording : startRecording}
               disabled={loading}
               type="button"
-              className={`flex items-center justify-center px-4 py-3 text-xs font-semibold rounded-xl border transition-colors cursor-pointer ${
+              className={`flex items-center justify-center px-4 py-3 text-xs font-bold rounded-xl border transition-colors cursor-pointer tracking-tight font-sans ${
                 recording
-                  ? 'bg-rose-950/30 text-rose-400 border-rose-900/50 animate-pulse'
-                  : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                  ? 'bg-rose-50 text-court-maroon border-rose-200 animate-pulse'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
               }`}
             >
               <Mic size={16} />
