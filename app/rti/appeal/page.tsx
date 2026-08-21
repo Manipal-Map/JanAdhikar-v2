@@ -1,18 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { Loader2, ShieldAlert, FileText, Download } from 'lucide-react';
-import { getCase, downloadGenericPdf, triggerBlobDownload } from '@/lib/api';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Loader2, ShieldAlert } from 'lucide-react';
+import { getCase } from '@/lib/api';
 import DraftViewer from '@/components/dashboard/DraftViewer';
 
-export default function FirstAppealPage() {
+function FirstAppealContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const caseId = searchParams.get('case_id');
 
   const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
   const [caseData, setCaseData] = useState<any>(null);
   const [appealDraft, setAppealDraft] = useState<string>('');
 
@@ -101,5 +99,20 @@ export default function FirstAppealPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function FirstAppealPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-rose-600" />
+          <p className="text-xs text-slate-500 font-mono">Loading First Appeal appellate data...</p>
+        </div>
+      }
+    >
+      <FirstAppealContent />
+    </Suspense>
   );
 }
