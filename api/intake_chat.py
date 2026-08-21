@@ -84,7 +84,7 @@ def intake_chat(payload: IntakeMessage):
         messages.append({"role": "user", "content": payload.message})
 
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="llama-3.1-70b-versatile",
             messages=messages,
             temperature=0.2,
             response_format={"type": "json_object"}
