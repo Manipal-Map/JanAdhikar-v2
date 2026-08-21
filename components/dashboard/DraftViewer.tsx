@@ -1,8 +1,9 @@
 'use client';
+
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Copy, Download, CheckCheck, FileText, Printer, Loader2 } from 'lucide-react'
-import { downloadGenericPdf } from '@/lib/api'
+import { downloadGenericPdf, downloadRtiPdf } from '@/lib/api'
 
 export default function DraftViewer({ title = 'Generated Document', draft, caseId }) {
   const [copied, setCopied] = useState(false)
@@ -19,7 +20,14 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
   const handleDownloadPdf = async () => {
     setDownloading(true)
     try {
-      const blob = await downloadGenericPdf(title, draft)
+      // Priority 1: Fetch structured backend RTI PDF if caseId exists
+      // Priority 2: Fallback to generic PDF generation using title + draft
+      let blob;
+      if (caseId) {
+        blob = await downloadRtiPdf(caseId)
+      } else {
+        blob = await downloadGenericPdf(title, draft)
+      }
       
       // BYPASS TRICK: Changing 'application/pdf' to 'application/octet-stream'
       // forces a silent background download. Chrome won't try to open it in a 
@@ -29,7 +37,7 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
       
       const link = document.createElement('a')
       link.href = url
-      link.download = `${caseId || 'Legal_Notice'}.pdf`
+      link.download = `${caseId ? `RTI_Application_${caseId}` : 'Legal_Notice'}.pdf`
       document.body.appendChild(link)
       link.click()
       
