@@ -6,8 +6,6 @@ import { useRouter } from 'next/navigation'
 import useCaseStore from '@/store/caseStore'
 import { rtiGenerate, resolveDepartment } from '@/lib/api'
 
-// We define a strict, clean schema. 
-// The AI backend will now infer all technical legal questions/clauses automatically.
 const INTAKE_FIELDS = [
   { key: 'applicant_name', label: 'Full Name', placeholder: 'Enter your full name' },
   { key: 'applicant_address', label: 'Permanent Address', placeholder: 'Enter your complete address' },
@@ -47,8 +45,6 @@ export default function RTIView() {
     setLoading(true)
     try {
       setFormData(localForm)
-      // The AI will generate the RTI questions/clauses based on the 'user_problem' 
-      // already stored in the backend from the GatewayView.
       const res = await rtiGenerate(caseId, localForm)
       setRtiDraft(res.initial_draft)
       setStage('PREDICTING')
@@ -61,11 +57,14 @@ export default function RTIView() {
   }
 
   return (
-    <div className="gradient-bg min-h-screen flex flex-col items-center justify-center p-4 py-12">
-      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl">
+    <div 
+      className="min-h-screen flex flex-col items-center justify-center p-4 py-12 bg-cover bg-center bg-no-repeat relative"
+      style={{ backgroundImage: "url('/bg.image.png')" }}
+    >
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl relative z-10">
         
         <div className="mb-3">
-          <span className="text-xs font-bold uppercase tracking-widest text-court-maroon bg-court-maroon/10 px-3 py-1 rounded-full border border-court-maroon/20">
+          <span className="text-xs font-bold uppercase tracking-widest text-court-maroon bg-court-maroon/10 px-3 py-1 rounded-full border border-court-maroon/25">
             STEP 2 · Applicant Details
           </span>
         </div>
@@ -73,11 +72,11 @@ export default function RTIView() {
         <h1 className="text-3xl sm:text-4xl font-extrabold text-ashoka-navy mb-2 tracking-tight">
           Who is filing this RTI?
         </h1>
-        <p className="text-slate-500 mb-8">
+        <p className="text-slate-600 mb-8 font-medium">
           Enter your contact details below. Our AI will automatically construct the RTI questions and statutory application clauses.
         </p>
 
-        <form onSubmit={handleSubmit} className="bg-white border border-[#b8c2cc] rounded-3xl p-8 shadow-sm space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-xs border border-slate-300 rounded-3xl p-8 shadow-md space-y-6">
           {INTAKE_FIELDS.map((field) => (
             <div key={field.key} className="space-y-2 text-left">
               <label className="block text-xs font-bold text-ashoka-navy uppercase tracking-wider">
@@ -95,17 +94,17 @@ export default function RTIView() {
           ))}
 
           {resolvingDept && (
-            <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div className="flex items-center gap-2 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-200 font-medium">
               <Loader2 size={14} className="animate-spin text-court-maroon" />
               <span>AI is auto-filling jurisdictional details for your RTI...</span>
             </div>
           )}
 
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-            <button type="button" onClick={() => { setStage('IDLE'); router.push('/dashboard'); }} className="btn-ghost text-sm cursor-pointer">
+          <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+            <button type="button" onClick={() => { setStage('IDLE'); router.push('/dashboard'); }} className="btn-ghost text-sm cursor-pointer bg-white border border-slate-300">
               <ArrowLeft size={16} /> Back
             </button>
-            <button type="submit" disabled={loading || resolvingDept} className="btn-primary text-base py-3 px-8 cursor-pointer">
+            <button type="submit" disabled={loading || resolvingDept} className="btn-primary text-base py-3 px-8 cursor-pointer bg-[#A32A02] hover:bg-[#138808] transition-colors text-white font-bold rounded-xl shadow-md">
               {loading ? <><Loader2 size={18} className="animate-spin" /> Drafting...</> : <>Generate Application <ArrowRight size={18} /></>}
             </button>
           </div>
