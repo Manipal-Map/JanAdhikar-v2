@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import Navbar from "./Navbar"; // Imported Navbar here
 import {
     Scale,
@@ -139,6 +140,7 @@ const CONSOLE_PRESETS: ConsolePreset[] = [
 ];
 
 export default function Landing() {
+    const router = useRouter();
     const [selectedPresetId, setSelectedPresetId] = useState<string>("road");
     const [inputText, setInputText] = useState<string>(
         CONSOLE_PRESETS[0].citizenInput
@@ -153,6 +155,10 @@ export default function Landing() {
     const handleSelectPreset = (p: ConsolePreset) => {
         setSelectedPresetId(p.id);
         setInputText(p.citizenInput);
+    };
+
+    const handleStartIntake = () => {
+        router.push("/dashboard");
     };
 
     const getFullPetitionText = () => {
@@ -348,8 +354,8 @@ __________________________
                         </p>
 
                         <div className="mt-8 flex justify-center">
-                            <a
-                                href="#transmuter-console"
+                            <button
+                                onClick={handleStartIntake}
                                 className="inline-flex items-center gap-3 px-8 py-4 rounded-xl btn-maroon-solid font-bold text-base tracking-tight shadow-md group cursor-pointer"
                             >
                                 <Gavel className="w-5 h-5 text-amber-200 shrink-0" />
@@ -357,7 +363,7 @@ __________________________
                                 <span>Launch Legal AI Copilot</span>
 
                                 <ChevronRight className="w-5 h-5 text-slate-200 group-hover:translate-x-0.5 transition-transform shrink-0" />
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </section>
@@ -898,12 +904,12 @@ __________________________
                                     Why Jan Adhikar
                                 </a>
 
-                                <a
-                                    href="#transmuter-console"
-                                    className="hover:text-white transition-colors"
+                                <button
+                                    onClick={handleStartIntake}
+                                    className="text-left hover:text-white transition-colors cursor-pointer"
                                 >
                                     Legal Analysis
-                                </a>
+                                </button>
 
                                 <a
                                     href="#the-law"
