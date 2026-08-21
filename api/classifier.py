@@ -24,7 +24,8 @@ class RouteClassifier:
                 "sub_category": "Irrelevant",
                 "confidence": 0.95,
                 "reasoning": "The provided input is too short or unstructured.",
-                "form_schema": []
+                "form_schema": [],
+                "extracted_data": {}
             }
 
         rti_terms = ["rti", "tender", "inspection", "records", "sanction order", "copy of", "budget"]
@@ -34,16 +35,16 @@ class RouteClassifier:
         grievance_score = sum(1 for term in grievance_terms if term in lower)
 
         if rti_score == 0 and grievance_score == 0:
-            return {"route": "Other", "sub_category": "General Query", "confidence": 0.80, "reasoning": "No civic keywords.", "form_schema": []}
+            return {"route": "Other", "sub_category": "General Query", "confidence": 0.80, "reasoning": "No civic keywords.", "form_schema": [], "extracted_data": {}}
 
         if rti_score >= grievance_score:
-            return {"route": "RTI", "sub_category": "Public Records", "confidence": 0.88, "reasoning": "Seeking official records.", "form_schema": DYNAMIC_FORM_SCHEMAS.get("RTI", [])}
+            return {"route": "RTI", "sub_category": "Public Records", "confidence": 0.88, "reasoning": "Seeking official records.", "form_schema": DYNAMIC_FORM_SCHEMAS.get("RTI", []), "extracted_data": {}}
         else:
-            return {"route": "Rights/Grievance", "sub_category": "Grievance", "confidence": 0.85, "reasoning": "Seeking dispute resolution.", "form_schema": DYNAMIC_FORM_SCHEMAS.get("Rights/Grievance", [])}
+            return {"route": "Rights/Grievance", "sub_category": "Grievance", "confidence": 0.85, "reasoning": "Seeking dispute resolution.", "form_schema": DYNAMIC_FORM_SCHEMAS.get("Rights/Grievance", []), "extracted_data": {}}
 
     def classify(self, user_text: str, language: str = "English") -> Dict[str, Any]:
         if not user_text or not user_text.strip():
-            return {"route": "Other", "sub_category": "Empty", "confidence": 1.0, "reasoning": "No text provided.", "form_schema": []}
+            return {"route": "Other", "sub_category": "Empty", "confidence": 1.0, "reasoning": "No text provided.", "form_schema": [], "extracted_data": {}}
 
         if self.client:
             try:
@@ -71,6 +72,7 @@ class RouteClassifier:
                 if route not in ["RTI", "Rights/Grievance", "Other"]: route = "Other"
                 result["route"] = route
                 result["form_schema"] = DYNAMIC_FORM_SCHEMAS.get(route, [])
+                result["extracted_data"] = result.get("extracted_data", {})
                 return result
             except Exception as e:
                 print(f"[Classifier Fallback] API failed ({e}).")
