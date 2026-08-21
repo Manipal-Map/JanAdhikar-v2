@@ -246,9 +246,16 @@ export default function GatewayView() {
               {stage === 'INITIALIZING' ? <><Loader2 className="animate-spin" /> Generating Your Case ID...</> : <>Start Analysis &amp; Form Fill <ArrowRight size={20} /></>}
             </button>
 
-            <div className="mt-8 flex items-center justify-between px-2">
-              <button onClick={() => setResumeMode(true)} className="text-white font-bold text-sm hover:text-amber-300 transition cursor-pointer">Resume existing case</button>
-              <button onClick={() => window.location.reload()} className="text-slate-400 flex items-center gap-1.5 text-sm font-medium hover:text-white transition cursor-pointer"><RefreshCw size={14}/> Reset Form</button>
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-6 px-2">
+              <button onClick={() => setResumeMode(true)} className="text-white font-bold text-sm hover:text-amber-300 transition cursor-pointer">
+                Resume Draft
+              </button>
+              <Link href="/dashboard/track" className="text-emerald-400 font-bold text-sm hover:text-emerald-300 transition cursor-pointer">
+                Track Filed Case
+              </Link>
+              <button onClick={() => window.location.reload()} className="text-slate-400 flex items-center gap-1.5 text-sm font-medium hover:text-white transition cursor-pointer">
+                <RefreshCw size={14}/> Reset Form
+              </button>
             </div>
           </motion.div>
         ) : (
