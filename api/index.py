@@ -263,13 +263,12 @@ def analyze_pio_backend_endpoint(payload: PIOAnalysisRequest):
 
         case = case_manager.get_case(payload.case_id)
         if case:
-            # Generate First Appeal Draft automatically to complete the pipeline
-            appellant_name = case.get("form_data", {}).get("applicant_name", "[Applicant Name]")
-            dept_name = case.get("department_info", {}).get("public_authority_name", "[Public Authority]")
-            grounds = analysis.get("appeal_grounds", "The PIO failed to provide complete information in accordance with the RTI Act.")
-            precedent = analysis.get("legal_counter", "Section 7(9) and CIC guidelines mandate strict adherence to disclosure.")
+            # Inject PIO text so OutcomeEngine can view it
+            case["pio_response_text"] = payload.pio_text
+            language = case.get("language", "English")
             
-            draft = f"BEFORE THE FIRST APPELLATE AUTHORITY\nUnder Section 19(1) of the RTI Act, 2005\n\nAppellant: {appellant_name}\nPublic Authority: {dept_name}\n\nGROUNDS FOR APPEAL:\n{grounds}\n\nSTATUTORY PRECEDENT:\n{precedent}\n\nPRAYER:\nDirect the PIO to provide complete information free of cost under Section 7(6) and initiate Section 20(1) penalty proceedings."
+            # Request AI to dynamically generate the First Appeal based on facts
+            draft = outcome_engine.generate_first_appeal(case, analysis, language)
 
             case_manager.update_case(payload.case_id, {
                 "pio_response_text": payload.pio_text,
@@ -366,10 +365,9 @@ def get_case_state(case_id: str):
     if not case_data:
         raise HTTPException(status_code=404, detail="Case ID not found.")
         
-    # --- Perform SLA Calculations ---
     filing_date_str = case_data.get("filing_date")
     if not filing_date_str:
-        filing_date_obj = datetime.now(timezone.utc) - timedelta(days=35) # Fallback to overdue for tracking visualizer
+        filing_date_obj = datetime.now(timezone.utc) - timedelta(days=35) 
         filing_date_str = filing_date_obj.isoformat()
     else:
         try:
@@ -385,7 +383,6 @@ def get_case_state(case_id: str):
     diff_time = now - response_due_date_obj
     days_overdue = diff_time.days if is_overdue and diff_time.days > 0 else 0
     
-    # Sec 20 Penalty: Rs 250/day up to 25000 maximum cap
     section_20_penalty = min(25000, days_overdue * 250)
     time_remaining_seconds = max(0, int((response_due_date_obj - now).total_seconds()))
 
