@@ -4,15 +4,17 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Gavel, Menu, X } from "lucide-react";
+import Link from "next/link";
 
 export default function Navbar() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { name: "Architecture", href: "#comparison" },
-    { name: "Workflow", href: "#export-pipeline" }, // Points directly to 'Automated Export Pipeline' section
-    { name: "Jurisdiction", href: "#the-law" },
+    { name: "Architecture", href: "/#comparison" },
+    { name: "Workflow", href: "/#export-pipeline" },
+    { name: "Jurisdiction", href: "/#the-law" },
+    { name: "Track Case", href: "/dashboard/track" },
   ];
 
   const handleLaunch = () => {
@@ -26,7 +28,7 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-14">
             
             {/* Logo */}
-            <a href="#" className="flex items-center shrink-0 py-1">
+            <Link href="/" className="flex items-center shrink-0 py-1">
               <Image
                 src="/janadhikar-logo-v2.png"
                 alt="Jan Adhikar"
@@ -35,18 +37,18 @@ export default function Navbar() {
                 className="object-contain h-10 sm:h-11 w-auto"
                 priority
               />
-            </a>
+            </Link>
 
             {/* Links */}
             <div className="hidden md:flex items-center gap-7 text-xs font-bold tracking-wide text-slate-700 uppercase">
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.name}
                   href={link.href}
                   className="hover:text-[#881337] transition-colors"
                 >
                   {link.name}
-                </a>
+                </Link>
               ))}
             </div>
 
@@ -75,14 +77,14 @@ export default function Navbar() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-slate-200 px-4 pt-2 pb-4 space-y-1 bg-white rounded-b-2xl mt-1">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.name}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-800 hover:bg-slate-100 transition-colors"
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
           </div>
         )}
