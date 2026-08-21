@@ -21,28 +21,66 @@ import {
 import useCaseStore from '@/store/caseStore';
 import { classifyCase, rtiGenerate, grievanceGenerate } from '@/lib/api';
 
-// --- UTILITY FUNCTION TO FIX MESSY AI TEXT ---
+// --- UTILITY FUNCTION TO FIX MESSY AI TEXT & RENDER BULLETS ---
 const formatAIText = (text?: string) => {
   if (!text) return null;
-  return text.split('\n').map((line, i) => {
-    if (!line.trim()) return <div key={i} className="h-3" />;
+  const lines = text.split('\n');
+  const result: JSX.Element[] = [];
+  let currentList: JSX.Element[] = [];
+
+  const pushList = () => {
+    if (currentList.length > 0) {
+      result.push(
+        <ul key={`list-${result.length}`} className="list-disc pl-5 mb-3 space-y-2 marker:text-slate-400">
+          {currentList}
+        </ul>
+      );
+      currentList = [];
+    }
+  };
+
+  const formatBold = (str: string) => {
+    return str.split(/(\*\*.*?\*\*)/g).map((part, j) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <strong key={j} className="font-extrabold text-slate-900">
+            {part.slice(2, -2)}
+          </strong>
+        );
+      }
+      return <span key={j}>{part}</span>;
+    });
+  };
+
+  lines.forEach((line, i) => {
+    if (!line.trim()) {
+      pushList();
+      result.push(<div key={`space-${i}`} className="h-2" />);
+      return;
+    }
+
+    // Detect bullet points: starts with "-", "*", or "1."
+    const isBullet = /^(\-|\*|\d+\.)\s+(.*)/.exec(line.trim());
     
-    const parts = line.split(/(\*\*.*?\*\*)/g);
-    return (
-      <div key={i} className="mb-2 last:mb-0">
-        {parts.map((part, j) => {
-          if (part.startsWith('**') && part.endsWith('**')) {
-            return (
-              <strong key={j} className="font-extrabold text-slate-900">
-                {part.slice(2, -2)}
-              </strong>
-            );
-          }
-          return <span key={j}>{part}</span>;
-        })}
-      </div>
-    );
+    if (isBullet) {
+      const content = isBullet[2];
+      currentList.push(
+        <li key={`item-${i}`} className="leading-relaxed text-sm">
+          {formatBold(content)}
+        </li>
+      );
+    } else {
+      pushList();
+      result.push(
+        <div key={`line-${i}`} className="mb-2 last:mb-0 leading-relaxed text-sm">
+          {formatBold(line)}
+        </div>
+      );
+    }
   });
+  
+  pushList(); // Catch any trailing lists
+  return result;
 };
 
 export default function IntakeFormView() {
@@ -58,12 +96,13 @@ export default function IntakeFormView() {
     setStage, 
     setRtiDraft, 
     setGrievanceResult,
-    reset // Pulling in reset to clear state on new case
+    reset
   } = useCaseStore();
 
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   
+  // 0 = Assessment, 1 = Applicant, 2 = AI Strategy, 3 = Confirmation
   const [currentStep, setCurrentStep] = useState<0 | 1 | 2 | 3>(0);
   const [localForm, setLocalForm] = useState<Record<string, any>>({});
 
@@ -172,6 +211,7 @@ export default function IntakeFormView() {
     <div className="gradient-bg min-h-screen p-4 sm:p-6 lg:p-8 flex items-center justify-center font-sans">
       <div className="w-full max-w-3xl space-y-6">
         
+        {/* Step Progression Bar (Hidden if Out of Scope) */}
         {!isOther && (
           <div className="bg-white border border-slate-300 rounded-2xl p-4 shadow-sm flex items-center justify-between overflow-x-auto gap-2">
             {[
@@ -205,6 +245,7 @@ export default function IntakeFormView() {
           </div>
         )}
 
+        {/* Case Info Header */}
         <div className="flex items-center justify-between px-2">
           <div>
             <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${isOther ? 'bg-slate-100 text-slate-600 border-slate-200' : 'text-court-maroon bg-rose-50 border-rose-200'}`}>
@@ -226,7 +267,7 @@ export default function IntakeFormView() {
 
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-300 shadow-sm text-left">
           
-          {/* STEP 0: LEGAL ASSESSMENT (No Extracted Facts Box) */}
+          {/* STEP 0: LEGAL ASSESSMENT */}
           {currentStep === 0 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="p-6 bg-[#FAF8F5] border border-slate-200 rounded-3xl flex flex-col gap-4 shadow-inner text-left">
@@ -247,20 +288,33 @@ export default function IntakeFormView() {
 
                 <div className="pt-2">
                   <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Detailed Legal Analysis</h4>
-                  <div className="text-sm font-medium text-slate-700 leading-relaxed">
+                  <div className="text-slate-700">
                     {formatAIText(classifyResult.reasoning)}
                   </div>
                 </div>
               </div>
 
-              {/* ACTION PLAN IF OUT OF SCOPE */}
-              {isOther && (
+              {isOther ? (
                 <div className="p-6 bg-blue-50 border border-blue-200 rounded-3xl text-left shadow-sm">
                   <h4 className="text-base font-bold text-blue-900 flex items-center gap-2 mb-4 pb-2 border-b border-blue-200/60">
-                    <Info size={20} className="text-blue-700"/> Recommended Action Plan For Your Case
+                    <Info size={20} className="text-blue-700"/> Recommended Action Plan
                   </h4>
-                  <div className="text-sm text-blue-900 leading-relaxed font-medium">
+                  <div className="text-blue-900 font-medium">
                     {formatAIText(classifyResult.specific_advice || 'This case falls outside RTI or Consumer/Administrative grievance jurisdictions. Please consult a local legal professional or the relevant authority for this specific issue.')}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-6 bg-white border border-slate-200 rounded-3xl text-left shadow-sm">
+                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-5 flex items-center gap-2">
+                    <Sparkles size={16} className="text-emerald-600"/> Facts Extracted By AI Engine
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-5 gap-x-4">
+                    {Object.entries(localForm).filter(([k,v]) => v && typeof v === 'string').map(([k,v]) => (
+                      <div key={k}>
+                        <span className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{k.replace(/_/g, ' ')}</span>
+                        <span className="block text-xs font-semibold text-ashoka-navy truncate pr-2" title={v as string}>{v as string}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -278,7 +332,7 @@ export default function IntakeFormView() {
             </div>
           )}
 
-          {/* STEP 1: APPLICANT DETAILS */}
+          {/* STEP 1: APPLICANT DETAILS ONLY */}
           {currentStep === 1 && (
             <form onSubmit={handleNextStep} className="space-y-5 animate-in fade-in duration-300">
               <p className="text-xs text-slate-500 leading-relaxed mb-4 font-medium">
