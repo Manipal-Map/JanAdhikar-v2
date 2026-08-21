@@ -11,7 +11,6 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-
 class CaseManager:
     def __init__(self):
         url: str = os.environ.get("SUPABASE_URL", "")
@@ -34,6 +33,7 @@ class CaseManager:
             )
 
     def _generate_case_id(self) -> str:
+        # Generates a 12-character ID: CR-ABCD-1234
         chars = string.ascii_uppercase + string.digits
         return f"CR-{''.join(random.choices(chars, k=4))}-{''.join(random.choices(chars, k=4))}"
 
@@ -49,7 +49,6 @@ class CaseManager:
                 }).execute()
             except Exception as e:
                 logger.error(f"Supabase UPSERT Error on Create for case {case_id}: {e}")
-                # Raise an error to prevent issuing an unpersisted ID to the user in serverless environments
                 raise RuntimeError(f"Failed to persist case to database: {e}") from e
         else:
             self._memory_cases[case_id] = initial_data
@@ -59,6 +58,8 @@ class CaseManager:
     def get_case(self, case_id: str) -> Optional[Dict[str, Any]]:
         if not case_id:
             return None
+
+        # Fixes invisible spaces and lowercase letters sent from the frontend
         clean_id = case_id.strip().upper()
 
         if self.use_supabase:
@@ -69,14 +70,17 @@ class CaseManager:
                 return None  
             except Exception as e:
                 logger.error(f"Supabase SELECT Error for case {clean_id}: {e}")
-                raise RuntimeError(f"Database read failure: {e}") from e
+                return None # Return None instead of crashing, allowing FastAPI to send a clean 404
 
         return self._memory_cases.get(clean_id)
+
     def update_case(self, case_id: str, updates: Dict[str, Any]) -> None:
         if not case_id:
             return
 
-        current_data = self.get_case(case_id)
+        clean_id = case_id.strip().upper()
+        current_data = self.get_case(clean_id)
+        
         if current_data is None:
             current_data = {"status": "initialized"}
 
@@ -85,14 +89,13 @@ class CaseManager:
         if self.use_supabase:
             try:
                 self.supabase.table("cases").upsert({
-                    "id": case_id,
+                    "id": clean_id,
                     "data": current_data
                 }).execute()
             except Exception as e:
-                logger.error(f"Supabase UPSERT Error on Update for case {case_id}: {e}")
+                logger.error(f"Supabase UPSERT Error on Update for case {clean_id}: {e}")
                 raise RuntimeError(f"Failed to update case in database: {e}") from e
         else:
-            self._memory_cases[case_id] = current_data
-
+            self._memory_cases[clean_id] = current_data
 
 case_manager = CaseManager()
