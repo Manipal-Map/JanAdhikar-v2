@@ -76,7 +76,6 @@ function TrackPageContent() {
     try {
       const data = await analyzePio(currentCaseId, textToAnalyze);
       setAnalysisResult(data);
-      // Refresh case metrics
       await fetchCaseDetails(currentCaseId);
     } catch (err) {
       console.error('PIO Analysis Error:', err);
@@ -87,14 +86,15 @@ function TrackPageContent() {
 
   return (
     <div className="gradient-bg min-h-screen font-sans p-4 sm:p-6 lg:p-8 selection:bg-court-maroon selection:text-white pb-20">
-      {/* Header & Case Lookup Bar */}
       <div className="max-w-6xl mx-auto space-y-8 pt-4">
         
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-slate-300 pb-6">
           <div className="flex items-start sm:items-center gap-4">
+            {/* Redirects back to the landing page */}
             <button 
-              onClick={() => router.push('/dashboard')}
+              onClick={() => router.push('/')}
               className="p-2.5 rounded-xl bg-white border border-slate-300 text-slate-600 hover:text-ashoka-navy hover:bg-slate-50 transition shadow-sm cursor-pointer shrink-0 mt-1 sm:mt-0"
+              title="Back to Landing Page"
             >
               <ArrowLeft size={18} />
             </button>
@@ -133,7 +133,6 @@ function TrackPageContent() {
           </div>
         )}
 
-        {/* Empty State / Guidelines (Visible when no case is loaded) */}
         {!caseData && !loading && !error && (
           <div className="mt-12 flex flex-col items-center justify-center text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="w-20 h-20 bg-white border border-slate-200 rounded-full flex items-center justify-center mb-6 shadow-sm">
@@ -147,7 +146,6 @@ function TrackPageContent() {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl w-full text-left">
-              {/* Card 1: 30-Day Mandate */}
               <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl shadow-sm">
                 <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mb-5 border border-amber-100">
                   <Clock className="w-6 h-6 text-amber-600" />
@@ -158,7 +156,6 @@ function TrackPageContent() {
                 </p>
               </div>
               
-              {/* Card 2: Section 20 Penalty */}
               <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl shadow-sm">
                 <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center mb-5 border border-rose-100">
                   <Scale className="w-6 h-6 text-court-maroon" />
@@ -169,7 +166,6 @@ function TrackPageContent() {
                 </p>
               </div>
               
-              {/* Card 3: First Appeal */}
               <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl shadow-sm">
                 <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mb-5 border border-emerald-100">
                   <FileText className="w-6 h-6 text-emerald-600" />
@@ -183,13 +179,10 @@ function TrackPageContent() {
           </div>
         )}
 
-        {/* Active Case Data View */}
         {caseData && (
           <div className="animate-in fade-in zoom-in-95 duration-300 space-y-8">
-            {/* Top Metrics Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
-              {/* Status Card */}
               <div className="bg-white border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-sm space-y-2">
                 <span className="text-xs font-bold uppercase text-slate-400 tracking-wider">
                   Current Case Status
@@ -202,7 +195,6 @@ function TrackPageContent() {
                 </p>
               </div>
 
-              {/* Countdown / SLA Clock */}
               <div className="bg-white border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-sm space-y-2">
                 <span className="text-xs font-bold uppercase text-slate-400 tracking-wider">
                   30-Day SLA Deadline
@@ -219,7 +211,6 @@ function TrackPageContent() {
                 <p className="text-xs text-slate-500 font-medium">Section 7(1) Statutory Response Window</p>
               </div>
 
-              {/* Section 20 Penalty Box */}
               <div
                 className={`border rounded-3xl p-6 sm:p-8 space-y-2 shadow-sm transition-colors ${
                   (caseData.section_20_penalty_inr || 0) > 0
@@ -246,7 +237,6 @@ function TrackPageContent() {
               </div>
             </div>
 
-            {/* PIO Reply Analysis Engine */}
             <div className="bg-white border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-200 pb-5">
                 <div>
@@ -288,7 +278,6 @@ function TrackPageContent() {
                 </div>
               </div>
 
-              {/* Analysis Result Box */}
               {analysisResult && (
                 <div className="mt-8 bg-[#FAF8F5] border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-5 shadow-inner">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
