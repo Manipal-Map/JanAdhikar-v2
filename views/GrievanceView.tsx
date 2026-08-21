@@ -1,258 +1,254 @@
 'use client';
-import { useState } from 'react'
-import { ArrowRight, Loader2, ArrowLeft, Upload, FileText } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import useCaseStore from '@/store/caseStore'
-import { grievanceGenerate } from '@/lib/api'
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { 
+  Scale, 
+  Upload, 
+  FileText, 
+  User, 
+  MapPin, 
+  Building2, 
+  ArrowRight, 
+  Loader2, 
+  CheckCircle2, 
+  AlertCircle,
+  ArrowLeft
+} from 'lucide-react';
+import useCaseStore from '@/store/caseStore';
+import { grievanceGenerate } from '@/lib/api';
 
-export default function GrievanceView() {
-  const router = useRouter()
-  const {
-    caseId,
-    userProblem,
-    setFormData,
-    setGrievanceResult,
-    setStage,
-    language
-  } = useCaseStore()
+export default function GrievanceFormView() {
+  const router = useRouter();
+  const { caseId, userProblem, formData, setFormData, classifyResult, setDraft, language, setStage } = useCaseStore();
+  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Local state for evidence files
+  const [files, setFiles] = useState<File[]>([]);
 
-  const [localForm, setLocalForm] = useState({})
-  const [files, setFiles] = useState([])
-  const [loading, setLoading] = useState(false)
-
-  const schema = [
-    {
-      key: 'applicant_name',
-      label: 'Full Name',
-      placeholder: 'Enter your full name'
-    },
-    {
-      key: 'applicant_address',
-      label: 'Residential Address',
-      placeholder: 'Enter your address'
-    },
-    {
-      key: 'applicant_city',
-      label: 'City / District',
-      placeholder: 'e.g. Jaipur'
-    },
-    {
-      key: 'applicant_state',
-      label: 'State',
-      placeholder: 'e.g. Rajasthan'
-    },
-    {
-      key: 'applicant_contact',
-      label: 'Phone Number / Email',
-      placeholder: 'Enter contact information'
-    }
-  ]
-
-  const handleChange = (key, val) => {
-    setLocalForm(prev => ({
-      ...prev,
-      [key]: val
-    }))
-  }
-
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFiles(Array.from(e.target.files))
+      setFiles(Array.from(e.target.files));
     }
-  }
+  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-
+  const handleGenerate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    
     try {
-      setFormData(localForm)
-
-      const activeCaseId = caseId || `CR-GRV-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
-      const activeProblem = userProblem || 'Citizen Grievance and Deficiency of Service'
-
-      let filesData = []
-      if (files && files.length > 0) {
-        filesData = await Promise.all(files.map(file => new Promise((resolve) => {
-          const reader = new FileReader()
-          reader.onload = () => {
-            const res = reader.result ? reader.result.toString() : ''
-            const base64Str = res.includes(',') ? res.split(',')[1] : res
-            resolve({
-              filename: file.name,
-              mime_type: file.type || 'application/octet-stream',
-              base64: base64Str
-            })
-          }
-          reader.onerror = () => resolve({ filename: file.name, mime_type: file.type || '', base64: '' })
-          reader.readAsDataURL(file)
-        })))
-      }
-
+      // Prepare payload to send to backend
       const payload = {
-        case_id: activeCaseId,
-        form_data: localForm,
-        user_problem: activeProblem,
+        case_id: caseId,
+        problem_text: userProblem,
         language: language || 'English',
-        files: filesData
-      }
+        form_data: {
+          ...formData,
+          // If you have specific respondent details, map them here
+        }
+      };
 
-      const res = await grievanceGenerate(payload)
-
-      setGrievanceResult(res)
-      setStage('COMPLETE')
-      router.push('/dashboard/grievance/result')
-    } catch (err) {
-      let errMsg = 'Failed to generate legal notice.'
-      if (typeof err?.response?.data?.detail === 'string') {
-        errMsg = err.response.data.detail
-      } else if (Array.isArray(err?.response?.data?.detail)) {
-        errMsg = err.response.data.detail.map(d => d.msg || JSON.stringify(d)).join(', ')
-      } else if (err?.message) {
-        errMsg = err.message
-      }
-      alert(errMsg)
+      // Call the API
+      const result = await grievanceGenerate(payload);
+      
+      // Save the generated draft to global store
+      setDraft(result.demand_notice_draft || result.draft || "Draft generation successful.");
+      
+      // Move to the result/draft viewing stage
+      setStage('GRIEVANCE_COMPLETED');
+      router.push('/dashboard/grievance/result');
+      
+    } catch (err: any) {
+      console.error(err);
+      setError(err?.response?.data?.detail || "Failed to generate grievance. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage: "url('/bg.image.png')"
-      }}
-    >
-      {/* Step Badge */}
-      <div className="mb-3">
-        <span className="text-xs font-bold uppercase tracking-widest text-court-maroon bg-court-maroon/10 px-3 py-1 rounded-full border border-court-maroon/20">
-          STEP 2
-        </span>
-      </div>
-
-      <h1 className="text-3xl sm:text-4xl font-extrabold text-ashoka-navy mb-2 tracking-tight text-center">
-        Complainant Details & Evidence
-      </h1>
-
-      <p className="text-slate-500 mb-8 text-center max-w-2xl">
-        Provide your contact details and attach any supporting photos, bills,
-        or notices to empower the legal notice.
-      </p>
-
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-2xl bg-white border border-[#b8c2cc] rounded-3xl p-8 shadow-sm space-y-6"
-      >
-        {schema.map(field => (
-          <div
-            key={field.key}
-            className="space-y-2 text-left"
-          >
-            <label className="block text-xs font-bold text-ashoka-navy uppercase tracking-wider">
-              {field.label}
-            </label>
-
-            <input
-              type="text"
-              required
-              value={localForm[field.key] || ''}
-              onChange={e =>
-                handleChange(field.key, e.target.value)
-              }
-              placeholder={field.placeholder}
-              className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl px-4 py-3.5 text-ashoka-navy placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-court-maroon/30 focus:border-court-maroon transition-all text-sm font-medium"
-            />
-          </div>
-        ))}
-
-        {/* File Upload */}
-        <div className="space-y-2 text-left pt-2">
-          <label className="block text-xs font-bold text-ashoka-navy uppercase tracking-wider">
-            Upload Proof / Evidence (Optional)
-          </label>
-
-          <div className="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center hover:border-court-maroon transition-colors bg-[#FAF8F5]">
-            <input
-              type="file"
-              multiple
-              accept="image/*,.pdf"
-              onChange={handleFileChange}
-              className="hidden"
-              id="proof-upload"
-            />
-
-            <label
-              htmlFor="proof-upload"
-              className="cursor-pointer flex flex-col items-center justify-center gap-2"
+    <div className="min-h-screen bg-[#FAF8F5] p-4 sm:p-6 lg:p-8 font-sans selection:bg-[#881337] selection:text-white">
+      <div className="max-w-3xl mx-auto space-y-6">
+        
+        {/* Top Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => router.push('/dashboard')}
+              className="p-2.5 rounded-xl bg-white border border-slate-300 text-slate-600 hover:text-ashoka-navy hover:bg-slate-50 transition shadow-sm cursor-pointer"
             >
-              <Upload
-                size={24}
-                className="text-court-maroon"
+              <ArrowLeft size={18} />
+            </button>
+            <div>
+              <div className="flex items-center gap-2">
+                <Scale className="w-5 h-5 text-court-maroon" />
+                <h1 className="text-xl sm:text-2xl font-extrabold text-ashoka-navy tracking-tight">
+                  Grievance & Relief Setup
+                </h1>
+              </div>
+              <p className="text-sm text-slate-500 mt-1 font-medium">
+                Review your details before generating the legal notice.
+              </p>
+            </div>
+          </div>
+          {caseId && (
+            <div className="hidden sm:flex items-center gap-2 px-4 py-1.5 bg-white border border-slate-300 rounded-xl shadow-sm text-xs font-bold text-ashoka-navy uppercase tracking-wider">
+              ID: {caseId}
+            </div>
+          )}
+        </div>
+
+        <motion.form 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          onSubmit={handleGenerate} 
+          className="space-y-6"
+        >
+          {/* Section 1: Complainant Details */}
+          <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2">
+              <User size={16} className="text-court-maroon" />
+              1. Complainant Details
+            </h2>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Full Name</label>
+                <input 
+                  type="text"
+                  required
+                  value={formData.applicant_name || ''}
+                  onChange={e => setFormData({ ...formData, applicant_name: e.target.value })}
+                  placeholder="e.g. Rahul Sharma"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-sm text-ashoka-navy font-medium placeholder:text-slate-400 focus:outline-none focus:border-court-maroon focus:ring-1 focus:ring-court-maroon transition-all shadow-sm"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Contact Details</label>
+                <input 
+                  type="text"
+                  value={formData.applicant_contact || ''}
+                  onChange={e => setFormData({ ...formData, applicant_contact: e.target.value })}
+                  placeholder="Phone or Email"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-sm text-ashoka-navy font-medium placeholder:text-slate-400 focus:outline-none focus:border-court-maroon focus:ring-1 focus:ring-court-maroon transition-all shadow-sm"
+                />
+              </div>
+              
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">City / District</label>
+                <div className="relative">
+                  <MapPin size={16} className="absolute left-3.5 top-3.5 text-slate-400" />
+                  <input 
+                    type="text"
+                    required
+                    value={formData.applicant_city || ''}
+                    onChange={e => setFormData({ ...formData, applicant_city: e.target.value })}
+                    placeholder="e.g. Jaipur, Rajasthan"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 pl-10 text-sm text-ashoka-navy font-medium placeholder:text-slate-400 focus:outline-none focus:border-court-maroon focus:ring-1 focus:ring-court-maroon transition-all shadow-sm"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Respondent / Target Authority */}
+          <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2">
+              <Building2 size={16} className="text-court-maroon" />
+              2. Respondent Details
+            </h2>
+            
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Target Department / Company</label>
+              <input 
+                type="text"
+                required
+                value={formData.target_department || classifyResult?.sub_category || ''}
+                onChange={e => setFormData({ ...formData, target_department: e.target.value })}
+                placeholder="e.g. Municipal Corporation / E-Commerce Platform"
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-sm text-ashoka-navy font-medium placeholder:text-slate-400 focus:outline-none focus:border-court-maroon focus:ring-1 focus:ring-court-maroon transition-all shadow-sm"
               />
+              <p className="text-xs text-slate-500 mt-1.5">
+                The AI will use this to direct your legal notice to the correct authority.
+              </p>
+            </div>
+          </div>
 
-              <span className="text-sm font-semibold text-ashoka-navy">
-                Click to upload photos or PDFs
-              </span>
-
-              <span className="text-xs text-slate-400">
-                AI Vision will analyze your receipts, bills, or damage photos
-              </span>
+          {/* Section 3: Evidence & Documents */}
+          <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2">
+              <FileText size={16} className="text-court-maroon" />
+              3. Evidence & Proofs (Optional)
+            </h2>
+            
+            <label className="border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 transition-colors rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer group text-center">
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 mb-3 group-hover:scale-110 transition-transform">
+                <Upload size={20} className="text-ashoka-navy" />
+              </div>
+              <span className="text-sm font-bold text-ashoka-navy">Click to upload files</span>
+              <span className="text-xs text-slate-500 mt-1">Images, PDFs, or Receipts (Max 5MB)</span>
+              <input 
+                type="file" 
+                multiple 
+                onChange={handleFileChange}
+                className="hidden" 
+              />
             </label>
-
+            
             {files.length > 0 && (
-              <div className="mt-4 flex flex-wrap gap-2 justify-center">
-                {files.map((file, index) => (
-                  <span
-                    key={`${file.name}-${index}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-slate-200 text-xs font-medium text-slate-700 rounded-lg shadow-sm"
-                  >
-                    <FileText
-                      size={13}
-                      className="text-court-maroon"
-                    />
-
-                    {file.name}
-                  </span>
+              <div className="mt-4 space-y-2">
+                <h4 className="text-xs font-bold text-ashoka-navy uppercase tracking-wider mb-2">Attached Files:</h4>
+                {files.map((file, idx) => (
+                  <div key={idx} className="flex items-center gap-2 text-sm text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200 shadow-sm">
+                    <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                    <span className="truncate">{file.name}</span>
+                  </div>
                 ))}
               </div>
             )}
           </div>
-        </div>
 
-        {/* Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-          <button
-            type="button"
-            onClick={() => { setStage('IDLE'); router.push('/dashboard'); }}
-            className="btn-ghost text-sm cursor-pointer"
-          >
-            <ArrowLeft size={16} />
-            Back
-          </button>
+          {/* Error Message */}
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-4 bg-red-50 text-red-700 text-sm font-medium rounded-xl border border-red-200 flex items-start gap-3 shadow-sm"
+            >
+              <AlertCircle size={18} className="shrink-0 mt-0.5" />
+              <p>{error}</p>
+            </motion.div>
+          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary text-base py-3 px-8 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <>
-                <Loader2
-                  size={18}
-                  className="animate-spin"
-                />
-                Analyzing Evidence & Drafting...
-              </>
-            ) : (
-              <>
-                Generate Legal Notice
-                <ArrowRight size={18} />
-              </>
-            )}
-          </button>
-        </div>
-      </form>
+          {/* Submit Action */}
+          <div className="pt-4">
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="btn-primary w-full justify-center text-base py-4 cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white disabled:opacity-70 shadow-md rounded-xl flex items-center gap-2 transition-all font-bold"
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" />
+                  <span>Drafting Legal Notice...</span>
+                </>
+              ) : (
+                <>
+                  <span>Generate Grievance Draft</span>
+                  <ArrowRight size={20} />
+                </>
+              )}
+            </button>
+            <p className="text-center text-xs text-slate-500 mt-4 font-medium">
+              You will be able to review and edit the draft on the next page before downloading.
+            </p>
+          </div>
+        </motion.form>
+      </div>
     </div>
-  )
+  );
 }
