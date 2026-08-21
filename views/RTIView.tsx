@@ -58,25 +58,25 @@ export default function RTIView() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col items-center justify-center p-4 py-12 bg-cover bg-center bg-no-repeat relative text-slate-200 font-sans"
+      className="min-h-screen flex flex-col items-center justify-center p-4 py-12 bg-cover bg-center bg-no-repeat relative font-sans"
       style={{ backgroundImage: "url('/bg.image.png')" }}
     >
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl relative z-10">
         
-        <div className="mb-3">
-          <span className="text-xs font-bold uppercase font-sans tracking-tight text-[#FF9933] bg-[#A32A02]/20 px-3 py-1 rounded-full border border-[#A32A02]/30">
+        <div className="mb-3 text-center sm:text-left">
+          <span className="text-xs font-bold uppercase font-sans tracking-tight text-court-maroon bg-rose-50 px-3 py-1 rounded-full border border-rose-200 shadow-sm">
             STEP 2 · Applicant Details
           </span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md text-center sm:text-left">
           Who is filing this RTI?
         </h1>
-        <p className="text-slate-200 mb-8 font-medium drop-shadow-sm">
+        <p className="text-blue-100 mb-8 font-medium drop-shadow-sm text-center sm:text-left">
           Enter your contact details below. Our AI will automatically construct the RTI questions and statutory application clauses.
         </p>
 
-        <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-md border border-slate-300 rounded-3xl p-8 shadow-xl space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-sm border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
           {INTAKE_FIELDS.map((field) => (
             <div key={field.key} className="space-y-2 text-left">
               <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider">
