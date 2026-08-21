@@ -4,10 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Bot, User, Sparkles, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import useCaseStore from '@/store/caseStore';
+import { intakeChat } from '@/lib/api'; // <--- Using the safe API instance
 
 export default function IntakeChatView() {
   const router = useRouter();
-  const { setClassifyResult, setFormData, setCaseId } = useCaseStore();
+  const { setClassifyResult, setFormData, setCaseId, setStage } = useCaseStore(); // <--- Added setStage
   
   const [messages, setMessages] = useState<Array<{ role: 'assistant' | 'user'; content: string }>>([
     {
@@ -37,35 +38,33 @@ export default function IntakeChatView() {
     setLoading(true);
 
     try {
-      const res = await fetch('https://jan-adhikar-backend.vercel.app/api/intake/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: userText,
-          history: newHistory.map(m => ({ role: m.role, content: m.content })),
-          current_extracted_data: extractedData
-        })
+      // Connects cleanly via Axios (handles CORS and Base URLs automatically)
+      const data = await intakeChat({
+        message: userText,
+        history: newHistory.map(m => ({ role: m.role, content: m.content })),
+        current_extracted_data: extractedData
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        setMessages(prev => [...prev, { role: 'assistant', content: data.assistant_reply }]);
-        setIsReady(data.is_ready_to_proceed);
-        setExtractedData(data.extracted_data || {});
-      } else {
-        setMessages(prev => [...prev, { role: 'assistant', content: "I encountered a minor connection glitch. Please tell me more about your situation." }]);
-      }
+      setMessages(prev => [...prev, { role: 'assistant', content: data.assistant_reply }]);
+      setIsReady(!!data.is_ready_to_proceed);
+      setExtractedData(data.extracted_data || {});
+      
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Network error occurred. Please try again." }]);
+      console.error("Chat Error:", err);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Network error occurred. Please check your connection or try again." }]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleProceedToForm = () => {
-    // Save extracted AI facts into store state so the next form page auto-fills them
+    // 1. Properly detect route from AI extraction
+    const isRTI = extractedData.route_guess === 'RTI';
+    const finalRoute = isRTI ? 'RTI' : 'Rights/Grievance';
+
+    // 2. Save extracted facts
     setClassifyResult({
-      route: extractedData.route_guess || 'Rights/Grievance',
+      route: finalRoute,
       sub_category: extractedData.problem_summary || 'Civic Grievance',
       confidence: 0.95,
       reasoning: extractedData.additional_notes || 'Intake pre-screened by AI.',
@@ -73,15 +72,23 @@ export default function IntakeChatView() {
     });
 
     setFormData({
-      applicant_city: extractedData.applicant_city || 'Jaipur',
+      applicant_city: extractedData.applicant_city || '',
       applicant_name: extractedData.applicant_name || '',
       applicant_contact: extractedData.applicant_contact || '',
       user_problem: extractedData.problem_summary || ''
     });
 
-    // Generate temporary case ID & transition to details/form view
+    // 3. Setup Case ID
     setCaseId(`JA-${Math.floor(100000 + Math.random() * 900000)}`);
-    router.push('/dashboard/form'); 
+
+    // 4. FIX: Safely route to the correct actual directory instead of /dashboard/form
+    if (isRTI) {
+      setStage('RTI_GATHERING');
+      router.push('/dashboard/rti');
+    } else {
+      setStage('GRIEVANCE_GATHERING');
+      router.push('/dashboard/grievance');
+    }
   };
 
   return (
@@ -163,7 +170,7 @@ export default function IntakeChatView() {
           </motion.div>
         )}
 
-        <form onSubmit={handleSend} className="glass-card p-2 flex items-center gap-2 shadow-sm">
+        <form onSubmit={handleSend} className="glass-card p-2 flex items-center gap-2 shadow-sm bg-white rounded-xl border border-slate-300">
           <input
             type="text"
             value={input}
@@ -174,12 +181,12 @@ export default function IntakeChatView() {
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="btn-primary cursor-pointer p-2.5 rounded-xl disabled:opacity-50"
+            className="btn-primary cursor-pointer p-2.5 rounded-xl disabled:opacity-50 bg-[#881337] text-white hover:bg-[#701A75]"
           >
             <Send size={16} />
           </button>
         </form>
       </div>
     </div>
-  )
+  );
 }
