@@ -1,4 +1,3 @@
-current api.ts:
 import axios from 'axios'
 
 const api = axios.create({
@@ -13,18 +12,6 @@ export const resolveDepartment = (case_id: string, location: string | null = nul
 export const downloadRtiPdf = (case_id: string) => api.get(`/api/rti/pdf/${case_id}`, { responseType: 'blob' }).then(r => r.data)
 export const rtiPredict = (case_id: string, draft_text: string | null = null) => api.post('/api/rti/predict', { case_id, draft_text }).then(r => r.data)
 export const rtiImprove = (case_id: string) => api.post('/api/rti/improve', { case_id }).then(r => r.data)
-
-// Add this helper at the bottom of lib/api.ts
-export const triggerBlobDownload = (blobData: Blob, filename: string) => {
-  const url = window.URL.createObjectURL(new Blob([blobData]));
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', filename);
-  document.body.appendChild(link);
-  link.click();
-  link.parentNode?.removeChild(link);
-  window.URL.revokeObjectURL(url);
-};
 
 export const transcribeAudio = (audioBlob: Blob, language: string) => {
   const formData = new FormData()
@@ -46,3 +33,6 @@ export const getCase = (case_id: string) => api.get(`/api/case/${case_id}`).then
 export const intakeChat = (payload: any) => api.post('/api/intake/chat', payload).then(r => r.data)
 
 export default api
+
+
+what changes have to be made?
