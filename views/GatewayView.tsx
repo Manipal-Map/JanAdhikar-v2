@@ -103,7 +103,7 @@ export default function GatewayView() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-cover bg-center bg-no-repeat text-ashoka-navy font-sans tracking-tight"
+      className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-cover bg-center bg-no-repeat text-slate-200 font-sans tracking-tight"
       style={{ backgroundImage: "url('/bg.image.png')" }}
     >
       <div className="absolute top-6 left-6 z-20">
@@ -122,7 +122,7 @@ export default function GatewayView() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-ashoka-navy/40 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-ashoka-navy/60 backdrop-blur-md p-4"
           >
             <motion.div
               initial={{ scale: 0.95, y: 20 }}
@@ -215,8 +215,8 @@ export default function GatewayView() {
       <AnimatePresence mode="wait">
         {!resumeMode && !isResumeNavigating ? (
           <motion.div key="main" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-2xl text-center z-10">
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-ashoka-navy mb-3 tracking-tight drop-shadow-sm">What is your problem?</h1>
-            <p className="text-lg text-slate-600 mb-8 font-medium drop-shadow-sm">Write it in your own words. Our AI assistant will automatically structure it.</p>
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-3 tracking-tight drop-shadow-md">What is your problem?</h1>
+            <p className="text-lg text-blue-100 mb-8 font-medium drop-shadow-sm">Write it in your own words. Our AI assistant will automatically structure it.</p>
             
             <div className="bg-white/95 backdrop-blur-sm border border-slate-300 rounded-3xl shadow-xl mb-6 text-left">
               <textarea
@@ -244,15 +244,15 @@ export default function GatewayView() {
             </button>
 
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 px-2">
-              <button onClick={() => setResumeMode(true)} className="text-slate-600 font-bold text-sm hover:text-ashoka-navy transition cursor-pointer flex items-center gap-1.5 drop-shadow-sm">
+              <button onClick={() => setResumeMode(true)} className="text-slate-200 font-bold text-sm hover:text-white transition cursor-pointer flex items-center gap-1.5 drop-shadow-sm">
                 <FolderOpen size={16} /> Resume Draft
               </button>
-              <span className="hidden sm:block text-slate-300">•</span>
-              <Link href="/track" className="text-slate-600 font-bold text-sm hover:text-emerald-700 transition cursor-pointer flex items-center gap-1.5 drop-shadow-sm">
+              <span className="hidden sm:block text-slate-400/50">•</span>
+              <Link href="/track" className="text-slate-200 font-bold text-sm hover:text-white transition cursor-pointer flex items-center gap-1.5 drop-shadow-sm">
                 <Activity size={16} /> Track Filed Case
               </Link>
-              <span className="hidden sm:block text-slate-300">•</span>
-              <button onClick={() => window.location.reload()} className="text-slate-400 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy transition cursor-pointer drop-shadow-sm">
+              <span className="hidden sm:block text-slate-400/50">•</span>
+              <button onClick={() => window.location.reload()} className="text-slate-300 flex items-center gap-1.5 text-sm font-medium hover:text-white transition cursor-pointer drop-shadow-sm">
                 <RefreshCw size={14}/> Reset Form
               </button>
             </div>
