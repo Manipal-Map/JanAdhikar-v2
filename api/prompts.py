@@ -37,12 +37,23 @@ Your job is to analyze a citizen's problem and categorize it into exactly one of
 2. "Rights/Grievance": The user wants relief, compensation, dispute resolution, or enforcement of a legal/civic right (e.g., unpaid pensions via CPGRAMS, withheld tenant security deposits, defective consumer goods, unfair workplace termination).
 3. "Other": The input is pure casual conversation, spam, or completely outside legal/civic/RTI domains.
 
+Additionally, extract any relevant case details from the text to auto-fill our legal forms.
+
 Respond ONLY in valid JSON matching this exact schema:
 {
   "route": "RTI" | "Rights/Grievance" | "Other",
   "sub_category": "<short string>",
   "confidence": <float between 0.0 and 1.0>,
-  "reasoning": "<1-2 sentence explanation in clear language>"
+  "reasoning": "<1-2 sentence explanation in clear language>",
+  "extracted_data": {
+    "applicant_name": "<Extract if mentioned, else empty string>",
+    "applicant_city": "<Extract if mentioned, else empty string>",
+    "target_department": "<Extract opposing party, company, or authority, else empty string>",
+    "incident_date": "<Extract dates/timeframes, else empty string>",
+    "financial_loss": "<Extract amounts, else empty string>",
+    "specific_records": "<Extract what documents they want, if RTI, else empty string>",
+    "desired_relief": "<Extract what they want fixed, if Grievance, else empty string>"
+  }
 }
 """
 
@@ -78,14 +89,14 @@ FEW_SHOT_EXAMPLES = [
 
 DYNAMIC_FORM_SCHEMAS = {
     "RTI": [
-        {"key": "public_authority", "label": "Public Authority / Department", "required": True, "placeholder": "e.g., Municipal Corporation of Delhi, NHAI, PWD"},
+        {"key": "target_department", "label": "Public Authority / Department", "required": True, "placeholder": "e.g., Municipal Corporation of Delhi, NHAI, PWD"},
         {"key": "specific_records", "label": "Specific Records Requested", "required": True, "placeholder": "e.g., Certified copies of tender sanction orders, bills, and road inspection logs"},
         {"key": "time_period", "label": "Time Period / Year", "required": True, "placeholder": "e.g., 1st Jan 2023 to 31st Dec 2023"},
         {"key": "file_or_work_no", "label": "Application / Work Order No. (if any)", "required": False, "placeholder": "e.g., WO/2023/8892"},
         {"key": "applicant_state", "label": "State / Jurisdiction", "required": True, "placeholder": "e.g., Delhi, Maharashtra, Central Govt"}
     ],
     "Rights/Grievance": [
-        {"key": "opponent_party", "label": "Opposing Party / Department", "required": True, "placeholder": "e.g., Landlord Name / Company / Department"},
+        {"key": "target_department", "label": "Opposing Party / Department", "required": True, "placeholder": "e.g., Landlord Name / Company / Department"},
         {"key": "incident_date", "label": "Date of Dispute / Default", "required": True, "placeholder": "e.g., 15th January 2024"},
         {"key": "financial_loss", "label": "Amount Involved / Claim (₹)", "required": False, "placeholder": "e.g., 45000"},
         {"key": "prior_communication", "label": "Prior Complaint / Reference No. (if any)", "required": False, "placeholder": "e.g., Complaint #9921"},
@@ -94,15 +105,18 @@ DYNAMIC_FORM_SCHEMAS = {
     "Other": []
 }
 
-DYNAMIC_FORM_SCHEMAS["RTI"] += [
+# Add standard personal intake fields to ALL valid routes
+personal_fields = [
     {"key": "applicant_name", "label": "Your Full Name", "required": True, "placeholder": "e.g., Rohan Sharma"},
     {"key": "applicant_address", "label": "Your Postal Address", "required": True, "placeholder": "e.g., House No. 12, Sector 5, Delhi - 110001"},
     {"key": "applicant_contact", "label": "Phone / Email", "required": True, "placeholder": "e.g., 9876543210 / rohan@email.com"},
     {"key": "applicant_city", "label": "Your City / District", "required": True, "placeholder": "e.g., New Delhi"},
 ]
 
-# --- Phase 3 RTI-Bench Prompts ---
+DYNAMIC_FORM_SCHEMAS["RTI"].extend(personal_fields)
+DYNAMIC_FORM_SCHEMAS["Rights/Grievance"].extend(personal_fields)
 
+# --- Phase 3 RTI-Bench Prompts ---
 RTI_DRAFT_SYSTEM_PROMPT = """You are an expert Indian RTI lawyer. Generate a formal, Section 6(1) Right to Information Act application draft using the facts provided.
 Follow standard Indian RTI formatting:
 1. Address to: The Public Information Officer (PIO), [Department Name]
@@ -159,40 +173,4 @@ Respond in JSON format:
     "Step 3: PIO is mandated to provide information within 30 days under Section 7(1)."
   ]
 }
-"""
-
-GRIEVANCE_PACK_SYSTEM_PROMPT = """You are an Indian legal advocate drafting a formal Grievance Redressal / Legal Demand Action Pack.
-Generate a structured action pack containing:
-1. "legal_analysis": Applicable Indian laws and citizen rights.
-2. "demand_notice_draft": Formal Demand Notice / CPGRAMS grievance text ready to send.
-3. "filing_portal_guide": Exact portal links and submission steps (e.g., CPGRAMS, National Consumer Helpline 1915, e-Daakhil).
-
-Respond ONLY in JSON format:
-{
-  "legal_analysis": "<concise breakdown of legal violations and user rights>",
-  "demand_notice_draft": "<full text of formal notice/grievance>",
-  "filing_portal_guide": [
-    "<step 1 with portal name and link>",
-    "<step 2>",
-    "<step 3>"
-  ]
-}
-"""
-
-INFO_GATHERING_PROMPT = """You are an expert legal assistant gathering information for a {route} case.
-Your goal is to complete the Required Schema by asking the user questions one by one.
-
-Required Schema: {schema}
-Already Extracted Facts: {current_facts}
-
-Analyze the user's latest message. If they provided new information, map it to the exact keys in the Required Schema.
-Then, generate a friendly, conversational response asking for the NEXT missing required piece of information.
-If ALL required fields are collected, set "is_complete" to true and let the user know you are ready to generate the documents.
-
-Respond ONLY with a valid JSON object containing exactly these three top-level keys:
-{{
-  "new_facts_extracted": {{"key_name": "extracted_value"}},
-  "ai_response": "Your conversational response or next question here",
-  "is_complete": false
-}}
 """
