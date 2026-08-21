@@ -4,18 +4,14 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import useCaseStore from '@/store/caseStore';
 import GatewayView from '@/views/GatewayView';
-import RTIView from '@/views/RTIView';
-import GrievanceView from '@/views/GrievanceView';
+import IntakeFormView from '@/views/IntakeFormView';
 import RTIResultView from '@/views/RTIResultView';
 import GrievanceResultView from '@/views/GrievanceResultView';
 import OutOfScopeView from '@/views/OutOfScopeView';
 
 export default function DashboardApp() {
-  // Fix: Cast the store to 'any' to bypass strict TS inference errors
   const { stage, userProblem, setUserProblem } = useCaseStore() as any;
-  const router = useRouter();
 
-  // On mount: if landing page saved a problem text via sessionStorage, pre-populate it
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const savedProblem = sessionStorage.getItem('janadhikar_problem');
@@ -25,11 +21,12 @@ export default function DashboardApp() {
     }
   }, [userProblem, setUserProblem]);
 
-  if (stage === 'IDLE' || stage === 'INITIALIZING' || stage === 'CLASSIFYING' || stage === 'CLASSIFIED_CONFIRM') {
+  if (stage === 'IDLE' || stage === 'INITIALIZING') {
     return <GatewayView />;
   }
-  if (stage === 'RTI_GATHERING') return <RTIView />;
-  if (stage === 'GRIEVANCE_GATHERING') return <GrievanceView />;
+  if (stage === 'CLASSIFYING' || stage === 'RTI_GATHERING' || stage === 'GRIEVANCE_GATHERING') {
+    return <IntakeFormView />;
+  }
   if (stage === 'PREDICTING' || stage === 'IMPROVING' || stage === 'RTI_PREDICTED' || stage === 'RTI_COMPLETED') {
     return <RTIResultView />;
   }
