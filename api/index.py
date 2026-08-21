@@ -2,6 +2,7 @@ import io
 import json
 import email
 import logging
+from datetime import datetime, timedelta, timezone
 from fastapi import FastAPI, HTTPException, File, UploadFile, Form
 from starlette.requests import Request
 from starlette.responses import Response
@@ -17,7 +18,9 @@ from .department_resolver import department_resolver
 from .rti_pdf_generator import generate_rti_pdf, generate_generic_pdf
 from .appeal_pdf_generator import generate_first_appeal_pdf
 from .grievance_resolver import grievance_resolver
-from .intake_chat import router as intake_router  # AI Intake router
+from .intake_chat import router as intake_router 
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="JanAdhikar AI API", version="2.5")
 
@@ -252,26 +255,34 @@ def download_rti_pdf(case_id: str):
         headers={"Content-Disposition": f"attachment; filename={case_id}_RTI.pdf"}
     )
 
-@app.post("/analyze_pio")
-@app.post("/api/analyze_pio")
-def analyze_pio_endpoint(payload: PIOAnalysisRequest):
+@app.post("/api/analyze_pio_backend")
+def analyze_pio_backend_endpoint(payload: PIOAnalysisRequest):
     try:
         analysis = analyze_pio_response(payload.pio_text or "")
         analysis["case_id"] = payload.case_id
 
         case = case_manager.get_case(payload.case_id)
         if case:
+            # Generate First Appeal Draft automatically to complete the pipeline
+            appellant_name = case.get("form_data", {}).get("applicant_name", "[Applicant Name]")
+            dept_name = case.get("department_info", {}).get("public_authority_name", "[Public Authority]")
+            grounds = analysis.get("appeal_grounds", "The PIO failed to provide complete information in accordance with the RTI Act.")
+            precedent = analysis.get("legal_counter", "Section 7(9) and CIC guidelines mandate strict adherence to disclosure.")
+            
+            draft = f"BEFORE THE FIRST APPELLATE AUTHORITY\nUnder Section 19(1) of the RTI Act, 2005\n\nAppellant: {appellant_name}\nPublic Authority: {dept_name}\n\nGROUNDS FOR APPEAL:\n{grounds}\n\nSTATUTORY PRECEDENT:\n{precedent}\n\nPRAYER:\nDirect the PIO to provide complete information free of cost under Section 7(6) and initiate Section 20(1) penalty proceedings."
+
             case_manager.update_case(payload.case_id, {
                 "pio_response_text": payload.pio_text,
                 "exemption_cited": analysis.get("exemption_cited"),
                 "legal_counter": analysis.get("legal_counter"),
                 "precedent_title": analysis.get("precedent_title"),
-                "status": "pio_analyzed"
+                "status": "pio_analyzed",
+                "first_appeal_draft": draft
             })
 
         return analysis
     except Exception as e:
-        logger.error(f"Error in /analyze_pio: {e}")
+        logger.error(f"Error in /analyze_pio_backend: {e}")
         raise HTTPException(status_code=500, detail="Failed to analyze PIO response")
 
 @app.post("/generate_appeal_pdf")
@@ -354,11 +365,57 @@ def get_case_state(case_id: str):
     case_data = case_manager.get_case(case_id)
     if not case_data:
         raise HTTPException(status_code=404, detail="Case ID not found.")
-    return {"case_id": case_id, "data": case_data}
+        
+    # --- Perform SLA Calculations ---
+    filing_date_str = case_data.get("filing_date")
+    if not filing_date_str:
+        filing_date_obj = datetime.now(timezone.utc) - timedelta(days=35) # Fallback to overdue for tracking visualizer
+        filing_date_str = filing_date_obj.isoformat()
+    else:
+        try:
+            filing_date_obj = datetime.fromisoformat(filing_date_str.replace("Z", "+00:00"))
+        except ValueError:
+            filing_date_obj = datetime.now(timezone.utc) - timedelta(days=35)
+
+    response_due_date_obj = filing_date_obj + timedelta(days=30)
+    first_appeal_due_date_obj = filing_date_obj + timedelta(days=60)
+    now = datetime.now(timezone.utc)
+    
+    is_overdue = now > response_due_date_obj
+    diff_time = now - response_due_date_obj
+    days_overdue = diff_time.days if is_overdue and diff_time.days > 0 else 0
+    
+    # Sec 20 Penalty: Rs 250/day up to 25000 maximum cap
+    section_20_penalty = min(25000, days_overdue * 250)
+    time_remaining_seconds = max(0, int((response_due_date_obj - now).total_seconds()))
+
+    computed_status = case_data.get("status", "ACTIVE")
+    if computed_status in ["classified", "initialized", "FILED"] and is_overdue:
+        computed_status = "DEEMED_REFUSAL"
+
+    response_payload = {
+        "case_id": case_id,
+        "computed_status": computed_status,
+        "is_overdue": is_overdue,
+        "days_overdue": days_overdue,
+        "section_20_penalty_inr": section_20_penalty,
+        "filing_date": filing_date_str,
+        "response_due_date": response_due_date_obj.isoformat(),
+        "first_appeal_due_date": first_appeal_due_date_obj.isoformat(),
+        "time_remaining_seconds": time_remaining_seconds,
+        "pio_response_text": case_data.get("pio_response_text", ""),
+        "exemption_cited": case_data.get("exemption_cited", ""),
+        "legal_counter": case_data.get("legal_counter", ""),
+        "precedent_title": case_data.get("precedent_title", ""),
+        "first_appeal_draft": case_data.get("first_appeal_draft", ""),
+        "data": case_data 
+    }
+
+    return response_payload
 
 @app.get("/api/debug/supabase")
 def debug_supabase():
-    from case_manager import case_manager
+    from .case_manager import case_manager
     import os
     return {
         "use_supabase": case_manager.use_supabase,
