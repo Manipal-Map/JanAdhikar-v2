@@ -1,18 +1,21 @@
 import io
 import json
 import email
+import logging
 from fastapi import FastAPI, HTTPException, File, UploadFile, Form
 from starlette.requests import Request
+from starlette.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 
 from .case_manager import case_manager
-from .classifier import classifier
+from .classifier import classifier, analyze_pio_response
 from .outcome_predictor import outcome_engine
 from .department_resolver import department_resolver
 from .rti_pdf_generator import generate_rti_pdf, generate_generic_pdf
+from .appeal_pdf_generator import generate_first_appeal_pdf
 from .grievance_resolver import grievance_resolver
 from .intake_chat import router as intake_router  # AI Intake router
 
@@ -62,6 +65,21 @@ class GrievanceGenerateRequest(BaseModel):
     user_problem: Optional[str] = ""
     language: Optional[str] = "English"
     files: Optional[List[Dict[str, Any]]] = None
+
+class PIOAnalysisRequest(BaseModel):
+    case_id: str
+    pio_text: Optional[str] = ""
+
+class FirstAppealRequest(BaseModel):
+    appellant_name: str
+    appellant_address: str
+    first_appellate_authority: str
+    pio_address: str
+    rti_registration_no: str
+    rti_filing_date: str
+    pio_reply_date: Optional[str] = None
+    grounds_of_appeal: str
+    legal_precedent: str
 
 @app.get("/")
 def health_check():
@@ -233,6 +251,55 @@ def download_rti_pdf(case_id: str):
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename={case_id}_RTI.pdf"}
     )
+
+@app.post("/analyze_pio")
+@app.post("/api/analyze_pio")
+def analyze_pio_endpoint(payload: PIOAnalysisRequest):
+    try:
+        analysis = analyze_pio_response(payload.pio_text or "")
+        analysis["case_id"] = payload.case_id
+
+        case = case_manager.get_case(payload.case_id)
+        if case:
+            case_manager.update_case(payload.case_id, {
+                "pio_response_text": payload.pio_text,
+                "exemption_cited": analysis.get("exemption_cited"),
+                "legal_counter": analysis.get("legal_counter"),
+                "precedent_title": analysis.get("precedent_title"),
+                "status": "pio_analyzed"
+            })
+
+        return analysis
+    except Exception as e:
+        logger.error(f"Error in /analyze_pio: {e}")
+        raise HTTPException(status_code=500, detail="Failed to analyze PIO response")
+
+@app.post("/generate_appeal_pdf")
+@app.post("/api/generate_appeal_pdf")
+def generate_appeal_pdf_endpoint(payload: FirstAppealRequest):
+    try:
+        pdf_bytes = generate_first_appeal_pdf(
+            appellant_name=payload.appellant_name,
+            appellant_address=payload.appellant_address,
+            first_appellate_authority=payload.first_appellate_authority,
+            pio_address=payload.pio_address,
+            rti_registration_no=payload.rti_registration_no,
+            rti_filing_date=payload.rti_filing_date,
+            pio_reply_date=payload.pio_reply_date,
+            grounds_of_appeal=payload.grounds_of_appeal,
+            legal_precedent=payload.legal_precedent
+        )
+
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="First_Appeal_{payload.rti_registration_no}.pdf"'
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error generating appeal PDF: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate First Appeal PDF")
 
 @app.post("/api/grievance/generate")
 def generate_grievance(payload: GrievanceGenerateRequest):

@@ -2,6 +2,7 @@ import os
 import random
 import string
 import logging
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, Optional
 
 try:
@@ -29,7 +30,7 @@ class CaseManager:
         else:
             logger.warning(
                 "WARNING: Supabase credentials missing or package unavailable. "
-                "Falling back to in-memory storage (data will not persist in serverless environments)."
+                "Falling back to in-memory storage."
             )
 
     def _generate_case_id(self) -> str:
@@ -37,16 +38,22 @@ class CaseManager:
         chars = string.ascii_uppercase + string.digits
         return f"CR-{''.join(random.choices(chars, k=4))}-{''.join(random.choices(chars, k=4))}"
 
-    def create_case(self) -> str:
+    def create_case(self, life_liberty: bool = False) -> str:
         case_id = self._generate_case_id()
-        initial_data = {"status": "initialized"}
+        now_iso = datetime.now(timezone.utc).isoformat()
+        initial_data = {
+            "id": case_id,
+            "status": "FILED",
+            "filing_date": now_iso,
+            "life_liberty_flag": life_liberty,
+            "pio_response_date": None,
+            "first_appeal_date": None,
+            "first_appeal_decision_date": None,
+        }
 
         if self.use_supabase:
             try:
-                self.supabase.table("cases").upsert({
-                    "id": case_id,
-                    "data": initial_data
-                }).execute()
+                self.supabase.table("cases").upsert({"id": case_id, "data": initial_data}).execute()
             except Exception as e:
                 logger.error(f"Supabase UPSERT Error on Create for case {case_id}: {e}")
                 raise RuntimeError(f"Failed to persist case to database: {e}") from e
@@ -74,7 +81,7 @@ class CaseManager:
 
         return self._memory_cases.get(clean_id)
 
-    def update_case(self, case_id: str, updates: Dict[str, Any]) -> None:
+    def update_case(self, case_id: str, updates: Dict[str, Any]) -> Dict[str, Any]:
         if not case_id:
             return
 
@@ -84,6 +91,7 @@ class CaseManager:
         if current_data is None:
             current_data = {"status": "initialized"}
 
+        current_data = self.get_case(case_id) or {"id": case_id, "filing_date": datetime.now(timezone.utc).isoformat()}
         current_data.update(updates)
 
         if self.use_supabase:

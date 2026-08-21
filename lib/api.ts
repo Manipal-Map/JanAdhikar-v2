@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || '', 
-  timeout: 60000,
+  baseURL: process.env.NEXT_PUBLIC_API_URL || '', 
+  timeout: 60000,
 });
 
 export const initCase = () => api.post('/api/case/init').then(r => r.data)
@@ -23,12 +23,12 @@ export const transcribeAudio = (audioBlob: Blob, language: string) => {
 }
 
 export const downloadGenericPdf = (title: string, content: string) => {
-  return api.post('/api/generate-pdf', { title, content }, { responseType: 'blob' })
-    .then(r => r.data)
+  return api.post('/api/generate-pdf', { title, content }, { responseType: 'blob' })
+    .then(r => r.data)
 }
 
 export const grievanceGenerate = (payload: any) => {
-  return api.post('/api/grievance/generate', payload).then(r => r.data)
+  return api.post('/api/grievance/generate', payload).then(r => r.data)
 }
 
 export const getCase = (case_id: string) => api.get(`/api/case/${case_id}`).then(r => r.data)
@@ -36,3 +36,14 @@ export const getCase = (case_id: string) => api.get(`/api/case/${case_id}`).then
 export const intakeChat = (payload: any) => api.post('/api/intake/chat', payload).then(r => r.data)
 
 export default api
+
+export const triggerBlobDownload = (blobData: Blob, filename: string) => {
+  const url = window.URL.createObjectURL(new Blob([blobData]));
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  link.parentNode?.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
