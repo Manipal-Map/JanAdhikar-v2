@@ -58,21 +58,21 @@ export default function RTIView() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col items-center justify-center p-4 py-12 bg-cover bg-center bg-no-repeat relative text-ashoka-navy font-sans"
+      className="min-h-screen flex flex-col items-center justify-center p-4 py-12 bg-cover bg-center bg-no-repeat relative text-slate-200 font-sans"
       style={{ backgroundImage: "url('/bg.image.png')" }}
     >
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl relative z-10">
         
         <div className="mb-3">
-          <span className="text-xs font-bold uppercase font-sans tracking-tight text-court-maroon bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
+          <span className="text-xs font-bold uppercase font-sans tracking-tight text-[#FF9933] bg-[#A32A02]/20 px-3 py-1 rounded-full border border-[#A32A02]/30">
             STEP 2 · Applicant Details
           </span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-ashoka-navy mb-2 tracking-tight drop-shadow-sm">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md">
           Who is filing this RTI?
         </h1>
-        <p className="text-slate-600 mb-8 font-medium drop-shadow-sm">
+        <p className="text-slate-200 mb-8 font-medium drop-shadow-sm">
           Enter your contact details below. Our AI will automatically construct the RTI questions and statutory application clauses.
         </p>
 
