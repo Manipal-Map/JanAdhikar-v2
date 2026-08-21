@@ -40,6 +40,10 @@ export default function GatewayView() {
   const [resumeMode, setResumeMode] = useState(false)
   const [localErr, setLocalErr] = useState<string | null>(null)
   
+  // NEW: Navigation locks to prevent screen flashing during Next.js routing
+  const [isConfirmNavigating, setIsConfirmNavigating] = useState(false)
+  const [isResumeNavigating, setIsResumeNavigating] = useState(false)
+  
   // Modal State & Agreement Checkbox State
   const [showPasskeyModal, setShowPasskeyModal] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -47,8 +51,10 @@ export default function GatewayView() {
 
   const { stage, setStage, caseId, setCaseId, classifyResult, setUserProblem, language, hydrateState } = useCaseStore()
 
-  const isProcessing = stage === 'INITIALIZING' || showPasskeyModal
-  const isClassified = stage === 'CLASSIFIED_CONFIRM' && classifyResult
+  const isProcessing = stage === 'INITIALIZING' || showPasskeyModal || isConfirmNavigating || isResumeNavigating
+  
+  // UPDATED: Locks the confirmation screen in place while navigating
+  const isClassified = (stage === 'CLASSIFIED_CONFIRM' || isConfirmNavigating) && classifyResult
 
   // STEP 1: Initialize case and trigger the Passkey modal
   const handleStartCase = async () => {
@@ -102,6 +108,9 @@ export default function GatewayView() {
     try {
       const res = await getCase(passkey.trim().toUpperCase())
       if (!res) throw new Error("Case not found.")
+      
+      setIsResumeNavigating(true) // Locks the UI to prevent flashing
+      
       hydrateState(res.case_id, res.data)
       const st = res.data?.status
       const rt = res.data?.route
@@ -115,6 +124,7 @@ export default function GatewayView() {
         router.push('/dashboard/grievance')
       }
     } catch (err) {
+      setIsResumeNavigating(false)
       setLocalErr('Invalid Case ID or expired session. Please check and try again.')
       setStage('IDLE')
     }
@@ -122,6 +132,9 @@ export default function GatewayView() {
 
   const handleConfirmRoute = () => {
     if (!classifyResult) return
+    
+    setIsConfirmNavigating(true) // Locks the Confirmation screen while Next.js routes
+
     if (classifyResult.route === 'RTI') {
       setStage('RTI_GATHERING')
       router.push('/dashboard/rti')
@@ -254,7 +267,12 @@ export default function GatewayView() {
 
       {/* ── MAIN CONTAINER / ROUTE CLASSIFICATION CONFIRMATION ── */}
       <AnimatePresence mode="wait">
-        {isClassified ? (
+        {stage === 'CLASSIFYING' ? (
+          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12 z-10">
+            <Loader2 size={40} className="animate-spin text-court-maroon mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-ashoka-navy">Hang on while we classify your case...</h2>
+          </motion.div>
+        ) : isClassified ? (
           /* --- ROUTE CONFIRMATION SCREEN (Shown after AI Intake completes) --- */
           <motion.div key="confirm-screen" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-card p-8 shadow-xl border border-slate-200 max-w-xl w-full z-10">
             <div className="flex items-center gap-3 mb-6">
@@ -281,9 +299,8 @@ export default function GatewayView() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              <button onClick={handleConfirmRoute} className="btn-primary flex-1 justify-center py-3.5 cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white">
-                <CheckCircle2 size={16} />
-                <span>{currentRouteMeta?.actionText}</span>
+              <button onClick={handleConfirmRoute} disabled={isConfirmNavigating} className="btn-primary flex-1 justify-center py-3.5 cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white disabled:opacity-70">
+                {isConfirmNavigating ? <><Loader2 size={16} className="animate-spin" /> <span>Loading...</span></> : <><CheckCircle2 size={16} /><span>{currentRouteMeta?.actionText}</span></>}
               </button>
               <button onClick={() => router.push('/dashboard/intake')} className="btn-ghost flex-initial justify-center py-3.5 border border-slate-300 cursor-pointer">
                 <MessageSquare size={15} /> 
@@ -291,7 +308,7 @@ export default function GatewayView() {
               </button>
             </div>
           </motion.div>
-        ) : !resumeMode ? (
+        ) : (!resumeMode && !isResumeNavigating) ? (
           /* --- MAIN INPUT SCREEN --- */
           <motion.div key="main" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-2xl text-center z-10">
             <h1 className="text-4xl sm:text-5xl font-extrabold text-ashoka-navy mb-3 tracking-tight">What is your problem?</h1>
@@ -346,8 +363,8 @@ export default function GatewayView() {
             
             {localErr && <div className="p-3 bg-red-50 text-red-700 text-sm rounded-xl mb-4 text-left">{localErr}</div>}
 
-            <button onClick={handleResume} disabled={!passkey.trim() || stage === 'INITIALIZING'} className="btn-primary w-full justify-center text-lg py-4 mb-8 shadow-lg cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white">
-              {stage === 'INITIALIZING' ? <Loader2 className="animate-spin" /> : <>Open case <ArrowRight size={20} /></>}
+            <button onClick={handleResume} disabled={!passkey.trim() || stage === 'INITIALIZING' || isResumeNavigating} className="btn-primary w-full justify-center text-lg py-4 mb-8 shadow-lg cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white">
+              {stage === 'INITIALIZING' || isResumeNavigating ? <Loader2 className="animate-spin" /> : <>Open case <ArrowRight size={20} /></>}
             </button>
             
             <div className="flex items-center justify-between border-t border-slate-100 pt-6">
