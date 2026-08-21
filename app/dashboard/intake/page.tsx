@@ -1,5 +1,5 @@
-import IntakeChatView from '@/views/IntakeChatView';
+import IntakeFormView from '@/views/IntakeFormView';
 
 export default function IntakePage() {
-  return <IntakeChatView />;
+  return <IntakeFormView />;
 }
