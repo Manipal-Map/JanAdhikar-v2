@@ -39,6 +39,7 @@ You must respond ONLY in valid JSON format matching this exact schema:
 """
 
 def extract_json_from_text(text: str) -> dict:
+    """Safely extracts JSON from a string even if it's wrapped in markdown or conversational text."""
     try:
         return json.loads(text)
     except json.JSONDecodeError:
@@ -72,8 +73,9 @@ def intake_chat(payload: IntakeMessage):
         
         messages.append({"role": "user", "content": payload.message})
 
+        # --- UPDATED TO STABLE 8B MODEL ---
         response = client.chat.completions.create(
-            model="llama-3.1-70b-versatile", 
+            model="llama3-8b-8192", 
             messages=messages,
             temperature=0.2,
             response_format={"type": "json_object"}
