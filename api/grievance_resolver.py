@@ -6,8 +6,7 @@ from .classifier import classifier
 class GrievanceResolver:
     def __init__(self):
         self.vision_model = "llama-3.2-11b-vision-preview" 
-        # --- UPDATED TO STABLE 8B MODEL ---
-        self.text_model = "llama3-8b-8192"
+        self.text_model = "openai/gpt-oss-120b"
 
     def _get_client(self):
         return classifier.client
