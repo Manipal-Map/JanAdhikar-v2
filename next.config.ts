@@ -3,17 +3,17 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   transpilePackages: ["framer-motion", "recharts", "lucide-react"],
   typescript: {
-    ignoreBuildErrors: true, // Prevents type errors from failing the build
+    ignoreBuildErrors: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
   },
   async rewrites() {
+    const backendUrl = process.env.BACKEND_URL || "http://127.0.0.1:8000";
     return [
       {
         source: "/api/:path*",
-        // Secretly proxies all API calls to your Vercel backend, eliminating CORS!
-        destination: "https://jan-adhikar-backend-o5xfbvm3m-anmol-s-project1.vercel.app/api/:path*",
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },
