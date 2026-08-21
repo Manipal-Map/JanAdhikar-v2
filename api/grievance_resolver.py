@@ -1,7 +1,32 @@
 import json
 import base64
+import re
 from typing import Dict, Any, List
 from .classifier import classifier
+
+def extract_json_from_text(text: str) -> dict:
+    """Safely extracts JSON from a string even if it's wrapped in markdown or conversational text."""
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
+        if json_match:
+            try: return json.loads(json_match.group(1))
+            except json.JSONDecodeError: pass
+        json_match = re.search(r'(\{.*\})', text, re.DOTALL)
+        if json_match:
+            try: return json.loads(json_match.group(1))
+            except json.JSONDecodeError: pass
+        
+        # Absolute fallback if AI failed to return JSON
+        return {
+            "violated_rights": ["Right to Fair Service"],
+            "legal_explanation": "Based on the provided facts.",
+            "target_portal_name": "Appropriate Legal Forum",
+            "target_portal_url": "",
+            "evidence_analysis": "Reviewing attached documents.",
+            "demand_notice_draft": text # Dump whatever raw text the AI generated into the draft field
+        }
 
 class GrievanceResolver:
     def __init__(self):
@@ -70,7 +95,10 @@ class GrievanceResolver:
                     temperature=0.1,
                     response_format={"type": "json_object"},
                 )
-                return json.loads(resp.choices[0].message.content.strip())
+                
+                raw_content = resp.choices[0].message.content.strip()
+                return extract_json_from_text(raw_content) # Use the robust extractor here!
+                
             except Exception as e:
                 print(f"Grievance LLM call failed ({e}). Using expert legal rule engine.")
 
