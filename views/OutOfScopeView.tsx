@@ -24,7 +24,7 @@ export default function OutOfScopeView() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-cover bg-center bg-no-repeat relative text-slate-200 font-sans"
+      className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-cover bg-center bg-no-repeat relative text-ashoka-navy font-sans"
       style={{ backgroundImage: "url('/bg.image.png')" }}
     >
       <motion.div
@@ -33,12 +33,12 @@ export default function OutOfScopeView() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-2xl mx-auto relative z-10"
       >
-        <div className="bg-[#0F172A]/85 backdrop-blur-md p-8 text-center mb-6 rounded-3xl border border-white/10 shadow-2xl">
-          <div className="w-16 h-16 rounded-2xl bg-rose-950/30 border border-rose-900/50 flex items-center justify-center mx-auto mb-5">
+        <div className="bg-white/95 backdrop-blur-md p-8 text-center mb-6 rounded-3xl border border-slate-300 shadow-xl">
+          <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center mx-auto mb-5">
             <ShieldOff size={28} className="text-rose-500" />
           </div>
-          <h1 className="text-2xl font-extrabold text-white mb-3 tracking-tight">Outside Platform Scope</h1>
-          <p className="text-slate-300 leading-relaxed mb-4 text-sm sm:text-base font-medium">
+          <h1 className="text-2xl font-extrabold text-ashoka-navy mb-3 tracking-tight">Outside Platform Scope</h1>
+          <p className="text-slate-600 leading-relaxed mb-4 text-sm sm:text-base font-medium">
             Your query doesn't fall within our supported legal domains. JanAdhikar specialises
             in RTI applications, consumer rights, tenancy disputes, and civic grievances under
             Indian law.
@@ -51,8 +51,8 @@ export default function OutOfScopeView() {
           )}
 
           {classifyResult?.reasoning && (
-            <div className="p-4 bg-[#1E293B]/60 rounded-xl border border-slate-700 text-sm text-slate-300 text-left mb-5 shadow-inner">
-              <span className="font-bold text-white">AI Reasoning: </span>
+            <div className="p-4 bg-[#FAF8F5] rounded-xl border border-slate-200 text-sm text-slate-700 text-left mb-5 shadow-inner">
+              <span className="font-bold text-ashoka-navy">AI Reasoning: </span>
               {classifyResult.reasoning}
             </div>
           )}
@@ -60,23 +60,23 @@ export default function OutOfScopeView() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
               onClick={handleReset}
-              className="btn-primary cursor-pointer w-full sm:w-auto justify-center bg-[#A32A02] hover:bg-[#138808] transition-colors text-white font-bold"
+              className="btn-primary cursor-pointer w-full sm:w-auto justify-center bg-[#A32A02] hover:bg-[#138808] transition-colors text-white font-bold tracking-tight"
             >
               <RotateCcw size={15} /> Start a New Case
             </button>
             <button
               onClick={() => { reset(); router.push('/'); }}
-              className="btn-ghost cursor-pointer w-full sm:w-auto justify-center border border-slate-700 bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700"
+              className="btn-ghost cursor-pointer w-full sm:w-auto justify-center border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 font-sans tracking-tight font-bold"
             >
               <ArrowLeft size={15} /> Back to Landing
             </button>
           </div>
         </div>
 
-        <div className="bg-[#0F172A]/85 backdrop-blur-md p-6 rounded-3xl border border-white/10 shadow-2xl">
+        <div className="bg-white/95 backdrop-blur-md p-6 rounded-3xl border border-slate-300 shadow-xl">
           <div className="flex items-center gap-2 mb-4">
             <BookOpen size={16} className="text-[#FF9933]" />
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider">What JanAdhikar Handles</h2>
+            <h2 className="text-sm font-bold text-ashoka-navy uppercase tracking-wider font-sans">What JanAdhikar Handles</h2>
           </div>
           <div className="space-y-3">
             {SCOPE_ITEMS.map((item, i) => (
@@ -85,20 +85,20 @@ export default function OutOfScopeView() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.07 }}
-                className="flex items-start gap-3 p-3.5 bg-[#1E293B]/60 rounded-xl border border-slate-700 shadow-sm"
+                className="flex items-start gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200 shadow-sm"
               >
                 <span className="text-lg leading-none mt-0.5">{item.icon}</span>
                 <div className="text-left">
-                  <p className="text-sm font-bold text-white mb-0.5">{item.label}</p>
-                  <p className="text-xs text-slate-400 leading-relaxed font-medium">{item.desc}</p>
+                  <p className="text-sm font-bold text-ashoka-navy mb-0.5">{item.label}</p>
+                  <p className="text-xs text-slate-600 leading-relaxed font-medium">{item.desc}</p>
                 </div>
               </motion.div>
             ))}
           </div>
-          <div className="mt-4 p-3.5 bg-blue-950/30 border border-blue-900/50 rounded-xl flex items-start gap-2.5 text-left">
-            <MessageSquare size={16} className="text-blue-400 mt-0.5 shrink-0" />
-            <p className="text-xs text-blue-200 leading-relaxed font-medium">
-              <span className="font-bold text-white">Tip: </span>
+          <div className="mt-4 p-3.5 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-2.5 text-left">
+            <MessageSquare size={16} className="text-blue-700 mt-0.5 shrink-0" />
+            <p className="text-xs text-blue-900 leading-relaxed font-medium">
+              <span className="font-bold text-ashoka-navy">Tip: </span>
               Try rephrasing your query to describe a specific legal issue — e.g.
               "I want to know the status of my RTI application filed with PWD" or
               "My landlord refused to return my security deposit."
