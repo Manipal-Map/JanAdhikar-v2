@@ -82,12 +82,19 @@ export default function GatewayView() {
       hydrateState(res.case_id, res.data)
       const st = res.data?.status
       const rt = res.data?.route
+      
       if (st === 'rti_completed' || st === 'rti_predicted' || st === 'rti_drafted') {
         router.push('/dashboard/rti/result')
       } else if (st === 'grievance_completed') {
         router.push('/dashboard/grievance/result')
       } else if (rt === 'RTI' || rt === 'Rights/Grievance') {
         router.push('/dashboard/intake')
+      } else {
+        // FIX: Handles fresh "initialized" cases that haven't been classified yet.
+        // Drops you back to the text box so you can type your problem.
+        setResumeMode(false)
+        setIsResumeNavigating(false)
+        setStage('IDLE')
       }
     } catch (err) {
       setIsResumeNavigating(false)
