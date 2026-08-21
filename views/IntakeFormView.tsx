@@ -227,10 +227,10 @@ export default function IntakeFormView() {
 
         <div className="flex items-center justify-between px-2">
           <div>
-            <span className={`text-xs font-bold uppercase font-sans tracking-tight px-3 py-1 rounded-full border ${isOther ? 'bg-slate-100 text-slate-600 border-slate-200' : 'text-court-maroon bg-rose-50 border-rose-200'}`}>
+            <span className={`text-xs font-bold uppercase font-sans tracking-tight px-3 py-1 rounded-full border ${isOther ? 'bg-slate-100 text-slate-600 border-slate-200' : 'text-[#FF9933] bg-[#A32A02]/20 border-[#A32A02]/30'}`}>
               Route: {isOther ? 'Out of Platform Scope' : (isRTI ? 'Right to Information (RTI)' : 'Administrative Grievance')}
             </span>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-ashoka-navy mt-2 tracking-tight drop-shadow-sm">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-white mt-2 tracking-tight drop-shadow-md">
               {currentStep === 0 && 'Legal Route & Case Assessment'}
               {currentStep === 1 && 'Step 1: Your Contact Information'}
               {currentStep === 2 && 'Step 2: Review AI Legal Strategy'}
@@ -389,7 +389,7 @@ export default function IntakeFormView() {
 
           {currentStep === 2 && (
             <form onSubmit={handleNextStep} className="space-y-6 animate-in fade-in duration-300">
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl flex items-start gap-3 shadow-sm">
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl flex items-start gap-3 shadow-xs">
                 <Sparkles size={18} className="text-blue-600 mt-0.5 shrink-0" />
                 <p className="text-xs text-blue-900 font-medium leading-relaxed">
                   <strong className="text-ashoka-navy tracking-tight font-bold">AI Strategy Engine:</strong> We have automatically structured the technical legal clauses and target authority based on your problem. <br/><br/>
