@@ -58,28 +58,28 @@ export default function RTIView() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col items-center justify-center p-4 py-12 bg-cover bg-center bg-no-repeat relative"
+      className="min-h-screen flex flex-col items-center justify-center p-4 py-12 bg-cover bg-center bg-no-repeat relative text-slate-200 font-sans"
       style={{ backgroundImage: "url('/bg.image.png')" }}
     >
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl relative z-10">
         
         <div className="mb-3">
-          <span className="text-xs font-bold uppercase tracking-widest text-court-maroon bg-court-maroon/10 px-3 py-1 rounded-full border border-court-maroon/25">
+          <span className="text-xs font-bold uppercase font-sans tracking-tight text-[#FF9933] bg-[#A32A02]/20 px-3 py-1 rounded-full border border-[#A32A02]/30">
             STEP 2 · Applicant Details
           </span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-ashoka-navy mb-2 tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md">
           Who is filing this RTI?
         </h1>
-        <p className="text-slate-600 mb-8 font-medium">
+        <p className="text-blue-100 mb-8 font-medium drop-shadow-sm">
           Enter your contact details below. Our AI will automatically construct the RTI questions and statutory application clauses.
         </p>
 
-        <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-xs border border-slate-300 rounded-3xl p-8 shadow-md space-y-6">
+        <form onSubmit={handleSubmit} className="bg-[#0F172A]/85 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl space-y-6">
           {INTAKE_FIELDS.map((field) => (
             <div key={field.key} className="space-y-2 text-left">
-              <label className="block text-xs font-bold text-ashoka-navy uppercase tracking-wider">
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
                 {field.label}
               </label>
               <input
@@ -88,20 +88,20 @@ export default function RTIView() {
                 value={localForm[field.key] || ''}
                 onChange={(e) => handleChange(field.key, e.target.value)}
                 placeholder={field.placeholder}
-                className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl px-4 py-3.5 text-ashoka-navy placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-court-maroon/30 focus:border-court-maroon transition-all text-sm font-medium"
+                className="w-full bg-[#1E293B]/60 border border-slate-600 rounded-xl px-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#FF9933] focus:border-[#FF9933] transition-all text-sm font-medium"
               />
             </div>
           ))}
 
           {resolvingDept && (
-            <div className="flex items-center gap-2 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-200 font-medium">
-              <Loader2 size={14} className="animate-spin text-court-maroon" />
+            <div className="flex items-center gap-2 text-xs text-slate-300 bg-[#1E293B]/60 p-3 rounded-xl border border-slate-700 font-medium">
+              <Loader2 size={14} className="animate-spin text-[#FF9933]" />
               <span>AI is auto-filling jurisdictional details for your RTI...</span>
             </div>
           )}
 
-          <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-            <button type="button" onClick={() => { setStage('IDLE'); router.push('/dashboard'); }} className="btn-ghost text-sm cursor-pointer bg-white border border-slate-300">
+          <div className="flex items-center justify-between pt-4 border-t border-slate-700/60">
+            <button type="button" onClick={() => { setStage('IDLE'); router.push('/dashboard'); }} className="btn-ghost text-sm cursor-pointer bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700">
               <ArrowLeft size={16} /> Back
             </button>
             <button type="submit" disabled={loading || resolvingDept} className="btn-primary text-base py-3 px-8 cursor-pointer bg-[#A32A02] hover:bg-[#138808] transition-colors text-white font-bold rounded-xl shadow-md">
