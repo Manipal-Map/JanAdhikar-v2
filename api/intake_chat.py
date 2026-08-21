@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from typing import Dict, Any, List
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -37,21 +38,51 @@ You must respond ONLY in valid JSON format matching this exact schema:
 }
 """
 
+def extract_json_from_text(text: str) -> dict:
+    """Safely extracts JSON from a string even if it's wrapped in markdown or conversational text."""
+    try:
+        # First try direct parse
+        return json.loads(text)
+    except json.JSONDecodeError:
+        # Try to find JSON block wrapped in triple backticks
+        json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
+        if json_match:
+            try:
+                return json.loads(json_match.group(1))
+            except json.JSONDecodeError:
+                pass
+        
+        # Try to find anything that looks like a JSON object
+        json_match = re.search(r'(\{.*\})', text, re.DOTALL)
+        if json_match:
+            try:
+                return json.loads(json_match.group(1))
+            except json.JSONDecodeError:
+                pass
+                
+        # Ultimate fallback if everything fails
+        return {
+            "assistant_reply": "I am processing your details, but encountered a formatting hiccup. Could you please clarify your city and the main issue again?",
+            "is_ready_to_proceed": False,
+            "extracted_data": {}
+        }
+
 @router.post("/api/intake/chat")
 def intake_chat(payload: IntakeMessage):
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
-        raise HTTPException(status_code=500, detail="Groq API key not configured.")
-
-    client = Groq(api_key=api_key)
-    
-    messages = [{"role": "system", "content": INTAKE_SYSTEM_PROMPT}]
-    for h in payload.history:
-        messages.append({"role": h.get("role", "user"), "content": h.get("content", "")})
-    
-    messages.append({"role": "user", "content": payload.message})
+        print("CRITICAL ERROR: GROQ_API_KEY is missing from environment variables.")
+        raise HTTPException(status_code=500, detail="Groq API key not configured on server.")
 
     try:
+        client = Groq(api_key=api_key)
+        
+        messages = [{"role": "system", "content": INTAKE_SYSTEM_PROMPT}]
+        for h in payload.history:
+            messages.append({"role": h.get("role", "user"), "content": h.get("content", "")})
+        
+        messages.append({"role": "user", "content": payload.message})
+
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=messages,
@@ -60,16 +91,20 @@ def intake_chat(payload: IntakeMessage):
         )
         
         raw_content = response.choices[0].message.content.strip()
-        # Clean potential markdown wrapping if present
-        if raw_content.startswith("```json"):
-            raw_content = raw_content[7:]
-        if raw_content.startswith("```"):
-            raw_content = raw_content[3:]
-        if raw_content.endswith("```"):
-            raw_content = raw_content[:-3]
-            
-        result = json.loads(raw_content.strip())
+        result = extract_json_from_text(raw_content)
+        
+        # Ensure we don't lose previously extracted data
+        if payload.current_extracted_data:
+            merged_data = {**payload.current_extracted_data, **result.get("extracted_data", {})}
+            result["extracted_data"] = merged_data
+
         return result
+        
     except Exception as e:
-        print(f"Intake Chat Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Intake Chat Exception: {str(e)}")
+        # Instead of crashing with 500, return a graceful fallback response
+        return {
+            "assistant_reply": "I apologize, our secure legal network experienced a slight delay. Please continue telling me about your problem.",
+            "is_ready_to_proceed": False,
+            "extracted_data": payload.current_extracted_data
+        }
