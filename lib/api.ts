@@ -13,10 +13,9 @@ export const downloadRtiPdf = (case_id: string) => api.get(`/api/rti/pdf/${case_
 export const rtiPredict = (case_id: string, draft_text: string | null = null) => api.post('/api/rti/predict', { case_id, draft_text }).then(r => r.data)
 export const rtiImprove = (case_id: string) => api.post('/api/rti/improve', { case_id }).then(r => r.data)
 
-// FIX: Added the missing analyzePio function required by the track page
-export const analyzePio = (case_id: string, pio_text: string) => api.post('/api/analyze_pio', { case_id, pio_text }).then(r => r.data)
+// FIX: Point directly to the python backend to bypass Next.js API wrapper issues
+export const analyzePio = (case_id: string, pio_text: string) => api.post('/api/analyze_pio_backend', { case_id, pio_text }).then(r => r.data)
 
-// UPDATED: Dynamically assign the correct file extension based on browser
 export const transcribeAudio = (audioBlob: Blob, language: string) => {
   const formData = new FormData()
   const extension = audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
