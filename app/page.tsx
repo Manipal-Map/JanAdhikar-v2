@@ -159,7 +159,7 @@ export default function Home() {
   };
 
   const handleStartIntake = () => {
-    router.push("/dashboard/intake");
+    router.push("/dashboard");
   };
 
   const getFullPetitionText = () => {
