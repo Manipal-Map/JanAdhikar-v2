@@ -288,33 +288,20 @@ export default function IntakeFormView() {
 
                 <div className="pt-2">
                   <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Detailed Legal Analysis</h4>
-                  <div className="text-slate-700">
+                  <div className="text-sm font-medium text-slate-700 leading-relaxed">
                     {formatAIText(classifyResult.reasoning)}
                   </div>
                 </div>
               </div>
 
-              {isOther ? (
+              {/* ACTION PLAN IF OUT OF SCOPE */}
+              {isOther && (
                 <div className="p-6 bg-blue-50 border border-blue-200 rounded-3xl text-left shadow-sm">
                   <h4 className="text-base font-bold text-blue-900 flex items-center gap-2 mb-4 pb-2 border-b border-blue-200/60">
                     <Info size={20} className="text-blue-700"/> Recommended Action Plan
                   </h4>
-                  <div className="text-blue-900 font-medium">
+                  <div className="text-sm text-blue-900 leading-relaxed font-medium">
                     {formatAIText(classifyResult.specific_advice || 'This case falls outside RTI or Consumer/Administrative grievance jurisdictions. Please consult a local legal professional or the relevant authority for this specific issue.')}
-                  </div>
-                </div>
-              ) : (
-                <div className="p-6 bg-white border border-slate-200 rounded-3xl text-left shadow-sm">
-                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-5 flex items-center gap-2">
-                    <Sparkles size={16} className="text-emerald-600"/> Facts Extracted By AI Engine
-                  </h4>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-5 gap-x-4">
-                    {Object.entries(localForm).filter(([k,v]) => v && typeof v === 'string').map(([k,v]) => (
-                      <div key={k}>
-                        <span className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{k.replace(/_/g, ' ')}</span>
-                        <span className="block text-xs font-semibold text-ashoka-navy truncate pr-2" title={v as string}>{v as string}</span>
-                      </div>
-                    ))}
                   </div>
                 </div>
               )}
