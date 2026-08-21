@@ -73,13 +73,13 @@ export default function RTIResultView({ initialDepartment }: RTIResultViewProps)
   if (!rtiDraft && !loadingPred) {
     return (
       <div 
-        className="min-h-screen flex flex-col items-center justify-center p-4 bg-cover bg-center bg-no-repeat relative text-slate-200"
+        className="min-h-screen flex flex-col items-center justify-center p-4 bg-cover bg-center bg-no-repeat relative text-ashoka-navy"
         style={{ backgroundImage: "url('/bg.image.png')" }}
       >
-        <div className="bg-[#0F172A]/85 backdrop-blur-md border border-white/10 rounded-3xl p-8 max-w-md text-center space-y-4 shadow-2xl relative z-10">
+        <div className="bg-white/95 backdrop-blur-md border border-slate-300 rounded-3xl p-8 max-w-md text-center space-y-4 shadow-xl relative z-10">
           <AlertCircle size={36} className="text-amber-500 mx-auto" />
-          <h2 className="text-xl font-extrabold text-white tracking-tight">No Draft Found</h2>
-          <p className="text-xs text-slate-400 font-medium">
+          <h2 className="text-xl font-extrabold text-ashoka-navy tracking-tight">No Draft Found</h2>
+          <p className="text-xs text-slate-600 font-medium">
             We couldn't locate an active RTI draft for analysis. Please start or select an existing case.
           </p>
           <button
@@ -87,7 +87,7 @@ export default function RTIResultView({ initialDepartment }: RTIResultViewProps)
               setStage('RTI_GATHERING');
               router.push('/dashboard/rti');
             }}
-            className="btn-primary text-xs py-2.5 px-6 mx-auto cursor-pointer bg-[#A32A02] hover:bg-[#138808] transition-colors text-white font-bold"
+            className="btn-primary text-xs py-2.5 px-6 mx-auto cursor-pointer bg-[#A32A02] hover:bg-[#138808] transition-colors text-white font-bold font-sans tracking-tight"
           >
             Go to RTI Form
           </button>
@@ -98,7 +98,7 @@ export default function RTIResultView({ initialDepartment }: RTIResultViewProps)
 
   return (
     <div 
-      className="min-h-screen flex flex-col items-center justify-center p-4 py-12 bg-cover bg-center bg-no-repeat relative text-slate-200 font-sans"
+      className="min-h-screen flex flex-col items-center justify-center p-4 py-12 bg-cover bg-center bg-no-repeat relative text-ashoka-navy font-sans"
       style={{ backgroundImage: "url('/bg.image.png')" }}
     >
       <motion.div
@@ -109,44 +109,44 @@ export default function RTIResultView({ initialDepartment }: RTIResultViewProps)
         {subStep === 1 ? (
           <div>
             <div className="mb-3">
-              <span className="text-xs font-bold uppercase font-sans tracking-tight text-[#FF9933] bg-[#A32A02]/20 px-3 py-1 rounded-full border border-[#A32A02]/30">
+              <span className="text-xs font-bold uppercase font-sans tracking-tight text-court-maroon bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
                 STEP 3 · RTI Risk Analysis & Predictor
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-ashoka-navy mb-2 tracking-tight drop-shadow-sm">
               RTI Rejection Risk Factors
             </h1>
-            <p className="text-blue-100 mb-8 font-medium drop-shadow-sm">
+            <p className="text-slate-600 mb-8 font-medium drop-shadow-sm">
               Our AI evaluates your RTI draft against Section 8/9 exemptions to predict approval likelihood and highlight potential risks.
             </p>
 
-            <div className="bg-[#0F172A]/85 backdrop-blur-md border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-left">
+            <div className="bg-white/95 backdrop-blur-md border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6 text-left">
               {loadingPred ? (
                 <div className="py-12 text-center space-y-3">
-                  <Loader2 size={32} className="animate-spin text-[#FF9933] mx-auto" />
-                  <p className="text-sm font-medium text-slate-400">
+                  <Loader2 size={32} className="animate-spin text-court-maroon mx-auto" />
+                  <p className="text-sm font-medium text-slate-500">
                     Analyzing RTI exemption risks and predictability...
                   </p>
                 </div>
               ) : prediction ? (
                 <>
-                  <div className="flex items-center justify-between bg-[#1E293B]/60 p-4 rounded-2xl border border-slate-700">
+                  <div className="flex items-center justify-between bg-[#FAF8F5] p-4 rounded-2xl border border-slate-200">
                     <div>
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider font-sans">
                         Predicted Success Outlook
                       </h4>
-                      <p className="text-lg font-black text-white mt-0.5 tracking-tight">
+                      <p className="text-lg font-black text-ashoka-navy mt-0.5 tracking-tight">
                         {prediction.prediction || prediction.status || 'HIGH LIKELIHOOD'}
                       </p>
                     </div>
-                    <span className="px-3 py-1 bg-emerald-900/40 text-emerald-400 font-bold text-xs rounded-full border border-emerald-700/50">
+                    <span className="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold text-xs rounded-full border border-emerald-200 font-sans tracking-tight">
                       Optimized
                     </span>
                   </div>
 
                   <div>
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
                       Detected Risks & Pitfalls
                     </h4>
                     {detectedRisks.length > 0 ? (
@@ -154,26 +154,26 @@ export default function RTIResultView({ initialDepartment }: RTIResultViewProps)
                         {detectedRisks.map((risk: any, idx: number) => (
                           <div
                             key={idx}
-                            className="p-3 bg-amber-950/30 border border-amber-900/50 rounded-xl text-xs text-amber-200 font-medium flex items-start gap-2"
+                            className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 font-medium flex items-start gap-2"
                           >
-                            <AlertTriangle size={15} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                            <AlertTriangle size={15} className="text-amber-600 flex-shrink-0 mt-0.5" />
                             <span>{typeof risk === 'string' ? risk : risk.description || risk.risk}</span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-slate-400 italic">
+                      <p className="text-xs text-slate-500 italic">
                         No major Section 8/9 exemption risks detected.
                       </p>
                     )}
                   </div>
 
                   <div>
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
                       AI Improvement Suggestions
                     </h4>
                     {improvementSuggestions.length > 0 ? (
-                      <ul className="space-y-2 text-xs text-slate-300 list-disc list-inside font-medium bg-[#1E293B]/60 p-4 rounded-xl border border-slate-700">
+                      <ul className="space-y-2 text-xs text-slate-700 list-disc list-inside font-medium bg-[#FAF8F5] p-4 rounded-xl border border-slate-200">
                         {improvementSuggestions.map((sug: string, idx: number) => (
                           <li key={idx} className="leading-relaxed">
                             {sug}
@@ -181,7 +181,7 @@ export default function RTIResultView({ initialDepartment }: RTIResultViewProps)
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-xs text-slate-400 italic bg-[#1E293B]/60 p-4 rounded-xl border border-slate-700">
+                      <p className="text-xs text-slate-500 italic bg-[#FAF8F5] p-4 rounded-xl border border-slate-200">
                         Draft is clear and well-structured for filing.
                       </p>
                     )}
@@ -191,13 +191,13 @@ export default function RTIResultView({ initialDepartment }: RTIResultViewProps)
                 <p className="text-sm text-slate-500">Draft ready for optimization.</p>
               )}
 
-              <div className="flex items-center justify-between pt-4 border-t border-slate-700/60">
+              <div className="flex items-center justify-between pt-4 border-t border-slate-200">
                 <button
                   onClick={() => {
                     setStage('RTI_GATHERING');
                     router.push('/dashboard/rti');
                   }}
-                  className="btn-ghost text-sm cursor-pointer bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700"
+                  className="btn-ghost text-sm cursor-pointer bg-white border-slate-300 text-slate-700 hover:bg-slate-50 font-sans tracking-tight font-bold"
                 >
                   <ArrowLeft size={16} /> Edit Applicant Form
                 </button>
@@ -222,18 +222,18 @@ export default function RTIResultView({ initialDepartment }: RTIResultViewProps)
         ) : (
           <div>
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-xs font-bold uppercase font-sans tracking-tight text-[#FF9933] bg-[#A32A02]/20 px-3 py-1 rounded-full border border-[#A32A02]/30">
+              <span className="text-xs font-bold uppercase font-sans tracking-tight text-court-maroon bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
                 STEP 4 · Final RTI Application (Form A)
               </span>
-              <span className="text-xs font-mono font-bold text-slate-300 bg-[#0F172A]/80 backdrop-blur-md px-3 py-1 rounded-xl border border-slate-700/60 shadow-xs">
+              <span className="text-xs font-mono font-bold text-slate-600 bg-white/95 backdrop-blur-md px-3 py-1 rounded-xl border border-slate-300 shadow-xs">
                 Case ID: #{caseId}
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-ashoka-navy mb-2 tracking-tight drop-shadow-md">
               Statutory RTI Application Ready
             </h1>
-            <p className="text-blue-100 mb-8 font-medium drop-shadow-sm">
+            <p className="text-slate-600 mb-8 font-medium drop-shadow-sm">
               Your application has been polished to withstand statutory rejections. Download the official PDF or copy the text.
             </p>
 
@@ -244,30 +244,30 @@ export default function RTIResultView({ initialDepartment }: RTIResultViewProps)
                 caseId={caseId}
               />
 
-              <div className="bg-amber-950/30 border border-amber-900/50 rounded-2xl p-4 flex items-start gap-3 shadow-sm text-left">
-                <div className="mt-0.5 text-amber-500 flex-shrink-0">
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 shadow-sm text-left">
+                <div className="mt-0.5 text-amber-600 flex-shrink-0">
                   <AlertCircle size={18} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wide mb-1">
+                  <h4 className="text-xs font-bold text-amber-900 uppercase tracking-wide mb-1 font-sans">
                     Important Disclaimer
                   </h4>
-                  <p className="text-xs text-amber-200 leading-relaxed font-medium">
+                  <p className="text-xs text-amber-800 leading-relaxed font-medium">
                     This is an AI generated document, read well before submission. Please verify all facts, dates, and claims thoroughly before sending it to the concerned authority or court.
                   </p>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-slate-700/60 mt-6 gap-3">
+              <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-slate-300 mt-6 gap-3">
                 <button
                   onClick={() => setSubStep(1)}
-                  className="btn-ghost text-sm cursor-pointer w-full sm:w-auto justify-center bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700"
+                  className="btn-ghost text-sm cursor-pointer w-full sm:w-auto justify-center bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-sans tracking-tight font-bold"
                 >
                   <ArrowLeft size={16} /> Back to Risk Analysis
                 </button>
                 <button
                   onClick={() => router.push(`/track?case_id=${caseId}`)}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold text-sm transition-all shadow-md cursor-pointer w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-ashoka-navy hover:bg-slate-800 border border-slate-700 text-white font-bold text-sm transition-all shadow-md cursor-pointer w-full sm:w-auto tracking-tight font-sans"
                 >
                   <Activity size={16} className="text-emerald-400" />
                   <span>Track SLA & Appeals</span>
