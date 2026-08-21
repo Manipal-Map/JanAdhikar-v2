@@ -73,10 +73,10 @@ export default function RTIResultView({ initialDepartment }: RTIResultViewProps)
   if (!rtiDraft && !loadingPred) {
     return (
       <div 
-        className="min-h-screen flex flex-col items-center justify-center p-4 bg-cover bg-center bg-no-repeat relative text-ashoka-navy"
+        className="min-h-screen flex flex-col items-center justify-center p-4 bg-cover bg-center bg-no-repeat relative text-slate-200"
         style={{ backgroundImage: "url('/bg.image.png')" }}
       >
-        <div className="bg-white/95 backdrop-blur-md border border-slate-300 rounded-3xl p-8 max-w-md text-center space-y-4 shadow-xl relative z-10">
+        <div className="bg-white/95 backdrop-blur-sm border border-slate-300 rounded-3xl p-8 max-w-md text-center space-y-4 shadow-xl relative z-10">
           <AlertCircle size={36} className="text-amber-500 mx-auto" />
           <h2 className="text-xl font-extrabold text-ashoka-navy tracking-tight">No Draft Found</h2>
           <p className="text-xs text-slate-600 font-medium">
@@ -114,14 +114,14 @@ export default function RTIResultView({ initialDepartment }: RTIResultViewProps)
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-ashoka-navy mb-2 tracking-tight drop-shadow-sm">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md">
               RTI Rejection Risk Factors
             </h1>
-            <p className="text-slate-600 mb-8 font-medium drop-shadow-sm">
+            <p className="text-slate-200 mb-8 font-medium drop-shadow-sm">
               Our AI evaluates your RTI draft against Section 8/9 exemptions to predict approval likelihood and highlight potential risks.
             </p>
 
-            <div className="bg-white/95 backdrop-blur-md border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6 text-left">
+            <div className="bg-white/95 backdrop-blur-sm border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6 text-left">
               {loadingPred ? (
                 <div className="py-12 text-center space-y-3">
                   <Loader2 size={32} className="animate-spin text-court-maroon mx-auto" />
@@ -225,15 +225,15 @@ export default function RTIResultView({ initialDepartment }: RTIResultViewProps)
               <span className="text-xs font-bold uppercase font-sans tracking-tight text-court-maroon bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
                 STEP 4 · Final RTI Application (Form A)
               </span>
-              <span className="text-xs font-mono font-bold text-slate-600 bg-white/95 backdrop-blur-md px-3 py-1 rounded-xl border border-slate-300 shadow-xs">
+              <span className="text-xs font-mono font-bold text-slate-600 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-xl border border-slate-300 shadow-xs">
                 Case ID: #{caseId}
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-ashoka-navy mb-2 tracking-tight drop-shadow-md">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md">
               Statutory RTI Application Ready
             </h1>
-            <p className="text-slate-600 mb-8 font-medium drop-shadow-sm">
+            <p className="text-slate-200 mb-8 font-medium drop-shadow-sm">
               Your application has been polished to withstand statutory rejections. Download the official PDF or copy the text.
             </p>
 
@@ -267,7 +267,7 @@ export default function RTIResultView({ initialDepartment }: RTIResultViewProps)
                 </button>
                 <button
                   onClick={() => router.push(`/track?case_id=${caseId}`)}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-ashoka-navy hover:bg-slate-800 border border-slate-700 text-white font-bold text-sm transition-all shadow-md cursor-pointer w-full sm:w-auto tracking-tight font-sans"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-ashoka-navy hover:bg-[#1E293B] text-white font-bold text-sm transition-all shadow-md cursor-pointer w-full sm:w-auto tracking-tight font-sans"
                 >
                   <Activity size={16} className="text-emerald-400" />
                   <span>Track SLA & Appeals</span>
