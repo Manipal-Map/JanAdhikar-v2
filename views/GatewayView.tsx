@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Scale, FileSearch, Loader2, CheckCircle2, RotateCcw, HelpCircle, KeyRound, Copy, Download, Lock, RefreshCw, FolderOpen, Check, ArrowLeft, MessageSquare } from 'lucide-react'
+import { ArrowRight, Scale, FileSearch, Loader2, CheckCircle2, HelpCircle, KeyRound, Copy, Download, Lock, RefreshCw, FolderOpen, Check, ArrowLeft, MessageSquare } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import useCaseStore from '@/store/caseStore'
@@ -40,11 +40,9 @@ export default function GatewayView() {
   const [resumeMode, setResumeMode] = useState(false)
   const [localErr, setLocalErr] = useState<string | null>(null)
   
-  // NEW: Navigation locks to prevent screen flashing during Next.js routing
   const [isConfirmNavigating, setIsConfirmNavigating] = useState(false)
   const [isResumeNavigating, setIsResumeNavigating] = useState(false)
   
-  // Modal State & Agreement Checkbox State
   const [showPasskeyModal, setShowPasskeyModal] = useState(false)
   const [copied, setCopied] = useState(false)
   const [hasAgreed, setHasAgreed] = useState(false)
@@ -53,10 +51,8 @@ export default function GatewayView() {
 
   const isProcessing = stage === 'INITIALIZING' || showPasskeyModal || isConfirmNavigating || isResumeNavigating
   
-  // UPDATED: Locks the confirmation screen in place while navigating
   const isClassified = (stage === 'CLASSIFIED_CONFIRM' || isConfirmNavigating) && classifyResult
 
-  // STEP 1: Initialize case and trigger the Passkey modal
   const handleStartCase = async () => {
     if (!text.trim() || isProcessing) return
     setLocalErr(null)
@@ -74,7 +70,6 @@ export default function GatewayView() {
     }
   }
 
-  // STEP 2: After user saves passkey, route directly to the AI Intake Chat
   const handleProceedToIntake = () => {
     if (!hasAgreed) return
     setShowPasskeyModal(false)
@@ -109,7 +104,7 @@ export default function GatewayView() {
       const res = await getCase(passkey.trim().toUpperCase())
       if (!res) throw new Error("Case not found.")
       
-      setIsResumeNavigating(true) // Locks the UI to prevent flashing
+      setIsResumeNavigating(true) 
       
       hydrateState(res.case_id, res.data)
       const st = res.data?.status
@@ -132,8 +127,7 @@ export default function GatewayView() {
 
   const handleConfirmRoute = () => {
     if (!classifyResult) return
-    
-    setIsConfirmNavigating(true) // Locks the Confirmation screen while Next.js routes
+    setIsConfirmNavigating(true) 
 
     if (classifyResult.route === 'RTI') {
       setStage('RTI_GATHERING')
@@ -157,18 +151,16 @@ export default function GatewayView() {
       className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: "url('/bg.image.png')" }}
     >
-      {/* Top Bar Back to Landing */}
       <div className="absolute top-6 left-6 z-20">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/90 backdrop-blur border border-slate-200 text-ashoka-navy text-xs font-bold shadow-sm hover:bg-white transition cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/90 backdrop-blur border border-slate-200 text-ashoka-navy text-xs font-bold shadow-sm hover:bg-slate-50 transition cursor-pointer"
         >
           <ArrowLeft size={14} />
           <span>Back to Landing</span>
         </Link>
       </div>
       
-      {/* ── PASSKEY POP-UP MODAL OVERLAY ── */}
       <AnimatePresence>
         {showPasskeyModal && (
           <motion.div
@@ -185,7 +177,7 @@ export default function GatewayView() {
             >
               <div className="absolute top-0 left-0 w-full h-1.5 bg-court-maroon"></div>
               
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-semibold mb-4 shadow-sm">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-ashoka-navy border border-slate-200 rounded-full text-xs font-semibold mb-4 shadow-sm">
                 <KeyRound size={13} />
                 <span>Case Passkey Created</span>
               </div>
@@ -197,7 +189,7 @@ export default function GatewayView() {
                 Save this key before we open the AI Intake conversation. You will need it to reopen your case anytime without an account.
               </p>
 
-              <div className="bg-slate-50/70 border border-[#b8c2cc]/60 rounded-2xl p-6 shadow-inner mb-5">
+              <div className="bg-[#FAF8F5] border border-slate-200 rounded-2xl p-6 shadow-inner mb-5">
                 <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">
                   YOUR PRIVATE ACCESS IDENTIFIER
                 </span>
@@ -211,13 +203,13 @@ export default function GatewayView() {
                     onClick={handleCopyId}
                     className="w-full sm:w-auto flex-1 bg-court-maroon hover:bg-[#701A75] text-white font-semibold py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-xs cursor-pointer"
                   >
-                    {copied ? <Check size={15} className="text-emerald-300" /> : <Copy size={15} />}
+                    {copied ? <Check size={15} /> : <Copy size={15} />}
                     {copied ? 'Copied!' : 'Copy Case ID'}
                   </button>
 
                   <button 
                     onClick={handleDownloadTxt}
-                    className="w-full sm:w-auto flex-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-xs cursor-pointer"
+                    className="w-full sm:w-auto flex-1 bg-white hover:bg-slate-50 text-ashoka-navy border border-slate-300 font-semibold py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-xs cursor-pointer"
                   >
                     <Download size={15} className="text-slate-500" />
                     <span>Download .txt Key</span>
@@ -226,18 +218,18 @@ export default function GatewayView() {
               </div>
 
               <div className="bg-white border border-slate-200 rounded-2xl p-3.5 text-left flex items-start gap-3 shadow-sm mb-4">
-                <div className="mt-0.5 text-emerald-600 flex-shrink-0">
+                <div className="mt-0.5 text-slate-500 flex-shrink-0">
                   <Lock size={15} />
                 </div>
                 <div>
-                  <h4 className="text-[11px] font-bold text-slate-900 uppercase tracking-wide mb-0.5">Zero-Account Privacy:</h4>
+                  <h4 className="text-[11px] font-bold text-ashoka-navy uppercase tracking-wide mb-0.5">Zero-Account Privacy:</h4>
                   <p className="text-[11px] text-slate-500 leading-relaxed">
                     Take a quick screenshot or write it down. Your case is stored locally and never linked to your phone number or email.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-2.5 mb-5 bg-[#FAF8F5] p-3.5 rounded-2xl border border-slate-200 text-left">
+              <div className="flex items-start gap-2.5 mb-5 bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-left">
                 <input
                   type="checkbox"
                   id="modal-agreement"
@@ -250,7 +242,7 @@ export default function GatewayView() {
                 </label>
               </div>
 
-              {localErr && <div className="p-3 bg-red-50 text-red-700 text-xs rounded-xl mb-4 text-left">{localErr}</div>}
+              {localErr && <div className="p-3 bg-red-50 text-red-700 text-xs rounded-xl mb-4 text-left border border-red-100">{localErr}</div>}
 
               <button 
                 onClick={handleProceedToIntake} 
@@ -265,7 +257,6 @@ export default function GatewayView() {
         )}
       </AnimatePresence>
 
-      {/* ── MAIN CONTAINER / ROUTE CLASSIFICATION CONFIRMATION ── */}
       <AnimatePresence mode="wait">
         {stage === 'CLASSIFYING' ? (
           <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12 z-10">
@@ -273,14 +264,13 @@ export default function GatewayView() {
             <h2 className="text-xl font-bold text-ashoka-navy">Hang on while we classify your case...</h2>
           </motion.div>
         ) : isClassified ? (
-          /* --- ROUTE CONFIRMATION SCREEN (Shown after AI Intake completes) --- */
-          <motion.div key="confirm-screen" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-card p-8 shadow-xl border border-slate-200 max-w-xl w-full z-10">
+          <motion.div key="confirm-screen" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-card p-8 shadow-xl border border-slate-200 max-w-xl w-full z-10 bg-white">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-court-maroon/10 text-court-maroon flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 text-ashoka-navy border border-slate-200 flex items-center justify-center flex-shrink-0">
                 <RouteIcon size={24} />
               </div>
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-court-maroon bg-court-maroon/10 px-2.5 py-0.5 rounded-full border border-court-maroon/20">{currentRouteMeta?.badge}</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-court-maroon bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">{currentRouteMeta?.badge}</span>
                 <h2 className="text-xl font-extrabold text-ashoka-navy mt-1">{currentRouteMeta?.title}</h2>
               </div>
             </div>
@@ -293,7 +283,7 @@ export default function GatewayView() {
               {classifyResult.sub_category && (
                 <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
                   <span className="text-slate-500 font-semibold">Sub-Category:</span>
-                  <span className="font-mono font-bold text-court-maroon">{classifyResult.sub_category}</span>
+                  <span className="font-mono font-bold text-ashoka-navy">{classifyResult.sub_category}</span>
                 </div>
               )}
             </div>
@@ -302,26 +292,25 @@ export default function GatewayView() {
               <button onClick={handleConfirmRoute} disabled={isConfirmNavigating} className="btn-primary flex-1 justify-center py-3.5 cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white disabled:opacity-70">
                 {isConfirmNavigating ? <><Loader2 size={16} className="animate-spin" /> <span>Loading...</span></> : <><CheckCircle2 size={16} /><span>{currentRouteMeta?.actionText}</span></>}
               </button>
-              <button onClick={() => router.push('/dashboard/intake')} className="btn-ghost flex-initial justify-center py-3.5 border border-slate-300 cursor-pointer">
+              <button onClick={() => router.push('/dashboard/intake')} className="btn-ghost flex-initial justify-center py-3.5 border border-slate-300 text-ashoka-navy hover:bg-slate-50 cursor-pointer">
                 <MessageSquare size={15} /> 
                 <span>Back to Chat</span>
               </button>
             </div>
           </motion.div>
         ) : (!resumeMode && !isResumeNavigating) ? (
-          /* --- MAIN INPUT SCREEN --- */
           <motion.div key="main" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-2xl text-center z-10">
             <h1 className="text-4xl sm:text-5xl font-extrabold text-ashoka-navy mb-3 tracking-tight">What is your problem?</h1>
-            <p className="text-lg text-slate-500 mb-8">Write it in your own words. Our AI assistant will guide you step by step.</p>
+            <p className="text-lg text-slate-600 mb-8 font-medium">Write it in your own words. Our AI assistant will guide you step by step.</p>
             
-            <div className="bg-white border border-[#b8c2cc] rounded-3xl shadow-sm mb-6 text-left">
+            <div className="bg-white border border-slate-300 rounded-3xl shadow-sm mb-6 text-left">
               <textarea
                 rows={6}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 disabled={stage === 'INITIALIZING'}
                 placeholder="e.g. My pension has not come for 3 months. My landlord refuses to return my deposit. The road in our ward is uncarpeted..."
-                className="w-full bg-transparent p-6 text-lg text-ashoka-navy placeholder-slate-400 focus:outline-none resize-none rounded-t-3xl"
+                className="w-full bg-transparent p-6 text-lg text-ashoka-navy font-medium placeholder-slate-400 focus:outline-none resize-none rounded-t-3xl"
               />
               <div className="flex items-center justify-between px-6 pb-5">
                 <AudioRecorder language={language} onTranscription={(t) => setText(prev => prev + (prev ? " " : "") + t)} />
@@ -329,25 +318,24 @@ export default function GatewayView() {
               </div>
             </div>
 
-            {localErr && <div className="p-3 bg-red-50 text-red-700 text-sm rounded-xl mb-4 text-left">{localErr}</div>}
+            {localErr && <div className="p-3 bg-red-50 text-red-700 text-sm rounded-xl mb-4 text-left border border-red-100">{localErr}</div>}
 
             <button 
               onClick={handleStartCase} 
               disabled={!text.trim() || stage === 'INITIALIZING'} 
-              className="btn-primary w-full justify-center text-lg py-4 cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white flex items-center gap-2"
+              className="btn-primary w-full justify-center text-lg py-4 cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white flex items-center gap-2 shadow-md"
             >
               {stage === 'INITIALIZING' ? <><Loader2 className="animate-spin" /> Generating Your Case ID...</> : <>Start Intake &amp; Analysis <ArrowRight size={20} /></>}
             </button>
 
             <div className="mt-8 flex items-center justify-between px-2">
-              <button onClick={() => setResumeMode(true)} className="text-court-maroon font-semibold text-sm hover:underline cursor-pointer">Resume existing case</button>
-              <button onClick={() => window.location.reload()} className="text-slate-500 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy cursor-pointer"><RefreshCw size={14}/> Reset Demos</button>
+              <button onClick={() => setResumeMode(true)} className="text-ashoka-navy font-bold text-sm hover:text-court-maroon transition cursor-pointer">Resume existing case</button>
+              <button onClick={() => window.location.reload()} className="text-slate-500 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy transition cursor-pointer"><RefreshCw size={14}/> Reset Form</button>
             </div>
           </motion.div>
         ) : (
-          /* --- RESUME CASE SCREEN --- */
-          <motion.div key="resume" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="w-full max-w-lg bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center z-10">
-            <div className="w-14 h-14 bg-rose-50 text-court-maroon rounded-2xl flex items-center justify-center mx-auto mb-6 border border-rose-100">
+          <motion.div key="resume" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="w-full max-w-lg bg-white p-8 rounded-3xl shadow-xl border border-slate-200 text-center z-10">
+            <div className="w-14 h-14 bg-slate-50 text-ashoka-navy rounded-2xl flex items-center justify-center mx-auto mb-6 border border-slate-200">
               <FolderOpen size={28} />
             </div>
             <h2 className="text-3xl font-extrabold text-ashoka-navy mb-3">Resume your case</h2>
@@ -358,18 +346,18 @@ export default function GatewayView() {
               value={passkey} 
               onChange={(e) => setPasskey(e.target.value.toUpperCase())}
               placeholder="E.G. CR-88FA-992B"
-              className="w-full text-center bg-slate-50 border border-slate-200 rounded-xl p-4 text-lg font-mono tracking-widest uppercase mb-6 placeholder:text-slate-300 focus:ring-2 focus:ring-court-maroon/20 focus:border-court-maroon"
+              className="w-full text-center bg-slate-50 border border-slate-300 rounded-xl p-4 text-lg font-mono font-bold text-ashoka-navy tracking-widest uppercase mb-6 placeholder:text-slate-300 focus:ring-2 focus:ring-court-maroon/20 focus:border-court-maroon focus:outline-none"
             />
             
-            {localErr && <div className="p-3 bg-red-50 text-red-700 text-sm rounded-xl mb-4 text-left">{localErr}</div>}
+            {localErr && <div className="p-3 bg-red-50 text-red-700 text-sm rounded-xl mb-4 text-left border border-red-100">{localErr}</div>}
 
-            <button onClick={handleResume} disabled={!passkey.trim() || stage === 'INITIALIZING' || isResumeNavigating} className="btn-primary w-full justify-center text-lg py-4 mb-8 shadow-lg cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white">
+            <button onClick={handleResume} disabled={!passkey.trim() || stage === 'INITIALIZING' || isResumeNavigating} className="btn-primary w-full justify-center text-lg py-4 mb-8 shadow-md cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white">
               {stage === 'INITIALIZING' || isResumeNavigating ? <Loader2 className="animate-spin" /> : <>Open case <ArrowRight size={20} /></>}
             </button>
             
-            <div className="flex items-center justify-between border-t border-slate-100 pt-6">
-              <button onClick={() => setResumeMode(false)} className="text-court-maroon font-semibold text-sm hover:underline cursor-pointer">Start a new case instead</button>
-              <button onClick={() => window.location.reload()} className="text-slate-500 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy cursor-pointer"><RefreshCw size={14}/> Reset</button>
+            <div className="flex items-center justify-between border-t border-slate-200 pt-6">
+              <button onClick={() => setResumeMode(false)} className="text-ashoka-navy font-bold text-sm hover:text-court-maroon transition cursor-pointer">Start a new case instead</button>
+              <button onClick={() => window.location.reload()} className="text-slate-500 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy transition cursor-pointer"><RefreshCw size={14}/> Reset Form</button>
             </div>
           </motion.div>
         )}
