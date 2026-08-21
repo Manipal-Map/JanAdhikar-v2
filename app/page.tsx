@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Navbar from "./Navbar"; // Imported Navbar here
 import {
     Scale,
     FileText,
@@ -203,6 +204,10 @@ __________________________
 
     return (
         <div className="min-h-screen bg-[#FAF8F5] text-slate-900 font-sans selection:bg-[#881337] selection:text-white relative">
+            
+            {/* INJECTED NAVBAR HERE */}
+            <Navbar />
+
             {/* BACKGROUND ASHOKA CHAKRA */}
             <div className="fixed inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden">
                 <svg
