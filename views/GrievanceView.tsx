@@ -1,242 +1,292 @@
 'use client';
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
-import { 
-  Scale, 
-  Upload, 
-  FileText, 
-  User, 
-  MapPin, 
-  Building2, 
-  ArrowRight, 
-  Loader2, 
-  CheckCircle,
-  TriangleAlert,
-  ArrowLeft
-} from 'lucide-react';
-import useCaseStore from '@/store/caseStore';
-import { grievanceGenerate } from '@/lib/api';
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowRight, FileSearch, Loader2, KeyRound, Copy, Download, Lock, RefreshCw, FolderOpen, Check, ArrowLeft, Activity } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import useCaseStore from '@/store/caseStore'
+import { initCase, getCase, classifyCase } from '@/lib/api'
+import AudioRecorder from '@/components/dashboard/AudioRecorder'
 
-export default function GrievanceFormView() {
-  const router = useRouter();
-  const { caseId, userProblem, formData, setFormData, classifyResult, setGrievanceResult, language, setStage } = useCaseStore();
+export default function GatewayView() {
+  const router = useRouter()
+  const [text, setText] = useState('')
+  const [passkey, setPasskey] = useState('')
+  const [resumeMode, setResumeMode] = useState(false)
+  const [localErr, setLocalErr] = useState<string | null>(null)
   
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [files, setFiles] = useState<File[]>([]);
+  const [isResumeNavigating, setIsResumeNavigating] = useState(false)
+  const [showPasskeyModal, setShowPasskeyModal] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [hasAgreed, setHasAgreed] = useState(false)
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFiles(Array.from(e.target.files));
-    }
-  };
+  const { stage, setStage, caseId, setCaseId, setUserProblem, language, hydrateState } = useCaseStore()
 
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    
+  const isProcessing = stage === 'INITIALIZING' || showPasskeyModal || isResumeNavigating
+  
+  const handleStartCase = async () => {
+    if (!text.trim() || isProcessing) return
+    setLocalErr(null)
+    setHasAgreed(false)
     try {
-      const payload = {
-        case_id: caseId,
-        problem_text: userProblem,
-        language: language || 'English',
-        form_data: {
-          ...formData,
-        }
-      };
+      setStage('INITIALIZING')
+      const { case_id } = await initCase()
+      setCaseId(case_id)
+      setUserProblem(text.trim())
+      setStage('IDLE')
+      setShowPasskeyModal(true)
 
-      const result = await grievanceGenerate(payload);
-      setGrievanceResult(result);
-      setStage('GRIEVANCE_COMPLETED');
-      router.push('/dashboard/grievance/result');
-      
+      classifyCase(case_id, text.trim(), language || 'English').catch(() => {});
     } catch (err: any) {
-      console.error("Grievance Generation Error:", err);
-      setError(err?.response?.data?.detail || "Failed to generate grievance. Please try again.");
-    } finally {
-      setLoading(false);
+      setLocalErr(err?.response?.data?.detail || err.message || 'Something went wrong.')
+      setStage('IDLE')
     }
-  };
+  }
+
+  const handleProceedToIntake = () => {
+    if (!hasAgreed) return
+    setShowPasskeyModal(false)
+    setLocalErr(null)
+    router.push('/dashboard/intake')
+  }
+
+  const handleCopyId = () => {
+    if (caseId) {
+      navigator.clipboard.writeText(caseId)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  const handleDownloadTxt = () => {
+    if (!caseId) return
+    const element = document.createElement("a")
+    const file = new Blob([`JanAdhikar Private Case ID: ${caseId}\nKeep this key safe to resume your case anytime.`], {type: 'text/plain'})
+    element.href = URL.createObjectURL(file)
+    element.download = `${caseId}-Passkey.txt`
+    document.body.appendChild(element)
+    element.click()
+    document.body.removeChild(element)
+  }
+
+  const handleResume = async () => {
+    if (!passkey.trim() || isProcessing) return
+    setLocalErr(null)
+    setStage('INITIALIZING')
+    try {
+      const res = await getCase(passkey.trim().toUpperCase())
+      if (!res) throw new Error("Case not found.")
+      
+      setIsResumeNavigating(true) 
+      
+      hydrateState(res.case_id, res.data)
+      const st = res.data?.status
+      const rt = res.data?.route
+      
+      if (st === 'rti_completed' || st === 'rti_predicted' || st === 'rti_drafted') {
+        router.push('/dashboard/rti/result')
+      } else if (st === 'grievance_completed') {
+        router.push('/dashboard/grievance/result')
+      } else if (rt === 'RTI' || rt === 'Rights/Grievance' || st === 'classified' || st === 'initialized') {
+        router.push('/dashboard/intake')
+      } else {
+        setResumeMode(false)
+        setIsResumeNavigating(false)
+        setStage('IDLE')
+      }
+    } catch (err) {
+      setIsResumeNavigating(false)
+      setLocalErr('Invalid Case ID or expired session. Please check and try again.')
+      setStage('IDLE')
+    }
+  }
 
   return (
     <div 
-      className="min-h-screen p-4 sm:p-6 lg:p-8 font-sans selection:bg-[#A32A02] selection:text-white flex items-center justify-center bg-cover bg-center bg-no-repeat relative text-ashoka-navy tracking-tight"
+      className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-cover bg-center bg-no-repeat text-slate-200 font-sans tracking-tight"
       style={{ backgroundImage: "url('/bg.image.png')" }}
     >
-      <div className="w-full max-w-3xl space-y-6 relative z-10">
-        
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 bg-white/95 backdrop-blur-sm p-4 rounded-2xl border border-slate-300 shadow-sm">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => router.push('/dashboard')}
-              className="p-2.5 rounded-xl bg-white border border-slate-300 text-slate-500 hover:text-ashoka-navy hover:bg-slate-50 transition shadow-sm cursor-pointer"
-            >
-              <ArrowLeft size={18} />
-            </button>
-            <div>
-              <div className="flex items-center gap-2">
-                <Scale className="w-5 h-5 text-court-maroon" />
-                <h1 className="text-xl sm:text-2xl font-extrabold text-ashoka-navy tracking-tight drop-shadow-sm">
-                  Grievance & Relief Setup
-                </h1>
-              </div>
-              <p className="text-sm text-slate-500 mt-1 font-medium">
-                Review your details before generating the legal notice.
-              </p>
-            </div>
-          </div>
-          {caseId && (
-            <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl shadow-sm text-xs font-bold text-slate-600 uppercase tracking-wider">
-              ID: {caseId}
-            </div>
-          )}
-        </div>
-
-        <motion.form 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          onSubmit={handleGenerate} 
-          className="space-y-6"
+      <div className="absolute top-6 left-6 z-20">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/95 backdrop-blur-sm border border-slate-300 text-slate-700 text-xs font-bold shadow-sm hover:text-ashoka-navy hover:bg-slate-50 transition cursor-pointer"
         >
-          <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-slate-300 shadow-xl">
-            <h2 className="text-sm font-bold font-sans tracking-tight uppercase text-court-maroon mb-6 flex items-center gap-2">
-              <User size={16} className="text-court-maroon" />
-              1. Complainant Details
-            </h2>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div className="space-y-2 text-left">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Full Name</label>
-                <input 
-                  type="text"
-                  required
-                  value={formData.applicant_name || ''}
-                  onChange={e => setFormData({ ...formData, applicant_name: e.target.value })}
-                  placeholder="e.g. Rahul Sharma"
-                  className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-sm text-ashoka-navy font-medium placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] transition-all"
-                />
-              </div>
+          <ArrowLeft size={14} />
+          <span>Back to Landing</span>
+        </Link>
+      </div>
+      
+      <AnimatePresence>
+        {showPasskeyModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-ashoka-navy/60 backdrop-blur-md p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-8 border border-slate-300 relative overflow-hidden text-center"
+            >
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-court-maroon"></div>
               
-              <div className="space-y-2 text-left">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Contact Details</label>
-                <input 
-                  type="text"
-                  value={formData.applicant_contact || ''}
-                  onChange={e => setFormData({ ...formData, applicant_contact: e.target.value })}
-                  placeholder="Phone or Email"
-                  className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-sm text-ashoka-navy font-medium placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] transition-all"
-                />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-ashoka-navy border border-slate-200 rounded-full text-xs font-bold mb-4 shadow-sm">
+                <KeyRound size={13} />
+                <span>Case Passkey Created</span>
               </div>
-              
-              <div className="space-y-2 sm:col-span-2 text-left">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">City / District</label>
-                <div className="relative">
-                  <MapPin size={16} className="absolute left-3.5 top-3.5 text-slate-400" />
-                  <input 
-                    type="text"
-                    required
-                    value={formData.applicant_city || ''}
-                    onChange={e => setFormData({ ...formData, applicant_city: e.target.value })}
-                    placeholder="e.g. Jaipur, Rajasthan"
-                    className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 pl-10 text-sm text-ashoka-navy font-medium placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] transition-all"
-                  />
+
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-ashoka-navy mb-2 tracking-tight">
+                Save Your Private Case ID
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 mb-6 max-w-sm mx-auto font-medium">
+                Save this key before we prepare your official legal form. You will need it to reopen your case anytime.
+              </p>
+
+              <div className="bg-[#FAF8F5] border border-slate-200 rounded-2xl p-6 shadow-inner mb-5">
+                <span className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">
+                  YOUR PRIVATE ACCESS IDENTIFIER
+                </span>
+                
+                <div className="text-2xl sm:text-3xl font-mono font-black text-court-maroon tracking-widest mb-6 drop-shadow-sm">
+                  {caseId}
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                  <button 
+                    onClick={handleCopyId}
+                    className="w-full sm:w-auto flex-1 bg-[#A32A02] hover:bg-[#138808] text-white font-bold py-2.5 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-xs cursor-pointer tracking-tight"
+                  >
+                    {copied ? <Check size={15} /> : <Copy size={15} />}
+                    {copied ? 'Copied!' : 'Copy Case ID'}
+                  </button>
+
+                  <button 
+                    onClick={handleDownloadTxt}
+                    className="w-full sm:w-auto flex-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-xs cursor-pointer tracking-tight"
+                  >
+                    <Download size={15} className="text-slate-500" />
+                    <span>Download .txt Key</span>
+                  </button>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-slate-300 shadow-xl">
-            <h2 className="text-sm font-bold font-sans tracking-tight uppercase text-court-maroon mb-6 flex items-center gap-2">
-              <Building2 size={16} className="text-court-maroon" />
-              2. Respondent Details
-            </h2>
-            
-            <div className="space-y-2 text-left">
-              <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Target Department / Company</label>
-              <input 
-                type="text"
-                required
-                value={formData.target_department || classifyResult?.sub_category || ''}
-                onChange={e => setFormData({ ...formData, target_department: e.target.value })}
-                placeholder="e.g. Municipal Corporation / E-Commerce Platform"
-                className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-sm text-ashoka-navy font-bold placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] transition-all tracking-tight"
-              />
-              <p className="text-xs text-slate-500 mt-1.5 font-medium">
-                The AI will use this to direct your legal notice to the correct authority.
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-slate-300 shadow-xl">
-            <h2 className="text-sm font-bold font-sans tracking-tight uppercase text-court-maroon mb-6 flex items-center gap-2">
-              <FileText size={16} className="text-court-maroon" />
-              3. Evidence & Proofs (Optional)
-            </h2>
-            
-            <label className="border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 transition-colors rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer group text-center shadow-inner">
-              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 mb-3 group-hover:scale-110 transition-transform">
-                <Upload size={20} className="text-ashoka-navy" />
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-left flex items-start gap-3 shadow-sm mb-4">
+                <div className="mt-0.5 text-slate-500 flex-shrink-0">
+                  <Lock size={15} />
+                </div>
+                <div>
+                  <h4 className="text-[11px] font-bold text-ashoka-navy uppercase tracking-wide mb-0.5">Zero-Account Privacy:</h4>
+                  <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                    Take a quick screenshot or write it down. Your case is stored locally and never linked to your phone number or email.
+                  </p>
+                </div>
               </div>
-              <span className="text-sm font-bold text-ashoka-navy">Click to upload files</span>
-              <span className="text-xs text-slate-500 mt-1 font-medium">Images, PDFs, or Receipts (Max 5MB)</span>
-              <input 
-                type="file" 
-                multiple 
-                onChange={handleFileChange}
-                className="hidden" 
-              />
-            </label>
-            
-            {files.length > 0 && (
-              <div className="mt-4 space-y-2 text-left">
-                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Attached Files:</h4>
-                {files.map((file, idx) => (
-                  <div key={idx} className="flex items-center gap-2 text-sm text-slate-700 font-medium bg-[#FAF8F5] p-3 rounded-xl border border-slate-200 shadow-sm">
-                    <CheckCircle size={16} className="text-emerald-500 shrink-0" />
-                    <span className="truncate">{file.name}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
-          {error && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="p-4 bg-red-50 text-red-700 text-sm font-medium rounded-xl border border-red-200 flex items-start gap-3 shadow-sm text-left"
-            >
-              <TriangleAlert size={18} className="shrink-0 mt-0.5" />
-              <p>{error}</p>
+              <div className="flex items-start gap-2.5 mb-5 bg-white p-3.5 rounded-2xl border border-slate-200 text-left shadow-sm">
+                <input
+                  type="checkbox"
+                  id="modal-agreement"
+                  checked={hasAgreed}
+                  onChange={(e) => setHasAgreed(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 text-[#A32A02] bg-white border-slate-300 rounded focus:ring-[#A32A02] cursor-pointer flex-shrink-0"
+                />
+                <label htmlFor="modal-agreement" className="text-xs text-slate-600 font-medium cursor-pointer leading-relaxed select-none">
+                  I acknowledge that this <strong className="text-ashoka-navy">Passkey is solely responsible for retrieving my case data</strong>, and I confirm I have safely saved it.
+                </label>
+              </div>
+
+              {localErr && <div className="p-3 bg-red-50 text-red-700 text-xs rounded-xl mb-4 text-left border border-red-200">{localErr}</div>}
+
+              <button 
+                onClick={handleProceedToIntake} 
+                disabled={!hasAgreed}
+                className="btn-primary w-full justify-center text-sm py-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-[#A32A02] hover:bg-[#138808] text-white flex items-center gap-2 font-bold tracking-tight shadow-md"
+              >
+                <span>Generate Form & Continue</span>
+                <ArrowRight size={16} />
+              </button>
             </motion.div>
-          )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-          <div className="pt-2">
+      <AnimatePresence mode="wait">
+        {!resumeMode && !isResumeNavigating ? (
+          <motion.div key="main" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="w-full max-w-2xl text-center z-10">
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-3 tracking-tight drop-shadow-md">What is your problem?</h1>
+            <p className="text-lg text-blue-100 mb-8 font-medium drop-shadow-sm">Write it in your own words. Our AI assistant will automatically structure it.</p>
+            
+            <div className="bg-white/95 backdrop-blur-sm border border-slate-300 rounded-3xl shadow-xl mb-6 text-left">
+              <textarea
+                rows={6}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                disabled={stage === 'INITIALIZING'}
+                placeholder="e.g. My pension has not come for 3 months. My landlord refuses to return my deposit. The road in our ward is uncarpeted..."
+                className="w-full bg-transparent p-6 text-lg text-ashoka-navy font-medium placeholder-slate-400 focus:outline-none resize-none rounded-t-3xl"
+              />
+              <div className="flex items-center justify-between px-6 pb-5">
+                <AudioRecorder language={language} onTranscription={(t) => setText(prev => prev + (prev ? " " : "") + t)} />
+                <span className="text-sm text-slate-400 font-medium">{text.length} chars</span>
+              </div>
+            </div>
+
+            {localErr && <div className="p-3 bg-red-50 text-red-700 text-sm rounded-xl mb-4 text-left border border-red-200">{localErr}</div>}
+
             <button 
-              type="submit" 
-              disabled={loading}
-              className="btn-primary w-full justify-center text-lg py-4 cursor-pointer bg-[#A32A02] hover:bg-[#138808] transition-colors text-white disabled:opacity-70 shadow-md rounded-2xl flex items-center gap-2 font-bold tracking-tight"
+              onClick={handleStartCase} 
+              disabled={!text.trim() || stage === 'INITIALIZING'} 
+              className="btn-primary w-full justify-center text-lg py-4 cursor-pointer bg-[#A32A02] hover:bg-[#138808] transition-colors text-white flex items-center gap-2 shadow-md rounded-xl font-bold tracking-tight"
             >
-              {loading ? (
-                <>
-                  <Loader2 size={20} className="animate-spin" />
-                  <span>Drafting Legal Notice...</span>
-                </>
-              ) : (
-                <>
-                  <span>Generate Grievance Draft</span>
-                  <ArrowRight size={20} />
-                </>
-              )}
+              {stage === 'INITIALIZING' ? <><Loader2 className="animate-spin" /> Generating Your Case ID...</> : <>Start Analysis &amp; Form Fill <ArrowRight size={20} /></>}
             </button>
-            <p className="text-center text-xs text-slate-500 mt-4 font-medium">
-              You will be able to review and edit the draft on the next page before downloading.
-            </p>
-          </div>
-        </motion.form>
-      </div>
+
+            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 px-2">
+              <button onClick={() => setResumeMode(true)} className="text-slate-200 font-bold text-sm hover:text-white transition cursor-pointer flex items-center gap-1.5 drop-shadow-sm">
+                <FolderOpen size={16} /> Resume Draft
+              </button>
+              <span className="hidden sm:block text-slate-400/50">•</span>
+              <Link href="/track" className="text-slate-200 font-bold text-sm hover:text-white transition cursor-pointer flex items-center gap-1.5 drop-shadow-sm">
+                <Activity size={16} /> Track Filed Case
+              </Link>
+              <span className="hidden sm:block text-slate-400/50">•</span>
+              <button onClick={() => window.location.reload()} className="text-slate-300 flex items-center gap-1.5 text-sm font-medium hover:text-white transition cursor-pointer drop-shadow-sm">
+                <RefreshCw size={14}/> Reset Form
+              </button>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div key="resume" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="w-full max-w-lg bg-white/95 backdrop-blur-sm p-8 rounded-3xl shadow-xl border border-slate-300 text-center z-10">
+            <div className="w-14 h-14 bg-slate-50 text-court-maroon rounded-2xl flex items-center justify-center mx-auto mb-6 border border-slate-200">
+              <FolderOpen size={28} />
+            </div>
+            <h2 className="text-3xl font-extrabold text-ashoka-navy mb-3 tracking-tight">Resume your case</h2>
+            <p className="text-slate-500 mb-8 font-medium">Enter your 12-character Case ID to pick up where you left off.</p>
+            
+            <input 
+              type="text" 
+              value={passkey} 
+              onChange={(e) => setPasskey(e.target.value.toUpperCase())}
+              placeholder="E.G. CR-ABCD-1234"
+              maxLength={12}
+              className="w-full text-center bg-[#FAF8F5] border border-slate-300 rounded-xl p-4 text-lg font-mono font-bold text-ashoka-navy tracking-widest uppercase mb-6 placeholder-slate-400 focus:ring-2 focus:ring-court-maroon/20 focus:border-court-maroon focus:outline-none shadow-inner"
+            />
+            
+            {localErr && <div className="p-3 bg-red-50 text-red-700 text-sm rounded-xl mb-4 text-left border border-red-200">{localErr}</div>}
+
+            <button onClick={handleResume} disabled={!passkey.trim() || stage === 'INITIALIZING' || isResumeNavigating} className="btn-primary w-full justify-center text-lg py-4 mb-8 shadow-md cursor-pointer bg-[#A32A02] hover:bg-[#138808] transition-colors text-white rounded-xl font-bold tracking-tight">
+              {stage === 'INITIALIZING' || isResumeNavigating ? <Loader2 className="animate-spin" /> : <>Open case <ArrowRight size={20} /></>}
+            </button>
+            
+            <div className="flex items-center justify-between border-t border-slate-200 pt-6">
+              <button onClick={() => setResumeMode(false)} className="text-slate-600 font-bold text-sm hover:text-ashoka-navy transition cursor-pointer">Start a new case instead</button>
+              <button onClick={() => window.location.reload()} className="text-slate-400 flex items-center gap-1.5 text-sm font-medium hover:text-ashoka-navy transition cursor-pointer"><RefreshCw size={14}/> Reset Form</button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
-  );
+  )
 }
