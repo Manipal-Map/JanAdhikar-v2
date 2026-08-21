@@ -13,7 +13,9 @@ import {
   Building2, 
   FileCheck2,
   Clock,
-  Banknote
+  Banknote,
+  Scale,
+  Info
 } from 'lucide-react';
 import useCaseStore from '@/store/caseStore';
 import { classifyCase, rtiGenerate, grievanceGenerate } from '@/lib/api';
@@ -35,7 +37,9 @@ export default function IntakeFormView() {
 
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  
+  // 0 = Assessment, 1 = Applicant, 2 = AI Strategy, 3 = Confirmation
+  const [currentStep, setCurrentStep] = useState<0 | 1 | 2 | 3>(0);
   const [localForm, setLocalForm] = useState<Record<string, any>>({});
 
   useEffect(() => {
@@ -48,12 +52,6 @@ export default function IntakeFormView() {
         setLoading(true);
         const res = await classifyCase(caseId || '', userProblem, language || 'English');
         setClassifyResult(res);
-
-        if (res.route === 'Other') {
-          setStage('OUT_OF_SCOPE');
-          router.push('/dashboard/out-of-scope');
-          return;
-        }
 
         const aiExtracted = res.extracted_data || {};
         setLocalForm({
@@ -95,10 +93,11 @@ export default function IntakeFormView() {
     setLocalForm(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleNextStep = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleNextStep = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setFormData(localForm);
-    if (currentStep === 1) setCurrentStep(2);
+    if (currentStep === 0) setCurrentStep(1);
+    else if (currentStep === 1) setCurrentStep(2);
     else if (currentStep === 2) setCurrentStep(3);
   };
 
@@ -142,47 +141,54 @@ export default function IntakeFormView() {
   }
 
   const isRTI = classifyResult?.route === 'RTI';
+  const isOther = classifyResult?.route === 'Other';
 
   return (
     <div className="gradient-bg min-h-screen p-4 sm:p-6 lg:p-8 flex items-center justify-center font-sans">
       <div className="w-full max-w-3xl space-y-6">
         
-        <div className="bg-white border border-slate-300 rounded-2xl p-4 shadow-sm flex items-center justify-between">
-          {[
-            { num: 1, label: 'Applicant Details', icon: User },
-            { num: 2, label: 'AI Strategy Review', icon: Sparkles },
-            { num: 3, label: 'Final Confirmation', icon: FileCheck2 },
-          ].map((s) => {
-            const active = currentStep === s.num;
-            const done = currentStep > s.num;
-            return (
-              <div 
-                key={s.num} 
-                className={`flex items-center gap-2 text-xs sm:text-sm font-bold transition-all ${
-                  active ? 'text-court-maroon' : done ? 'text-statutory-green' : 'text-slate-400'
-                }`}
-              >
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                  active 
-                    ? 'bg-court-maroon text-white shadow-sm' 
-                    : done 
-                    ? 'bg-emerald-100 text-emerald-800' 
-                    : 'bg-slate-100 text-slate-400'
-                }`}>
-                  {done ? '✓' : s.num}
+        {/* Step Progression Bar (Hidden if Out of Scope) */}
+        {!isOther && (
+          <div className="bg-white border border-slate-300 rounded-2xl p-4 shadow-sm flex items-center justify-between overflow-x-auto gap-2">
+            {[
+              { num: 0, label: 'Assessment', icon: Scale },
+              { num: 1, label: 'Applicant', icon: User },
+              { num: 2, label: 'AI Strategy', icon: Sparkles },
+              { num: 3, label: 'Confirm', icon: FileCheck2 },
+            ].map((s) => {
+              const active = currentStep === s.num;
+              const done = currentStep > s.num;
+              return (
+                <div 
+                  key={s.num} 
+                  className={`flex items-center gap-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
+                    active ? 'text-court-maroon' : done ? 'text-statutory-green' : 'text-slate-400'
+                  }`}
+                >
+                  <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold shrink-0 ${
+                    active 
+                      ? 'bg-court-maroon text-white shadow-sm' 
+                      : done 
+                      ? 'bg-emerald-100 text-emerald-800' 
+                      : 'bg-slate-100 text-slate-400'
+                  }`}>
+                    {done ? '✓' : s.num}
+                  </div>
+                  <span className="hidden sm:inline">{s.label}</span>
                 </div>
-                <span className="hidden sm:inline">{s.label}</span>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
+        {/* Case Info Header */}
         <div className="flex items-center justify-between px-2">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-court-maroon bg-rose-50 border border-rose-200 px-3 py-1 rounded-full">
-              Legal Route: {isRTI ? 'Right to Information (RTI)' : 'Administrative Grievance'}
+            <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${isOther ? 'bg-slate-100 text-slate-600 border-slate-200' : 'text-court-maroon bg-rose-50 border-rose-200'}`}>
+              Route: {isOther ? 'Out of Platform Scope' : (isRTI ? 'Right to Information (RTI)' : 'Administrative Grievance')}
             </span>
             <h2 className="text-xl sm:text-2xl font-extrabold text-ashoka-navy mt-2">
+              {currentStep === 0 && 'Legal Route & Case Assessment'}
               {currentStep === 1 && 'Step 1: Your Contact Information'}
               {currentStep === 2 && 'Step 2: Review AI Legal Strategy'}
               {currentStep === 3 && 'Step 3: Generate Statutory Document'}
@@ -197,8 +203,64 @@ export default function IntakeFormView() {
 
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-300 shadow-sm text-left">
           
+          {/* STEP 0: LEGAL ASSESSMENT & EXPLANATION */}
+          {currentStep === 0 && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <div className="p-5 bg-[#FAF8F5] border border-slate-200 rounded-2xl flex flex-col gap-4 shadow-inner text-left">
+                <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
+                  <Scale className="text-court-maroon" size={24} />
+                  <div>
+                    <h3 className="font-bold text-ashoka-navy text-lg">Case Classification & Analysis</h3>
+                    <p className="text-xs font-medium text-slate-500 mt-0.5">Sub-category: {classifyResult.sub_category}</p>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Detailed Legal Description</h4>
+                  <p className="text-sm font-medium text-slate-700 leading-relaxed">{classifyResult.reasoning}</p>
+                </div>
+              </div>
+
+              {isOther ? (
+                <div className="p-5 bg-blue-50 border border-blue-200 rounded-2xl text-left shadow-sm">
+                  <h4 className="text-sm font-bold text-blue-900 flex items-center gap-2 mb-3">
+                    <Info size={18} className="text-blue-700"/> Guidance For Your Specific Case
+                  </h4>
+                  <p className="text-sm text-blue-800 leading-relaxed whitespace-pre-wrap font-medium">
+                    {classifyResult.specific_advice || 'This case falls outside RTI or Consumer/Administrative grievance jurisdictions. Please consult a local legal professional or the relevant authority for this specific issue.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="p-5 bg-white border border-slate-200 rounded-2xl text-left shadow-sm">
+                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <Sparkles size={14} className="text-emerald-600"/> Facts Extracted By AI Engine
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-3">
+                    {Object.entries(localForm).filter(([k,v]) => v && typeof v === 'string').map(([k,v]) => (
+                      <div key={k}>
+                        <span className="block text-[10px] font-bold text-slate-400 uppercase">{k.replace(/_/g, ' ')}</span>
+                        <span className="block text-xs font-semibold text-ashoka-navy truncate pr-2" title={v as string}>{v as string}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
+                <button onClick={() => { setStage('IDLE'); router.push('/'); }} className="btn-ghost py-3 px-5 border border-slate-300 cursor-pointer">
+                  <ArrowLeft size={16} /> Start New Case
+                </button>
+                {!isOther && (
+                  <button onClick={() => handleNextStep()} className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-court-maroon hover:bg-[#701A75] text-white rounded-xl shadow-md cursor-pointer font-bold">
+                    Proceed to Form Fill <ArrowRight size={18} />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* STEP 1: APPLICANT DETAILS ONLY */}
           {currentStep === 1 && (
-            <form onSubmit={handleNextStep} className="space-y-5">
+            <form onSubmit={handleNextStep} className="space-y-5 animate-in fade-in duration-300">
               <p className="text-xs text-slate-500 leading-relaxed mb-4 font-medium">
                 Official applications require the physical correspondence identity of the citizen. The AI will handle the technical legal details in the next step.
               </p>
@@ -277,21 +339,25 @@ export default function IntakeFormView() {
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-slate-200 flex justify-end">
+              <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
+                <button type="button" onClick={() => setCurrentStep(0)} className="btn-ghost py-3 px-5 border border-slate-300 cursor-pointer">
+                  <ArrowLeft size={16} /> Back
+                </button>
                 <button type="submit" className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-court-maroon hover:bg-[#701A75] text-white rounded-xl shadow-md cursor-pointer font-bold">
-                  Next: Review AI Legal Strategy <ArrowRight size={18} />
+                  Next: AI Legal Strategy <ArrowRight size={18} />
                 </button>
               </div>
             </form>
           )}
 
+          {/* STEP 2: REVIEW AI LEGAL STRATEGY */}
           {currentStep === 2 && (
-            <form onSubmit={handleNextStep} className="space-y-6">
+            <form onSubmit={handleNextStep} className="space-y-6 animate-in fade-in duration-300">
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl flex items-start gap-3 shadow-xs">
                 <Sparkles size={18} className="text-blue-700 mt-0.5 shrink-0" />
                 <p className="text-xs text-blue-950 font-medium leading-relaxed">
                   <strong>AI Strategy Engine:</strong> We have automatically structured the technical legal clauses and target authority based on your problem. <br/><br/>
-                  <span className="font-bold">Note: All fields below are optional.</span> If you are unsure about any specifics, leave them as they are or blank—the Legal Engine will use standard statutory defaults.
+                  <span className="font-bold">Note: All fields below are optional.</span> If you are unsure about any specifics, leave them blank—the Legal Engine will automatically handle defaults.
                 </p>
               </div>
 
@@ -409,25 +475,19 @@ export default function IntakeFormView() {
               )}
 
               <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(1)}
-                  className="btn-ghost py-3 px-5 border border-slate-300 cursor-pointer"
-                >
+                <button type="button" onClick={() => setCurrentStep(1)} className="btn-ghost py-3 px-5 border border-slate-300 cursor-pointer">
                   <ArrowLeft size={16} /> Back
                 </button>
-                <button
-                  type="submit"
-                  className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-court-maroon hover:bg-[#701A75] text-white rounded-xl shadow-md cursor-pointer font-bold"
-                >
+                <button type="submit" className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-court-maroon hover:bg-[#701A75] text-white rounded-xl shadow-md cursor-pointer font-bold">
                   Proceed to Final Review <ArrowRight size={18} />
                 </button>
               </div>
             </form>
           )}
 
+          {/* STEP 3: FINAL REVIEW & CONFIRMATION */}
           {currentStep === 3 && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-in fade-in duration-300">
               <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start gap-3">
                 <ShieldCheck size={20} className="text-emerald-700 mt-0.5 shrink-0" />
                 <p className="text-xs text-emerald-950 leading-relaxed font-medium">
@@ -495,20 +555,10 @@ export default function IntakeFormView() {
               </div>
 
               <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(2)}
-                  disabled={generating}
-                  className="btn-ghost py-3 px-5 border border-slate-300 cursor-pointer w-full sm:w-auto justify-center"
-                >
+                <button type="button" onClick={() => setCurrentStep(2)} disabled={generating} className="btn-ghost py-3 px-5 border border-slate-300 cursor-pointer w-full sm:w-auto justify-center">
                   <ArrowLeft size={16} /> Back
                 </button>
-                <button
-                  type="button"
-                  onClick={handleGenerate}
-                  disabled={generating}
-                  className="btn-primary py-4 px-10 flex items-center justify-center gap-2 bg-court-maroon hover:bg-[#701A75] text-white rounded-xl shadow-md cursor-pointer font-bold w-full sm:w-auto"
-                >
+                <button type="button" onClick={handleGenerate} disabled={generating} className="btn-primary py-4 px-10 flex items-center justify-center gap-2 bg-court-maroon hover:bg-[#701A75] text-white rounded-xl shadow-md cursor-pointer font-bold w-full sm:w-auto">
                   {generating ? (
                     <>
                       <Loader2 size={18} className="animate-spin" />
