@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getCase, analyzePio } from '@/lib/api';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Search, Clock, Scale, FileText } from 'lucide-react';
 
 interface CaseMetrics {
   case_id: string;
@@ -133,6 +133,57 @@ function TrackPageContent() {
           </div>
         )}
 
+        {/* Empty State / Guidelines (Visible when no case is loaded) */}
+        {!caseData && !loading && !error && (
+          <div className="mt-12 flex flex-col items-center justify-center text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="w-20 h-20 bg-white border border-slate-200 rounded-full flex items-center justify-center mb-6 shadow-sm">
+              <Search className="w-10 h-10 text-slate-400" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-ashoka-navy mb-3 tracking-tight">
+              Track Your Legal Petition
+            </h2>
+            <p className="text-slate-500 max-w-lg mb-12 font-medium leading-relaxed text-sm sm:text-base">
+              Enter your 12-character Case ID above to monitor your statutory RTI timeline, calculate Section 20 penalties, and automatically draft First Appeals.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl w-full text-left">
+              {/* Card 1: 30-Day Mandate */}
+              <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl shadow-sm">
+                <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mb-5 border border-amber-100">
+                  <Clock className="w-6 h-6 text-amber-600" />
+                </div>
+                <h3 className="font-extrabold text-ashoka-navy mb-2 text-base">30-Day Statutory Limit</h3>
+                <p className="text-sm text-slate-500 leading-relaxed font-medium">
+                  Under Section 7(1) of the RTI Act, 2005, the Public Information Officer (PIO) is legally bound to provide the requested information within 30 days of receipt.
+                </p>
+              </div>
+              
+              {/* Card 2: Section 20 Penalty */}
+              <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl shadow-sm">
+                <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center mb-5 border border-rose-100">
+                  <Scale className="w-6 h-6 text-court-maroon" />
+                </div>
+                <h3 className="font-extrabold text-ashoka-navy mb-2 text-base">Section 20 Penalties</h3>
+                <p className="text-sm text-slate-500 leading-relaxed font-medium">
+                  Unjustified delays attract a personal penalty on the PIO of ₹250 per day, up to a maximum of ₹25,000. Our engine tracks this liability automatically.
+                </p>
+              </div>
+              
+              {/* Card 3: First Appeal */}
+              <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl shadow-sm">
+                <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mb-5 border border-emerald-100">
+                  <FileText className="w-6 h-6 text-emerald-600" />
+                </div>
+                <h3 className="font-extrabold text-ashoka-navy mb-2 text-base">First Appellate Route</h3>
+                <p className="text-sm text-slate-500 leading-relaxed font-medium">
+                  If the PIO denies information or fails to reply entirely, you are entitled to file a First Appeal under Section 19(1). We generate this court-ready draft for you.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Active Case Data View */}
         {caseData && (
           <div className="animate-in fade-in zoom-in-95 duration-300 space-y-8">
             {/* Top Metrics Row */}
