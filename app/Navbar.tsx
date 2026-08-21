@@ -45,7 +45,7 @@ export default function Navbar() {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="hover:text-[#881337] transition-colors"
+                  className="hover:text-[#FF9933] transition-colors"
                 >
                   {link.name}
                 </Link>
@@ -56,9 +56,9 @@ export default function Navbar() {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleLaunch}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#881337] hover:bg-[#70102d] text-white text-[11px] font-bold uppercase tracking-wider transition-colors shrink-0 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#FF9933] hover:bg-[#138808] text-white text-[11px] font-bold uppercase tracking-wider transition-colors shrink-0 cursor-pointer shadow-sm"
               >
-                <Gavel className="w-3.5 h-3.5 text-amber-200 shrink-0" />
+                <Gavel className="w-3.5 h-3.5 text-amber-100 shrink-0" />
                 <span>Janअधिकार</span>
               </button>
 
@@ -81,7 +81,7 @@ export default function Navbar() {
                 key={link.name}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-800 hover:bg-slate-100 transition-colors"
+                className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-800 hover:bg-slate-50 hover:text-[#FF9933] transition-colors"
               >
                 {link.name}
               </Link>

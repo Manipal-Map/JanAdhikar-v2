@@ -312,34 +312,34 @@ __________________________
 
           <div className="relative z-10 w-full max-w-4xl mx-auto text-center flex flex-col items-center my-0 py-4">
             <h1 className="text-5xl sm:text-6xl xl:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.08] max-w-3xl">
-              Claim Your Civic Rights.{" "}
-              <span className="relative inline-block text-[#881337]">
-                Zero Bureaucracy!
-                <svg
-                  className="absolute -bottom-2 left-0 w-full h-[16px] sm:h-[20px] pointer-events-none overflow-visible"
-                  viewBox="0 0 320 22"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M 3,13 C 65,5 145,16 220,9 C 265,5 295,14 317,8"
-                    stroke="#C2410C"
-                    strokeWidth="3.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M 14,18 C 85,14 185,20 295,14"
-                    stroke="#9A3412"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    opacity="0.85"
-                  />
-                </svg>
-              </span>
-            </h1>
+  Claim Your Civic Rights.{" "}
+  <span className="relative inline-block text-[#FF9933]">
+    Zero Bureaucracy!
+    <svg
+      className="absolute -bottom-2 left-0 w-full h-[16px] sm:h-[20px] pointer-events-none overflow-visible"
+      viewBox="0 0 320 22"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      preserveAspectRatio="none"
+    >
+      <path
+        d="M 3,13 C 65,5 145,16 220,9 C 265,5 295,14 317,8"
+        stroke="#FF9933"
+        strokeWidth="3.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M 14,18 C 85,14 185,20 295,14"
+        stroke="#FF9933"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.85"
+      />
+    </svg>
+  </span>
+</h1>
 
             <p className="mt-6 text-lg sm:text-xl text-slate-600 max-w-2xl leading-relaxed">
               An autonomous, local-first legal engine that helps turn everyday
@@ -349,21 +349,22 @@ __________________________
 
             <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4 w-full px-4 sm:px-0">
               <button
-                onClick={handleStartIntake}
-                className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl btn-maroon-solid font-bold text-base tracking-tight shadow-md group cursor-pointer"
-              >
-                <Gavel className="w-5 h-5 text-amber-200 shrink-0" />
-                <span>Launch Janअधिकार</span>
-                <ChevronRight className="w-5 h-5 text-white/70 group-hover:translate-x-0.5 transition-transform shrink-0" />
-              </button>
-              <button
-                onClick={() => router.push('/dashboard/track')}
-                className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl btn-navy-solid font-bold text-base tracking-tight shadow-md group cursor-pointer"
-              >
-                <Activity className="w-5 h-5 text-emerald-400 shrink-0" />
-                <span>Track Filed Case</span>
-                <ChevronRight className="w-5 h-5 text-white/70 group-hover:translate-x-0.5 transition-transform shrink-0" />
-              </button>
+  onClick={handleStartIntake}
+  className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-[#FF9933] hover:bg-[#138808] transition-colors font-bold text-base text-white tracking-tight shadow-md group cursor-pointer"
+>
+  <Gavel className="w-5 h-5 text-amber-200 shrink-0" />
+  <span>Launch Janअधिकार</span>
+  <ChevronRight className="w-5 h-5 text-white/70 group-hover:translate-x-0.5 transition-transform shrink-0" />
+</button>
+
+<button
+  onClick={() => router.push('/dashboard/track')}
+  className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-[#FF9933] hover:bg-[#138808] transition-colors font-bold text-base text-white tracking-tight shadow-md group cursor-pointer"
+>
+  <Activity className="w-5 h-5 text-emerald-200 shrink-0" />
+  <span>Track Filed Case</span>
+  <ChevronRight className="w-5 h-5 text-white/70 group-hover:translate-x-0.5 transition-transform shrink-0" />
+</button>
             </div>
           </div>
         </section>
