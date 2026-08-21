@@ -63,8 +63,9 @@ export default function IntakeChatView() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Updated to accept both Form and Keyboard events
+  const handleSend = async (e?: React.FormEvent | React.KeyboardEvent) => {
+    if (e) e.preventDefault();
     if (!input.trim() || loading) return;
 
     const userText = input.trim();
@@ -90,6 +91,15 @@ export default function IntakeChatView() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // NEW: Listens for Shift + Enter vs Normal Enter
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // Prevents a new line from forming
+      handleSend(e);      // Triggers the send function
+    }
+    // If Shift + Enter is pressed, it skips the if-block and natively drops to a new line!
   };
 
   // STEP 3: Trigger legal classification and return to the Classification Confirmation Screen
@@ -223,18 +233,19 @@ export default function IntakeChatView() {
           </motion.div>
         )}
 
-        <form onSubmit={handleSend} className="glass-card p-2 flex items-center gap-2 shadow-sm bg-white rounded-2xl border border-slate-300">
-          <input
-            type="text"
+        <form onSubmit={handleSend} className="glass-card p-2 flex items-end gap-2 shadow-sm bg-white rounded-2xl border border-slate-300">
+          <textarea
+            rows={2}
             value={input}
             onChange={e => setInput(e.target.value)}
-            placeholder="Answer the AI's questions or provide more details..."
-            className="flex-1 px-4 py-3 text-sm bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400"
+            onKeyDown={handleKeyDown}
+            placeholder="Type your reply... (Shift + Enter for new line)"
+            className="flex-1 px-4 py-3 text-sm bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400 resize-none leading-relaxed"
           />
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="btn-primary cursor-pointer p-3 rounded-xl disabled:opacity-50 bg-court-maroon text-white hover:bg-[#701A75]"
+            className="btn-primary cursor-pointer p-3 rounded-xl disabled:opacity-50 bg-court-maroon text-white hover:bg-[#701A75] mb-0.5"
           >
             <Send size={16} />
           </button>
