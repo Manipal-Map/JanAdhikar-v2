@@ -14,6 +14,18 @@ export const downloadRtiPdf = (case_id: string) => api.get(`/api/rti/pdf/${case_
 export const rtiPredict = (case_id: string, draft_text: string | null = null) => api.post('/api/rti/predict', { case_id, draft_text }).then(r => r.data)
 export const rtiImprove = (case_id: string) => api.post('/api/rti/improve', { case_id }).then(r => r.data)
 
+// Add this helper at the bottom of lib/api.ts
+export const triggerBlobDownload = (blobData: Blob, filename: string) => {
+  const url = window.URL.createObjectURL(new Blob([blobData]));
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  link.parentNode?.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
 export const transcribeAudio = (audioBlob: Blob, language: string) => {
   const formData = new FormData()
   formData.append('audio_file', audioBlob, 'recording.webm')
