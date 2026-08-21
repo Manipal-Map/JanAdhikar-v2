@@ -85,12 +85,12 @@ function TrackPageContent() {
 
   return (
     <div 
-      className="min-h-screen font-sans p-4 sm:p-6 lg:p-8 selection:bg-court-maroon selection:text-white pb-20 bg-cover bg-center bg-no-repeat relative text-slate-900"
+      className="min-h-screen font-sans p-4 sm:p-6 lg:p-8 selection:bg-court-maroon selection:text-white pb-20 bg-cover bg-center bg-no-repeat relative text-slate-200"
       style={{ backgroundImage: "url('/bg.image.png')" }}
     >
       <div className="max-w-6xl mx-auto space-y-8 pt-4 relative z-10">
         
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 backdrop-blur-md bg-white/95 border border-slate-300 p-4 rounded-2xl shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/20 pb-6">
           <div className="flex items-start sm:items-center gap-4">
             <button 
               onClick={() => router.push('/')}
@@ -100,11 +100,11 @@ function TrackPageContent() {
               <ArrowLeft size={18} />
             </button>
             <div>
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-ashoka-navy flex items-center gap-3 drop-shadow-sm">
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3 drop-shadow-md">
                 <span className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse hidden sm:block" />
                 SLA & Appellate Tracker
               </h1>
-              <p className="text-slate-600 text-sm mt-1 font-medium">
+              <p className="text-blue-100 text-sm mt-1 font-medium drop-shadow-sm">
                 Deterministic SLA enforcer & Section 20 penalty engine
               </p>
             </div>
@@ -116,7 +116,7 @@ function TrackPageContent() {
               placeholder="Enter Case ID (CR-...)"
               value={inputCaseId}
               onChange={(e) => setInputCaseId(e.target.value.toUpperCase())}
-              className="bg-[#FAF8F5] border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-ashoka-navy font-bold focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] w-full sm:w-56 uppercase tracking-widest shadow-sm placeholder:text-slate-400 placeholder:font-medium placeholder:tracking-normal placeholder:normal-case"
+              className="bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-ashoka-navy font-bold focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] w-full sm:w-56 uppercase tracking-widest shadow-sm placeholder:text-slate-400 placeholder:font-medium placeholder:tracking-normal placeholder:normal-case"
             />
             <button
               type="submit"
@@ -139,10 +139,10 @@ function TrackPageContent() {
             <div className="w-20 h-20 bg-white/95 border border-slate-300 rounded-full flex items-center justify-center mb-6 shadow-md backdrop-blur-md">
               <Search className="w-10 h-10 text-slate-400" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-ashoka-navy mb-3 tracking-tight drop-shadow-sm">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-3 tracking-tight drop-shadow-md">
               Track Your Legal Petition
             </h2>
-            <p className="text-slate-600 max-w-lg mb-12 font-medium leading-relaxed text-sm sm:text-base">
+            <p className="text-slate-200 max-w-lg mb-12 font-medium leading-relaxed text-sm sm:text-base drop-shadow-sm">
               Enter your 12-character Case ID above to monitor your statutory RTI timeline, calculate Section 20 penalties, and automatically draft First Appeals.
             </p>
 
@@ -321,8 +321,8 @@ export default function TrackPage() {
   return (
     <Suspense 
       fallback={
-        <div className="min-h-screen flex flex-col items-center justify-center p-6 text-sm font-bold text-ashoka-navy tracking-wide bg-cover bg-center" style={{ backgroundImage: "url('/bg.image.png')" }}>
-          <div className="w-8 h-8 border-4 border-court-maroon border-t-transparent rounded-full animate-spin mb-4" />
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 text-sm font-bold text-white tracking-wide bg-cover bg-center" style={{ backgroundImage: "url('/bg.image.png')" }}>
+          <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mb-4" />
           Loading Tracker Environment...
         </div>
       }
