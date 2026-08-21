@@ -56,7 +56,7 @@ export default function Navbar() {
             <div className="flex items-center gap-3">
               <button
                 onClick={handleLaunch}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#FF9933] hover:bg-[#138808] text-white text-[11px] font-bold uppercase tracking-wider transition-colors shrink-0 cursor-pointer shadow-sm"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#A32A02] hover:bg-[#138808] text-white text-[11px] font-bold uppercase tracking-wider transition-colors shrink-0 cursor-pointer shadow-sm"
               >
                 <Gavel className="w-3.5 h-3.5 text-amber-100 shrink-0" />
                 <span>Janअधिकार</span>
