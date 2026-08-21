@@ -403,9 +403,7 @@ __________________________
                         Standard AI Chatbots
                       </h3>
                     </div>
-                    <span className="text-[10px] font-mono bg-red-100 text-red-800 border border-red-200 px-2 py-0.5 rounded font-bold">
-                      Probabilistic
-                    </span>
+          
                   </div>
 
                   <ul className="space-y-4 text-xs text-slate-700">
@@ -457,9 +455,7 @@ __________________________
                         className="object-contain brightness-0"
                       />
                     </div>
-                    <span className="text-[10px] font-mono bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded font-bold">
-                      Structured
-                    </span>
+                    
                   </div>
 
                   <ul className="space-y-4 text-xs text-slate-700">
@@ -797,9 +793,6 @@ __________________________
               </p>
               <div className="mt-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-700 bg-slate-800/60">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
-                  Built for Indian citizens
-                </span>
               </div>
             </div>
 
