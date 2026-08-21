@@ -22,17 +22,11 @@ def search_department_details(department_name, city):
     try:
         response = requests.post(url, json=payload, headers=headers)
         results = response.json()
-        # Combine top 3 snippets into a context block for the LLM
         snippets = [item.get('snippet', '') for item in results.get('organic', [])]
         return "\n".join(snippets)
     except Exception as e:
         return "Could not fetch address dynamically."
 
-def resolveDepartment(case_id):
-    # 1. First, identify the department (use your LLM)
-    # 2. Call the search tool:
+def resolveDepartment(case_id, department_name, city):
     address_context = search_department_details(department_name, city)
-    
-    # 3. Feed address_context to your main LLM prompt:
-    # "You are an RTI drafter. Use this official address context: {address_context}"
-    return {"address": "...", "name": "..."}
+    return {"address": address_context, "name": department_name}
