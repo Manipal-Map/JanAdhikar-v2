@@ -84,7 +84,7 @@ ${applicantName}
 
   return (
     <div 
-      className="min-h-screen flex flex-col items-center justify-center p-4 py-12 bg-cover bg-center bg-no-repeat relative"
+      className="min-h-screen flex flex-col items-center justify-center p-4 py-12 bg-cover bg-center bg-no-repeat relative text-slate-200 font-sans"
       style={{ backgroundImage: "url('/bg.image.png')" }}
     >
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-4xl relative z-10">
@@ -93,84 +93,84 @@ ${applicantName}
           <div className="space-y-6">
             <div>
               <div className="mb-3">
-                <span className="text-xs font-bold uppercase tracking-widest text-court-maroon bg-court-maroon/10 px-3 py-1 rounded-full border border-court-maroon/20">
+                <span className="text-xs font-bold uppercase font-sans tracking-tight text-[#FF9933] bg-[#A32A02]/20 px-3 py-1 rounded-full border border-[#A32A02]/30">
                   STEP 3 · Institutional Legal Analysis
                 </span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-ashoka-navy mb-2 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md">
                 Identified Rights & Statutory Violations
               </h1>
-              <p className="text-slate-600 text-sm sm:text-base leading-relaxed font-medium">
+              <p className="text-blue-100 text-sm sm:text-base leading-relaxed font-medium drop-shadow-sm">
                 Based on your statement, our legal engine has analyzed the specific Indian statutory provisions, consumer protections, and case law precedents applicable to your case.
               </p>
             </div>
 
-            <div className="bg-white/95 backdrop-blur-xs border border-slate-300 rounded-2xl p-4 sm:p-5 text-left flex items-start gap-3 shadow-xs">
-              <BookOpen className="w-5 h-5 text-court-maroon mt-0.5 shrink-0" />
+            <div className="bg-[#1E293B]/60 backdrop-blur-md border border-slate-700 rounded-2xl p-4 sm:p-5 text-left flex items-start gap-3 shadow-sm">
+              <BookOpen className="w-5 h-5 text-[#FF9933] mt-0.5 shrink-0" />
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Citizen Matter on Record:</span>
-                <p className="text-sm font-semibold text-ashoka-navy mt-0.5">{defaultProblem}</p>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Citizen Matter on Record:</span>
+                <p className="text-sm font-semibold text-white mt-0.5">{defaultProblem}</p>
               </div>
             </div>
 
-            <div className="bg-white/95 backdrop-blur-xs border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-md space-y-6 text-left">
+            <div className="bg-[#0F172A]/85 backdrop-blur-md border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-left">
               
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <ShieldAlert className="w-4 h-4 text-court-maroon" />
-                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Applicable Acts & Violated Legal Provisions</h3>
+                  <ShieldAlert className="w-4 h-4 text-rose-400" />
+                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Applicable Acts & Violated Legal Provisions</h3>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {violated_rights.map((right, idx) => (
-                    <div key={idx} className="p-4 bg-rose-50/70 border border-rose-200/80 rounded-2xl flex items-start gap-3">
-                      <span className="w-6 h-6 rounded-full bg-court-maroon text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                    <div key={idx} className="p-4 bg-rose-950/30 border border-rose-900/50 rounded-2xl flex items-start gap-3">
+                      <span className="w-6 h-6 rounded-full bg-rose-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
                         {idx + 1}
                       </span>
                       <div>
-                        <p className="text-xs font-bold text-court-maroon leading-snug">{right}</p>
+                        <p className="text-xs font-bold text-rose-200 leading-snug">{right}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="border-t border-slate-200 pt-6">
+              <div className="border-t border-slate-700/60 pt-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <Scale className="w-4 h-4 text-statutory-green" />
-                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Legal Analysis & Fiduciary Rights</h3>
+                  <Scale className="w-4 h-4 text-emerald-400" />
+                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Legal Analysis & Fiduciary Rights</h3>
                 </div>
-                <div className="bg-[#FAF8F5] p-5 sm:p-6 rounded-2xl border border-slate-200 text-sm text-ashoka-navy leading-relaxed font-medium">
+                <div className="bg-[#1E293B]/60 p-5 sm:p-6 rounded-2xl border border-slate-700 text-sm text-slate-200 leading-relaxed font-medium">
                   {legal_explanation}
                 </div>
               </div>
 
-              <div className="border-t border-slate-200 pt-6">
+              <div className="border-t border-slate-700/60 pt-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <FileText className="w-4 h-4 text-blue-600" />
-                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Evidentiary Audit & Key Proofs Required</h3>
+                  <FileText className="w-4 h-4 text-blue-400" />
+                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Evidentiary Audit & Key Proofs Required</h3>
                 </div>
-                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line font-mono">
+                <div className="bg-[#1E293B]/60 p-5 rounded-2xl border border-slate-700 text-xs sm:text-sm text-slate-300 leading-relaxed whitespace-pre-line font-mono">
                   {evidence_analysis}
                 </div>
               </div>
 
               {target_portal_name && (
-                <div className="border-t border-slate-200 pt-6">
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="border-t border-slate-700/60 pt-6">
+                  <div className="bg-emerald-950/30 border border-emerald-900/50 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-900/40 px-2 py-0.5 rounded">
                         Statutory Forum
                       </span>
-                      <h4 className="text-base font-bold text-slate-900 mt-1">{target_portal_name}</h4>
-                      <p className="text-xs text-slate-600 mt-0.5">Recommended statutory appellate authority & online filing portal</p>
+                      <h4 className="text-base font-bold text-white mt-1">{target_portal_name}</h4>
+                      <p className="text-xs text-slate-400 mt-0.5">Recommended statutory appellate authority & online filing portal</p>
                     </div>
                     {target_portal_url && (
                       <a
                         href={target_portal_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="btn-ghost text-xs py-2 px-4 gap-1.5 bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 shrink-0 self-start sm:self-auto"
+                        className="btn-ghost text-xs py-2 px-4 gap-1.5 bg-slate-800 border border-emerald-700/50 text-emerald-400 hover:bg-emerald-900/50 shrink-0 self-start sm:self-auto"
                       >
                         <Globe size={14} /> Open Portal <ExternalLink size={12} />
                       </a>
@@ -179,16 +179,16 @@ ${applicantName}
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-slate-200">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-slate-700/60">
                 <button
                   onClick={() => router.push('/dashboard/grievance')}
-                  className="btn-ghost text-sm py-3 px-5 border border-slate-300 cursor-pointer w-full sm:w-auto justify-center bg-white"
+                  className="btn-ghost text-sm py-3 px-5 border border-slate-700 cursor-pointer w-full sm:w-auto justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white"
                 >
                   <ArrowLeft size={16} /> Edit Applicant Details
                 </button>
                 <button
                   onClick={() => setSubStep(2)}
-                  className="btn-primary text-base py-3.5 px-8 cursor-pointer w-full sm:w-auto justify-center shadow-md bg-[#A32A02] hover:bg-[#138808] transition-colors"
+                  className="btn-primary text-base py-3.5 px-8 cursor-pointer w-full sm:w-auto justify-center shadow-md bg-[#A32A02] hover:bg-[#138808] text-white font-bold"
                 >
                   View Ready-to-File Notice <ArrowRight size={18} />
                 </button>
@@ -199,21 +199,21 @@ ${applicantName}
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <span className="text-xs font-bold uppercase tracking-widest text-court-maroon bg-court-maroon/10 px-3 py-1 rounded-full border border-court-maroon/20">
+                <span className="text-xs font-bold uppercase font-sans tracking-tight text-[#FF9933] bg-[#A32A02]/20 px-3 py-1 rounded-full border border-[#A32A02]/30">
                   STEP 4 · Formal Legal Demand Notice
                 </span>
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-ashoka-navy mt-2 tracking-tight">
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-white mt-2 tracking-tight drop-shadow-md">
                   Ready-to-File Legal Notice
                 </h1>
               </div>
               {caseId && (
-                <span className="text-xs font-mono font-bold text-slate-700 bg-white/95 backdrop-blur-xs px-3 py-1 rounded-xl border border-slate-300 shadow-xs self-start sm:self-auto">
+                <span className="text-xs font-mono font-bold text-slate-300 bg-[#0F172A]/80 backdrop-blur-md px-3 py-1 rounded-xl border border-slate-700/60 shadow-xs self-start sm:self-auto">
                   Case ID: #{caseId}
                 </span>
               )}
             </div>
 
-            <p className="text-slate-600 text-sm leading-relaxed text-left font-medium">
+            <p className="text-blue-100 text-sm leading-relaxed text-left font-medium drop-shadow-sm">
               Your formal legal demand notice has been drafted in compliance with <strong>Section 80 CPC</strong> and the <strong>Consumer Protection Act, 2019</strong>. You can download it as a formal PDF, copy it, or print it.
             </p>
 
@@ -224,20 +224,20 @@ ${applicantName}
                 caseId={caseId}
               />
 
-              <div className="bg-white/95 backdrop-blur-xs border border-slate-300 rounded-2xl p-5 text-left space-y-2 shadow-xs">
-                <h4 className="text-xs font-bold text-ashoka-navy uppercase tracking-wider flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-court-maroon" /> Recommended Service Instructions
+              <div className="bg-[#0F172A]/85 backdrop-blur-md border border-white/10 rounded-2xl p-5 text-left space-y-2 shadow-xs">
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-amber-500" /> Recommended Service Instructions
                 </h4>
-                <ul className="text-xs text-slate-600 space-y-1.5 pl-4 list-disc leading-relaxed font-medium">
+                <ul className="text-xs text-slate-300 space-y-1.5 pl-4 list-disc leading-relaxed font-medium">
                   <li>Send this notice via <strong>Speed Post with Acknowledgment Due (AD)</strong> or by Registered Email to retain proof of delivery.</li>
                   <li>Give the opposite party <strong>15 statutory calendar days</strong> to comply from the date of receipt.</li>
                   <li>If the dispute remains unresolved after 15 days, submit the postal tracking receipt along with this notice on <strong>{target_portal_name || 'e-Daakhil'}</strong> to file your formal complaint.</li>
                 </ul>
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-left">
-                <AlertCircle size={18} className="text-amber-600 mt-0.5 shrink-0" />
-                <p className="text-xs text-amber-900 leading-relaxed font-medium">
+              <div className="bg-amber-950/30 border border-amber-900/50 rounded-2xl p-4 flex items-start gap-3 text-left">
+                <AlertCircle size={18} className="text-amber-400 mt-0.5 shrink-0" />
+                <p className="text-xs text-amber-200 leading-relaxed font-medium">
                   <strong>Statutory Notice Disclaimer:</strong> This legal notice has been generated by JanAdhikar's institutional AI engine. Please verify all party names, addresses, and transaction amounts before service.
                 </p>
               </div>
@@ -245,13 +245,13 @@ ${applicantName}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
                 <button
                   onClick={() => setSubStep(1)}
-                  className="btn-ghost text-sm py-3 px-5 border border-slate-300 cursor-pointer w-full sm:w-auto justify-center bg-white"
+                  className="btn-ghost text-sm py-3 px-5 border border-slate-700 cursor-pointer w-full sm:w-auto justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white"
                 >
                   <ArrowLeft size={16} /> Back to Rights Analysis
                 </button>
                 <button
                   onClick={() => { setStage('IDLE'); router.push('/'); }}
-                  className="btn-primary text-sm py-3 px-6 cursor-pointer w-full sm:w-auto justify-center bg-[#A32A02] hover:bg-[#138808] transition-colors"
+                  className="btn-primary text-sm py-3 px-6 cursor-pointer w-full sm:w-auto justify-center bg-[#A32A02] hover:bg-[#138808] transition-colors text-white font-bold"
                 >
                   Start Another Case
                 </button>
