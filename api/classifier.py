@@ -18,65 +18,28 @@ class RouteClassifier:
     def _rule_based_fallback(self, text: str) -> Dict[str, Any]:
         lower = text.strip().lower()
         
-        # If it's a completely short or random string (like "obb"), route to Other
         if len(lower) < 4 or not any(char.isalnum() for char in lower):
             return {
                 "route": "Other",
                 "sub_category": "Irrelevant",
                 "confidence": 0.95,
-                "reasoning": "The provided input is too short or unstructured to be a civic or legal inquiry.",
+                "reasoning": "The provided input is too short or unstructured.",
                 "form_schema": []
             }
 
-
-        # RTI terms focus purely on demanding documents, files, records, and transparency
-        rti_terms = [
-            "rti", "tender", "inspection", "records", "sanction order", "fund allocated", 
-            "status report", "file notings", "copy of", "certified copies", "blueprint", 
-            "budget", "procurement", "contractor details", "audit report", "guidelines", 
-            "policy document", "minutes of meeting", "merit list", "answer key", 
-            "response sheet", "cutoff marks", "attendance sheet", "empaneled"
-        ]
-
-        # Grievance terms focus on personal loss, financial delays, corruption, harassment, and service failure
-        grievance_terms = [
-            "pension", "not come", "delayed", "withheld", "disburse", "not credited", 
-            "refund", "deposit", "tenant", "eviction", "rent", "defective", "consumer", 
-            "service failure", "salary", "unpaid", "termination", "harassment", "bribe", 
-            "corruption", "extortion", "hospital", "negligence", "cheated", "fraud", 
-            "bill", "overcharged", "epfo", "pf withdrawal", "ration", "pds", "electricity cut", 
-            "water supply", "pothole", "garbage", "illegal construction", "encroachment", 
-            "arbitrary", "denied entry", "police inaction", "FIR not registered"
-        ]
+        rti_terms = ["rti", "tender", "inspection", "records", "sanction order", "copy of", "budget"]
+        grievance_terms = ["pension", "delayed", "withheld", "refund", "deposit", "tenant", "defective"]
         
         rti_score = sum(1 for term in rti_terms if term in lower)
         grievance_score = sum(1 for term in grievance_terms if term in lower)
 
         if rti_score == 0 and grievance_score == 0:
-            return {
-                "route": "Other",
-                "sub_category": "General Query",
-                "confidence": 0.80,
-                "reasoning": "This query does not contain recognized civic, administrative, or consumer law keywords.",
-                "form_schema": []
-            }
+            return {"route": "Other", "sub_category": "General Query", "confidence": 0.80, "reasoning": "No civic keywords.", "form_schema": []}
 
         if rti_score >= grievance_score:
-            return {
-                "route": "RTI",
-                "sub_category": "Municipal / Public Records",
-                "confidence": 0.88,
-                "reasoning": "You are seeking official administrative records or documents under the Right to Information Act, 2005.",
-                "form_schema": DYNAMIC_FORM_SCHEMAS.get("RTI", [])
-            }
+            return {"route": "RTI", "sub_category": "Public Records", "confidence": 0.88, "reasoning": "Seeking official records.", "form_schema": DYNAMIC_FORM_SCHEMAS.get("RTI", [])}
         else:
-            return {
-                "route": "Rights/Grievance",
-                "sub_category": "Consumer / Statutory Grievance",
-                "confidence": 0.85,
-                "reasoning": "You are seeking dispute resolution, statutory refund, or action against service deficiency.",
-                "form_schema": DYNAMIC_FORM_SCHEMAS.get("Rights/Grievance", [])
-            }
+            return {"route": "Rights/Grievance", "sub_category": "Grievance", "confidence": 0.85, "reasoning": "Seeking dispute resolution.", "form_schema": DYNAMIC_FORM_SCHEMAS.get("Rights/Grievance", [])}
 
     def classify(self, user_text: str, language: str = "English") -> Dict[str, Any]:
         if not user_text or not user_text.strip():
@@ -88,15 +51,11 @@ class RouteClassifier:
                     f"{CLASSIFIER_SYSTEM_PROMPT}\n\n"
                     f"CRITICAL LANGUAGE INSTRUCTION:\n"
                     f"The user has selected '{language}'. ALL text values in your JSON MUST be written in {language}.\n"
-                    f"If '{language}' is 'Hinglish', you MUST write conversational Hindi strictly using the English alphabet. "
-                    f"ABSOLUTELY NO Devanagari or regional scripts are allowed. Use English alphabet ONLY.\n\n"
-                    f"IMPORTANT TRIAJ RULE:\n"
-                    f"If the input is gibberish, random letters (like 'obb'), or completely unrelated to Indian civic/legal/RTI matters, "
-                    f"you MUST classify it as route: 'Other'."
+                    f"If '{language}' is 'Hinglish', write conversational Hindi using the English alphabet. "
                 )
                 
                 response = self.client.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
+                    model="llama-3.1-70b-versatile",
                     messages=[
                         {"role": "system", "content": system_msg},
                         {"role": "user", "content": user_text}
@@ -109,14 +68,12 @@ class RouteClassifier:
                 result = json.loads(content)
 
                 route = result.get("route", "Other")
-                if route not in ["RTI", "Rights/Grievance", "Other"]:
-                    route = "Other"
-
+                if route not in ["RTI", "Rights/Grievance", "Other"]: route = "Other"
                 result["route"] = route
                 result["form_schema"] = DYNAMIC_FORM_SCHEMAS.get(route, [])
                 return result
             except Exception as e:
-                print(f"[Classifier Fallback] Groq API call failed ({e}). Using intelligent rule fallback.")
+                print(f"[Classifier Fallback] Groq API failed ({e}).")
 
         return self._rule_based_fallback(user_text)
 
