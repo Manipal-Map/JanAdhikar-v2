@@ -350,7 +350,7 @@ __________________________
             <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4 w-full px-4 sm:px-0">
               <button
   onClick={handleStartIntake}
-  className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-[#FF9933] hover:bg-[#138808] transition-colors font-bold text-base text-white tracking-tight shadow-md group cursor-pointer"
+  className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-[#A32A02] hover:bg-[#138808] transition-colors font-bold text-base text-white tracking-tight shadow-md group cursor-pointer"
 >
   <Gavel className="w-5 h-5 text-amber-200 shrink-0" />
   <span>Launch Janअधिकार</span>
@@ -359,7 +359,7 @@ __________________________
 
 <button
   onClick={() => router.push('/dashboard/track')}
-  className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-[#FF9933] hover:bg-[#138808] transition-colors font-bold text-base text-white tracking-tight shadow-md group cursor-pointer"
+  className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-[#A32A02] hover:bg-[#138808] transition-colors font-bold text-base text-white tracking-tight shadow-md group cursor-pointer"
 >
   <Activity className="w-5 h-5 text-emerald-200 shrink-0" />
   <span>Track Filed Case</span>
