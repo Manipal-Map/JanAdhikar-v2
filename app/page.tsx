@@ -358,7 +358,7 @@ __________________________
 </button>
 
 <button
-  onClick={() => router.push('/dashboard/track')}
+  onClick={() => router.push('/track')}
   className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-[#FF9933] hover:bg-[#138808] transition-colors font-bold text-base text-white tracking-tight shadow-md group cursor-pointer"
 >
   <Activity className="w-5 h-5 text-emerald-200 shrink-0" />
