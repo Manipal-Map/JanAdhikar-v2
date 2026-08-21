@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Navbar from "./Navbar";
@@ -141,6 +141,20 @@ const CONSOLE_PRESETS: ConsolePreset[] = [
 
 export default function Landing() {
   const router = useRouter();
+
+  useEffect(() => {
+    const navigation = performance.getEntriesByType(
+      "navigation"
+    )[0] as PerformanceNavigationTiming;
+
+    if (navigation?.type === "reload") {
+      const currentPath = window.location.pathname;
+
+      if (currentPath !== "/") {
+        router.replace("/");
+      }
+    }
+  }, [router]);
   const [selectedPresetId, setSelectedPresetId] = useState<string>("road");
   const [inputText, setInputText] = useState<string>(
     CONSOLE_PRESETS[0].citizenInput
