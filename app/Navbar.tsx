@@ -2,9 +2,11 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Gavel, Menu, X } from "lucide-react";
 
 export default function Navbar() {
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -12,6 +14,10 @@ export default function Navbar() {
     { name: "Workflow", href: "#export-pipeline" }, // Points directly to 'Automated Export Pipeline' section
     { name: "Jurisdiction", href: "#the-law" },
   ];
+
+  const handleLaunch = () => {
+    router.push("/dashboard");
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 px-4 pt-6 sm:pt-8 font-sans">
@@ -46,13 +52,13 @@ export default function Navbar() {
 
             {/* Action CTA & Mobile Toggle */}
             <div className="flex items-center gap-3">
-              <a
-                href="#transmuter-console"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#881337] hover:bg-[#70102d] text-white text-[11px] font-bold uppercase tracking-wider transition-colors shrink-0"
+              <button
+                onClick={handleLaunch}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#881337] hover:bg-[#70102d] text-white text-[11px] font-bold uppercase tracking-wider transition-colors shrink-0 cursor-pointer"
               >
                 <Gavel className="w-3.5 h-3.5 text-amber-200 shrink-0" />
-                <span>Engine</span>
-              </a>
+                <span>Janअधिकार</span>
+              </button>
 
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
