@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || '', 
-  timeout: 60000,
+  baseURL: process.env.NEXT_PUBLIC_API_URL || '', 
+  timeout: 60000,
 });
 
 export const initCase = () => api.post('/api/case/init').then(r => r.data)
@@ -12,6 +12,9 @@ export const resolveDepartment = (case_id: string, location: string | null = nul
 export const downloadRtiPdf = (case_id: string) => api.get(`/api/rti/pdf/${case_id}`, { responseType: 'blob' }).then(r => r.data)
 export const rtiPredict = (case_id: string, draft_text: string | null = null) => api.post('/api/rti/predict', { case_id, draft_text }).then(r => r.data)
 export const rtiImprove = (case_id: string) => api.post('/api/rti/improve', { case_id }).then(r => r.data)
+
+// FIX: Added the missing analyzePio function required by the track page
+export const analyzePio = (case_id: string, pio_text: string) => api.post('/api/analyze_pio', { case_id, pio_text }).then(r => r.data)
 
 // UPDATED: Dynamically assign the correct file extension based on browser
 export const transcribeAudio = (audioBlob: Blob, language: string) => {
@@ -23,12 +26,12 @@ export const transcribeAudio = (audioBlob: Blob, language: string) => {
 }
 
 export const downloadGenericPdf = (title: string, content: string) => {
-  return api.post('/api/generate-pdf', { title, content }, { responseType: 'blob' })
-    .then(r => r.data)
+  return api.post('/api/generate-pdf', { title, content }, { responseType: 'blob' })
+    .then(r => r.data)
 }
 
 export const grievanceGenerate = (payload: any) => {
-  return api.post('/api/grievance/generate', payload).then(r => r.data)
+  return api.post('/api/grievance/generate', payload).then(r => r.data)
 }
 
 export const getCase = (case_id: string) => api.get(`/api/case/${case_id}`).then(r => r.data)
