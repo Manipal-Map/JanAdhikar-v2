@@ -347,21 +347,22 @@ __________________________
               routes, and statutory appeals. No legal jargon required.
             </p>
 
-            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4 w-full px-4 sm:px-0">
               <button
                 onClick={handleStartIntake}
                 className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl btn-maroon-solid font-bold text-base tracking-tight shadow-md group cursor-pointer"
               >
                 <Gavel className="w-5 h-5 text-amber-200 shrink-0" />
                 <span>Launch Janअधिकार</span>
-                <ChevronRight className="w-5 h-5 text-slate-200 group-hover:translate-x-0.5 transition-transform shrink-0" />
+                <ChevronRight className="w-5 h-5 text-white/70 group-hover:translate-x-0.5 transition-transform shrink-0" />
               </button>
               <button
                 onClick={() => router.push('/dashboard/track')}
-                className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-white text-ashoka-navy border border-slate-200 font-bold text-base tracking-tight shadow-sm hover:bg-slate-50 transition cursor-pointer"
+                className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl btn-navy-solid font-bold text-base tracking-tight shadow-md group cursor-pointer"
               >
-                <Activity className="w-5 h-5 text-emerald-600 shrink-0" />
+                <Activity className="w-5 h-5 text-emerald-400 shrink-0" />
                 <span>Track Filed Case</span>
+                <ChevronRight className="w-5 h-5 text-white/70 group-hover:translate-x-0.5 transition-transform shrink-0" />
               </button>
             </div>
           </div>
