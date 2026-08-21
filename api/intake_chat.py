@@ -73,9 +73,8 @@ def intake_chat(payload: IntakeMessage):
         
         messages.append({"role": "user", "content": payload.message})
 
-        # --- UPDATED TO STABLE 8B MODEL ---
         response = client.chat.completions.create(
-            model="llama3-8b-8192", 
+            model="openai/gpt-oss-120b", 
             messages=messages,
             temperature=0.2,
             response_format={"type": "json_object"}
