@@ -360,7 +360,7 @@ __________________________
                             >
                                 <Gavel className="w-5 h-5 text-amber-200 shrink-0" />
 
-                                <span>Launch Legal AI Copilot</span>
+                                <span>Launch Janअधिकार </span>
 
                                 <ChevronRight className="w-5 h-5 text-slate-200 group-hover:translate-x-0.5 transition-transform shrink-0" />
                             </button>
