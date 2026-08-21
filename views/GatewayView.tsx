@@ -5,7 +5,7 @@ import { ArrowRight, FileSearch, Loader2, KeyRound, Copy, Download, Lock, Refres
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import useCaseStore from '@/store/caseStore'
-import { initCase, getCase } from '@/lib/api'
+import { initCase, getCase, classifyCase } from '@/lib/api'
 import AudioRecorder from '@/components/dashboard/AudioRecorder'
 
 export default function GatewayView() {
@@ -36,6 +36,10 @@ export default function GatewayView() {
       setUserProblem(text.trim())
       setStage('IDLE')
       setShowPasskeyModal(true)
+
+      // Silently save to Supabase in the background instantly!
+      classifyCase(case_id, text.trim(), language || 'English').catch(() => {});
+
     } catch (err: any) {
       setLocalErr(err?.response?.data?.detail || err.message || 'Something went wrong.')
       setStage('IDLE')
@@ -46,7 +50,6 @@ export default function GatewayView() {
     if (!hasAgreed) return
     setShowPasskeyModal(false)
     setLocalErr(null)
-    // Directly push to the new universal AI Smart Form
     router.push('/dashboard/intake')
   }
 
@@ -87,11 +90,9 @@ export default function GatewayView() {
         router.push('/dashboard/rti/result')
       } else if (st === 'grievance_completed') {
         router.push('/dashboard/grievance/result')
-      } else if (rt === 'RTI' || rt === 'Rights/Grievance') {
+      } else if (rt === 'RTI' || rt === 'Rights/Grievance' || st === 'classified' || st === 'initialized') {
         router.push('/dashboard/intake')
       } else {
-        // FIX: Handles fresh "initialized" cases that haven't been classified yet.
-        // Drops you back to the text box so you can type your problem.
         setResumeMode(false)
         setIsResumeNavigating(false)
         setStage('IDLE')
@@ -256,13 +257,14 @@ export default function GatewayView() {
               <FolderOpen size={28} />
             </div>
             <h2 className="text-3xl font-extrabold text-ashoka-navy mb-3">Resume your case</h2>
-            <p className="text-slate-500 mb-8">Enter your 10-character Case ID to pick up where you left off.</p>
+            <p className="text-slate-500 mb-8">Enter your 12-character Case ID to pick up where you left off.</p>
             
             <input 
               type="text" 
               value={passkey} 
               onChange={(e) => setPasskey(e.target.value.toUpperCase())}
-              placeholder="E.G. CR-88FA-992B"
+              placeholder="E.G. CR-ABCD-1234"
+              maxLength={12}
               className="w-full text-center bg-slate-50 border border-slate-300 rounded-xl p-4 text-lg font-mono font-bold text-ashoka-navy tracking-widest uppercase mb-6 placeholder:text-slate-300 focus:ring-2 focus:ring-court-maroon/20 focus:border-court-maroon focus:outline-none"
             />
             
