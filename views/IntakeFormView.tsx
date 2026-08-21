@@ -21,7 +21,6 @@ import {
 import useCaseStore from '@/store/caseStore';
 import { classifyCase, rtiGenerate, grievanceGenerate } from '@/lib/api';
 
-// --- UTILITY FUNCTION TO FIX MESSY AI TEXT & RENDER BULLETS ---
 const formatAIText = (text?: string) => {
   if (!text) return null;
   const lines = text.split('\n');
@@ -59,7 +58,6 @@ const formatAIText = (text?: string) => {
       return;
     }
 
-    // Detect bullet points: starts with "-", "*", or "1."
     const isBullet = /^(\-|\*|\d+\.)\s+(.*)/.exec(line.trim());
     
     if (isBullet) {
@@ -79,7 +77,7 @@ const formatAIText = (text?: string) => {
     }
   });
   
-  pushList(); // Catch any trailing lists
+  pushList();
   return result;
 };
 
@@ -102,7 +100,6 @@ export default function IntakeFormView() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   
-  // 0 = Assessment, 1 = Applicant, 2 = AI Strategy, 3 = Confirmation
   const [currentStep, setCurrentStep] = useState<0 | 1 | 2 | 3>(0);
   const [localForm, setLocalForm] = useState<Record<string, any>>({});
 
@@ -196,10 +193,15 @@ export default function IntakeFormView() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAF8F5]">
-        <Loader2 size={40} className="animate-spin text-court-maroon mb-4" />
-        <h2 className="text-xl font-bold text-ashoka-navy">Analyzing Legal Merits...</h2>
-        <p className="text-slate-500 mt-2 text-sm">Drafting statutory clauses, identifying jurisdiction, and computing fees.</p>
+      <div 
+        className="min-h-screen flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/bg.image.png')" }}
+      >
+        <div className="bg-white/95 backdrop-blur-xs p-8 rounded-3xl border border-slate-300 shadow-md text-center space-y-3">
+          <Loader2 size={40} className="animate-spin text-court-maroon mx-auto" />
+          <h2 className="text-xl font-bold text-ashoka-navy">Analyzing Legal Merits...</h2>
+          <p className="text-slate-600 text-sm">Drafting statutory clauses, identifying jurisdiction, and computing fees.</p>
+        </div>
       </div>
     );
   }
@@ -208,12 +210,14 @@ export default function IntakeFormView() {
   const isOther = classifyResult?.route === 'Other';
 
   return (
-    <div className="gradient-bg min-h-screen p-4 sm:p-6 lg:p-8 flex items-center justify-center font-sans">
-      <div className="w-full max-w-3xl space-y-6">
+    <div 
+      className="min-h-screen p-4 sm:p-6 lg:p-8 flex items-center justify-center font-sans bg-cover bg-center bg-no-repeat relative"
+      style={{ backgroundImage: "url('/bg.image.png')" }}
+    >
+      <div className="w-full max-w-3xl space-y-6 relative z-10">
         
-        {/* Step Progression Bar (Hidden if Out of Scope) */}
         {!isOther && (
-          <div className="bg-white border border-slate-300 rounded-2xl p-4 shadow-sm flex items-center justify-between overflow-x-auto gap-2">
+          <div className="bg-white/95 backdrop-blur-xs border border-slate-300 rounded-2xl p-4 shadow-sm flex items-center justify-between overflow-x-auto gap-2">
             {[
               { num: 0, label: 'Assessment', icon: Scale },
               { num: 1, label: 'Applicant', icon: User },
@@ -226,7 +230,7 @@ export default function IntakeFormView() {
                 <div 
                   key={s.num} 
                   className={`flex items-center gap-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
-                    active ? 'text-court-maroon' : done ? 'text-statutory-green' : 'text-slate-400'
+                    active ? 'text-court-maroon' : done ? 'text-statutory-green' : 'text-slate-500'
                   }`}
                 >
                   <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold shrink-0 ${
@@ -234,7 +238,7 @@ export default function IntakeFormView() {
                       ? 'bg-court-maroon text-white shadow-sm' 
                       : done 
                       ? 'bg-emerald-100 text-emerald-800' 
-                      : 'bg-slate-100 text-slate-400'
+                      : 'bg-slate-100 text-slate-500'
                   }`}>
                     {done ? '✓' : s.num}
                   </div>
@@ -245,10 +249,9 @@ export default function IntakeFormView() {
           </div>
         )}
 
-        {/* Case Info Header */}
         <div className="flex items-center justify-between px-2">
           <div>
-            <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${isOther ? 'bg-slate-100 text-slate-600 border-slate-200' : 'text-court-maroon bg-rose-50 border-rose-200'}`}>
+            <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${isOther ? 'bg-slate-100 text-slate-700 border-slate-200' : 'text-court-maroon bg-rose-50 border-rose-200'}`}>
               Route: {isOther ? 'Out of Platform Scope' : (isRTI ? 'Right to Information (RTI)' : 'Administrative Grievance')}
             </span>
             <h2 className="text-xl sm:text-2xl font-extrabold text-ashoka-navy mt-2">
@@ -259,62 +262,57 @@ export default function IntakeFormView() {
             </h2>
           </div>
           {caseId && (
-            <span className="text-xs font-mono font-bold text-slate-600 bg-white border border-slate-300 px-3 py-1.5 rounded-xl shadow-xs">
+            <span className="text-xs font-mono font-bold text-slate-700 bg-white/95 backdrop-blur-xs border border-slate-300 px-3 py-1.5 rounded-xl shadow-xs">
               #{caseId}
             </span>
           )}
         </div>
 
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-300 shadow-sm text-left">
+        <div className="bg-white/95 backdrop-blur-xs rounded-3xl p-6 sm:p-8 border border-slate-300 shadow-md text-left">
           
-          {/* STEP 0: LEGAL ASSESSMENT */}
           {currentStep === 0 && (
             <div className="space-y-6 animate-in fade-in duration-300">
-              <div className="p-6 bg-[#FAF8F5] border border-slate-200 rounded-3xl flex flex-col gap-4 shadow-inner text-left">
+              <div className="p-6 bg-[#FAF8F5] border border-slate-300 rounded-3xl flex flex-col gap-4 shadow-inner text-left">
                 
-                <div className="flex flex-col gap-1 border-b border-slate-200 pb-5">
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">
+                <div className="flex flex-col gap-1 border-b border-slate-300 pb-5">
+                  <span className="text-xs font-bold text-slate-600 uppercase tracking-widest mb-1">
                     AI Classification Result
                   </span>
-                  <h3 className={`font-black text-3xl sm:text-4xl tracking-tight ${isOther ? 'text-slate-700' : isRTI ? 'text-blue-700' : 'text-emerald-700'}`}>
+                  <h3 className={`font-black text-3xl sm:text-4xl tracking-tight ${isOther ? 'text-slate-800' : isRTI ? 'text-blue-800' : 'text-emerald-800'}`}>
                     {isOther ? 'Out of Scope / Other' : isRTI ? 'Right to Information (RTI)' : 'Formal Legal Grievance'}
                   </h3>
                   <div className="mt-2">
                     <span className="text-sm font-bold text-court-maroon bg-court-maroon/10 px-3 py-1.5 rounded-lg inline-block border border-court-maroon/20">
-                      {/* Added optional chaining `?.` to safely handle null state during reset */}
                       Category: {classifyResult?.sub_category}
                     </span>
                   </div>
                 </div>
 
                 <div className="pt-2">
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Detailed Legal Analysis</h4>
-                  <div className="text-sm font-medium text-slate-700 leading-relaxed">
-                    {/* Added optional chaining `?.` */}
+                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Detailed Legal Analysis</h4>
+                  <div className="text-sm font-medium text-slate-800 leading-relaxed">
                     {formatAIText(classifyResult?.reasoning)}
                   </div>
                 </div>
               </div>
 
-              {/* ACTION PLAN IF OUT OF SCOPE */}
               {isOther && (
                 <div className="p-6 bg-blue-50 border border-blue-200 rounded-3xl text-left shadow-sm">
                   <h4 className="text-base font-bold text-blue-900 flex items-center gap-2 mb-4 pb-2 border-b border-blue-200/60">
                     <Info size={20} className="text-blue-700"/> Recommended Action Plan For Your Case
                   </h4>
                   <div className="text-sm text-blue-900 leading-relaxed font-medium">
-                    {/* Added optional chaining `?.` */}
                     {formatAIText(classifyResult?.specific_advice || 'This case falls outside RTI or Consumer/Administrative grievance jurisdictions. Please consult a local legal professional or the relevant authority for this specific issue.')}
                   </div>
                 </div>
               )}
 
-              <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
+              <div className="pt-6 border-t border-slate-300 flex items-center justify-between">
                 <button onClick={() => { reset(); router.push('/'); }} className="btn-ghost py-3 px-5 border border-slate-300 cursor-pointer">
                   <ArrowLeft size={16} /> Start New Case
                 </button>
                 {!isOther && (
-                  <button onClick={() => handleNextStep()} className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-court-maroon hover:bg-[#701A75] text-white rounded-xl shadow-md cursor-pointer font-bold">
+                  <button onClick={() => handleNextStep()} className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-[#A32A02] hover:bg-[#138808] transition-colors text-white rounded-xl shadow-md cursor-pointer font-bold">
                     Proceed to Form Fill <ArrowRight size={18} />
                   </button>
                 )}
@@ -322,10 +320,9 @@ export default function IntakeFormView() {
             </div>
           )}
 
-          {/* STEP 1: APPLICANT DETAILS ONLY */}
           {currentStep === 1 && (
             <form onSubmit={handleNextStep} className="space-y-5 animate-in fade-in duration-300">
-              <p className="text-xs text-slate-500 leading-relaxed mb-4 font-medium">
+              <p className="text-xs text-slate-600 leading-relaxed mb-4 font-medium">
                 Official applications require the physical correspondence identity of the citizen. The AI will handle the technical legal details in the next step.
               </p>
 
@@ -338,7 +335,7 @@ export default function IntakeFormView() {
                     value={localForm.applicant_name}
                     onChange={e => handleChange('applicant_name', e.target.value)}
                     placeholder="e.g. Rohan Sharma"
-                    className="input-field"
+                    className="input-field bg-white"
                   />
                 </div>
 
@@ -350,7 +347,7 @@ export default function IntakeFormView() {
                     value={localForm.applicant_contact}
                     onChange={e => handleChange('applicant_contact', e.target.value)}
                     placeholder="e.g. 9876543210 / rohan@email.com"
-                    className="input-field"
+                    className="input-field bg-white"
                   />
                 </div>
 
@@ -362,7 +359,7 @@ export default function IntakeFormView() {
                     value={localForm.applicant_city}
                     onChange={e => handleChange('applicant_city', e.target.value)}
                     placeholder="e.g. Jaipur"
-                    className="input-field"
+                    className="input-field bg-white"
                   />
                 </div>
 
@@ -374,7 +371,7 @@ export default function IntakeFormView() {
                     value={localForm.applicant_state}
                     onChange={e => handleChange('applicant_state', e.target.value)}
                     placeholder="e.g. Rajasthan"
-                    className="input-field"
+                    className="input-field bg-white"
                   />
                 </div>
 
@@ -386,7 +383,7 @@ export default function IntakeFormView() {
                     value={localForm.applicant_address}
                     onChange={e => handleChange('applicant_address', e.target.value)}
                     placeholder="e.g. House No. 42, Sector 3, Main Road"
-                    className="input-field"
+                    className="input-field bg-white"
                   />
                 </div>
 
@@ -398,23 +395,22 @@ export default function IntakeFormView() {
                     value={localForm.applicant_pincode}
                     onChange={e => handleChange('applicant_pincode', e.target.value)}
                     placeholder="e.g. 302001"
-                    className="input-field"
+                    className="input-field bg-white"
                   />
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
+              <div className="pt-6 border-t border-slate-300 flex items-center justify-between">
                 <button type="button" onClick={() => setCurrentStep(0)} className="btn-ghost py-3 px-5 border border-slate-300 cursor-pointer">
                   <ArrowLeft size={16} /> Back
                 </button>
-                <button type="submit" className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-court-maroon hover:bg-[#701A75] text-white rounded-xl shadow-md cursor-pointer font-bold">
+                <button type="submit" className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-[#A32A02] hover:bg-[#138808] transition-colors text-white rounded-xl shadow-md cursor-pointer font-bold">
                   Next: AI Legal Strategy <ArrowRight size={18} />
                 </button>
               </div>
             </form>
           )}
 
-          {/* STEP 2: REVIEW AI LEGAL STRATEGY */}
           {currentStep === 2 && (
             <form onSubmit={handleNextStep} className="space-y-6 animate-in fade-in duration-300">
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-2xl flex items-start gap-3 shadow-xs">
@@ -426,17 +422,17 @@ export default function IntakeFormView() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-[#FAF8F5] p-3 rounded-xl border border-slate-200 flex items-center gap-3">
-                  <Banknote size={16} className="text-slate-400" />
+                <div className="bg-[#FAF8F5] p-3 rounded-xl border border-slate-300 flex items-center gap-3">
+                  <Banknote size={16} className="text-slate-500" />
                   <div>
-                    <span className="block text-[10px] font-bold text-slate-400 uppercase">Statutory Fee</span>
+                    <span className="block text-[10px] font-bold text-slate-500 uppercase">Statutory Fee</span>
                     <span className="text-sm font-bold text-ashoka-navy">{localForm.statutory_fee || (isRTI ? '₹10' : 'N/A')}</span>
                   </div>
                 </div>
-                <div className="bg-[#FAF8F5] p-3 rounded-xl border border-slate-200 flex items-center gap-3">
-                  <Clock size={16} className="text-slate-400" />
+                <div className="bg-[#FAF8F5] p-3 rounded-xl border border-slate-300 flex items-center gap-3">
+                  <Clock size={16} className="text-slate-500" />
                   <div>
-                    <span className="block text-[10px] font-bold text-slate-400 uppercase">Mandated Response Time</span>
+                    <span className="block text-[10px] font-bold text-slate-500 uppercase">Mandated Response Time</span>
                     <span className="text-sm font-bold text-ashoka-navy">{localForm.response_time || (isRTI ? '30 Days' : '15 Days')}</span>
                   </div>
                 </div>
@@ -538,7 +534,7 @@ export default function IntakeFormView() {
                 </div>
               )}
 
-              <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
+              <div className="pt-6 border-t border-slate-300 flex items-center justify-between">
                 <button
                   type="button"
                   onClick={() => setCurrentStep(1)}
@@ -548,7 +544,7 @@ export default function IntakeFormView() {
                 </button>
                 <button
                   type="submit"
-                  className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-court-maroon hover:bg-[#701A75] text-white rounded-xl shadow-md cursor-pointer font-bold"
+                  className="btn-primary py-3.5 px-8 flex items-center gap-2 bg-[#A32A02] hover:bg-[#138808] transition-colors text-white rounded-xl shadow-md cursor-pointer font-bold"
                 >
                   Proceed to Final Review <ArrowRight size={18} />
                 </button>
@@ -556,7 +552,6 @@ export default function IntakeFormView() {
             </form>
           )}
 
-          {/* STEP 3: FINAL REVIEW & CONFIRMATION */}
           {currentStep === 3 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               
@@ -575,56 +570,56 @@ export default function IntakeFormView() {
               </div>
 
               <div className="space-y-4">
-                <div className="bg-[#FAF8F5] p-5 rounded-2xl border border-slate-200 shadow-inner">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-200/80 mb-3">
+                <div className="bg-[#FAF8F5] p-5 rounded-2xl border border-slate-300 shadow-inner">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-300 mb-3">
                     <h4 className="text-xs font-bold text-court-maroon uppercase tracking-wider flex items-center gap-1.5">
                       <User size={14} /> Identity Record
                     </h4>
-                    <button onClick={() => setCurrentStep(1)} className="text-xs font-bold text-slate-500 hover:text-ashoka-navy flex items-center gap-1">
+                    <button onClick={() => setCurrentStep(1)} className="text-xs font-bold text-slate-600 hover:text-ashoka-navy flex items-center gap-1">
                       <Edit3 size={12} /> Edit
                     </button>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                     <div>
-                      <span className="text-slate-400 font-bold block">NAME:</span>
+                      <span className="text-slate-500 font-bold block">NAME:</span>
                       <span className="font-semibold text-slate-800">{localForm.applicant_name}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 font-bold block">CONTACT:</span>
+                      <span className="text-slate-500 font-bold block">CONTACT:</span>
                       <span className="font-semibold text-slate-800">{localForm.applicant_contact}</span>
                     </div>
                     <div className="sm:col-span-2">
-                      <span className="text-slate-400 font-bold block">POSTAL ADDRESS:</span>
+                      <span className="text-slate-500 font-bold block">POSTAL ADDRESS:</span>
                       <span className="font-semibold text-slate-800">{localForm.applicant_address}, {localForm.applicant_city}, {localForm.applicant_state} - {localForm.applicant_pincode}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-[#FAF8F5] p-5 rounded-2xl border border-slate-200 shadow-inner">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-200/80 mb-3">
+                <div className="bg-[#FAF8F5] p-5 rounded-2xl border border-slate-300 shadow-inner">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-300 mb-3">
                     <h4 className="text-xs font-bold text-court-maroon uppercase tracking-wider flex items-center gap-1.5">
                       <Building2 size={14} /> Legal Specifications
                     </h4>
-                    <button onClick={() => setCurrentStep(2)} className="text-xs font-bold text-slate-500 hover:text-ashoka-navy flex items-center gap-1">
+                    <button onClick={() => setCurrentStep(2)} className="text-xs font-bold text-slate-600 hover:text-ashoka-navy flex items-center gap-1">
                       <Edit3 size={12} /> Edit
                     </button>
                   </div>
                   <div className="space-y-3 text-xs">
                     <div>
-                      <span className="text-slate-400 font-bold block">{isRTI ? 'PUBLIC AUTHORITY:' : 'OPPOSING PARTY:'}</span>
+                      <span className="text-slate-500 font-bold block">{isRTI ? 'PUBLIC AUTHORITY:' : 'OPPOSING PARTY:'}</span>
                       <span className="font-semibold text-slate-900 text-sm">{localForm.target_department || 'Standard Default / As determined by Law'}</span>
                     </div>
                     {isRTI ? (
                       <>
                         <div>
-                          <span className="text-slate-400 font-bold block">RECORDS SOUGHT:</span>
+                          <span className="text-slate-500 font-bold block">RECORDS SOUGHT:</span>
                           <p className="font-medium text-slate-800 whitespace-pre-wrap leading-relaxed mt-1">{localForm.specific_records || 'Standard certified records mapping to query'}</p>
                         </div>
                       </>
                     ) : (
                       <>
                         <div>
-                          <span className="text-slate-400 font-bold block">REMEDY DEMANDED:</span>
+                          <span className="text-slate-500 font-bold block">REMEDY DEMANDED:</span>
                           <p className="font-medium text-slate-800 leading-relaxed mt-1">{localForm.desired_relief || 'Standard statutory relief with interest'}</p>
                         </div>
                       </>
@@ -633,7 +628,7 @@ export default function IntakeFormView() {
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="pt-6 border-t border-slate-300 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <button
                   type="button"
                   onClick={() => setCurrentStep(2)}
@@ -646,7 +641,7 @@ export default function IntakeFormView() {
                   type="button"
                   onClick={handleGenerate}
                   disabled={generating}
-                  className="btn-primary py-4 px-10 flex items-center justify-center gap-2 bg-court-maroon hover:bg-[#701A75] text-white rounded-xl shadow-md cursor-pointer font-bold w-full sm:w-auto"
+                  className="btn-primary py-4 px-10 flex items-center justify-center gap-2 bg-[#A32A02] hover:bg-[#138808] transition-colors text-white rounded-xl shadow-md cursor-pointer font-bold w-full sm:w-auto"
                 >
                   {generating ? (
                     <>
