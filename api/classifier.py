@@ -94,7 +94,7 @@ def analyze_pio_response(pio_text: str) -> Dict[str, Any]:
                     {"role": "system", "content": PIO_ANALYZER_SYSTEM_PROMPT},
                     {"role": "user", "content": f"PIO Response Text:\n{pio_text}"}
                 ],
-                model="llama-3.3-70b-versatile",
+                model="llama-3.1-8b-instant",
                 temperature=0.1,
             )
             raw_content = chat_completion.choices[0].message.content.strip()
@@ -223,7 +223,7 @@ class RouteClassifier:
                 )
                 
                 response = self.client.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
+                    model="llama-3.1-8b-instant",
                     messages=[
                         {"role": "system", "content": system_msg},
                         {"role": "user", "content": user_text}
