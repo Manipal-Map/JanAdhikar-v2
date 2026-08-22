@@ -115,7 +115,7 @@ The platform is a monorepo: a **Next.js 15** frontend (App Router) driving the c
 | Client State | **Zustand** (with `persist` middleware) | Multi-step case flow state survives refreshes via `localStorage` |
 | Charts | **Recharts** | Radial risk-probability meter on the RTI results screen |
 | Backend API | **FastAPI** (Python), deployed as Vercel serverless functions | Classification, jurisdiction resolution, drafting, PDF generation |
-| LLM Provider | **Groq** — `llama-3.3-70b-versatile`, `openai/gpt-oss-120b`, `whisper-large-v3` | Classification, drafting, risk prediction, and speech-to-text |
+| LLM Provider | **Groq** — `openai/gpt-oss-120b`, `whisper-large-v3` | Classification, drafting, risk prediction, and speech-to-text |
 | PDF Generation | **ReportLab** | Statutory Form 'A' RTI applications and First Appeal documents |
 | Persistence | **Supabase** | Passkey-keyed case storage, with an in-memory fallback for local dev |
 | ML Evaluation | **scikit-learn**, **tabulate** | Classifier accuracy, confusion matrix, and per-class precision/recall against a hand-labeled test set |
