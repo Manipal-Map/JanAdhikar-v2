@@ -150,7 +150,7 @@ ${applicantName}
                   <FileText className="w-4 h-4 text-blue-600" />
                   <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Evidentiary Audit & Key Proofs Required</h3>
                 </div>
-                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line font-mono shadow-inner">
+                <div className="bg-[#FAF8F5] p-5 sm:p-6 rounded-2xl border border-slate-200 text-sm text-ashoka-navy leading-relaxed whitespace-pre-line font-medium shadow-inner">
                   {evidence_analysis}
                 </div>
               </div>
