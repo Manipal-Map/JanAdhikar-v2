@@ -4,7 +4,7 @@
 
 ### *जन अधिकार — The People's Right*
 
-**An AI-native legal engine that turns a citizen's plain-language civic complaint into a court-ready RTI application, a Section 19(1) First Appeal, or a formal consumer/grievance notice - all with 0 accounts**
+**An AI-native legal engine that turns a citizen's plain-language civic complaint into a filing-ready RTI application, a Section 19(1) First Appeal, or a formal consumer/grievance notice - all with 0 accounts**
 
 ![Status](https://img.shields.io/badge/Status-Active_Development-881337?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-0F172A?style=for-the-badge)
@@ -27,32 +27,32 @@
 
 <br/>
 
-## What is JanAdhikar?
+## Overview
 
-Filing a Right to Information (RTI) request or a formal grievance in India today usually means one of three things: paying a "typist" outside a government office, copy-pasting a generic template off a random blog, or giving up because you don't know which department to even write to.
+Filing an RTI or raising a formal grievance in India is still unnecessarily confusing & complicated. You may have to figure out which department handles it, how to frame the request, where to file it, and what to do if nothing happens. Today, people often turn to AI chatbots/ LLMs, scattered government portals, old templates, or paid agents just to piece that process together.
 
-**JanAdhikar** replaces all three with a guided, AI-driven pipeline. A citizen describes their problem in plain language — by typing or by speaking in **English, Hindi, or Hinglish** — and the system:
+**JanAdhikar** replaces all three with a guided, AI-driven pipeline. A citizen describes their problem in plain language, by typing or by speaking in **English, Hindi, or Hinglish**. And the system:
 
-1. **Classifies** the issue into the correct legal route (RTI vs. consumer/administrative grievance vs. out-of-scope),
+1. **Classifies** the issue into the correct legal route (Is it an RTI?  A consumer/administrative grievance? Or simply out-of-scope?),
 2. **Resolves jurisdiction**, identifying the specific public authority or PIO who actually holds the requested records,
-3. **Drafts** a statute-aware document from scratch — not a filled-in template,
-4. **Stress-tests** RTI drafts against real rejection grounds (Section 8/9 exemptions) *before* filing,
+3. **Drafts** a statute-aware document from scratch, implementing the gov-issued, latest RTI form's format,
+4. **Stress-tests** RTI drafts against real rejection grounds (Section 8/9 exemptions) ***before*** filing,
 5. **Tracks** the statutory 30-day clock and calculates the Section 20(1) penalty accruing against the defaulting officer, and
-6. **Escalates** automatically — generating a court-ready First Appeal the moment a PIO reply is denied, evasive, or simply never comes.
+6. **Escalates** automatically, by generating a court-ready First Appeal the moment a PIO reply is denied, evasive, or simply never comes.
 
-No account. No email. No phone number. Just a 12-character Passkey that is the *only* way back into a case.
+No account, email, or phone number is required for resuming your case. Just a 12-character *Secret Passkey* is the *only* way back into a case.
 
 ---
 
-## Why It Matters
+## Why Differentiates Janअधिकार?
 
-| The Old Way | JanAdhikar |
+| Conventional Way | JanAdhikar Way |
 | :--- | :--- |
-| Pay an agent ₹200–500 to draft a one-page letter | Free, AI-drafted, statute-compliant document in under a minute |
-| Generic AI chatbots ask *"why"* — which RTI law forbids | Every query is reframed as a request for a physical record (Sec. 2(f) compliant) |
-| No idea which office to even address | Jurisdiction auto-resolved from the issue + location |
-| PIO ignores the request — citizen has no recourse | Deterministic SLA tracker computes the exact ₹250/day penalty and drafts the First Appeal for you |
-| Personal data sits on a server forever | Nothing is tied to your identity — the Passkey is disposable by design |
+| ChatGPT drafts RTIs — often vague, legally toothless | **LLM + benchmarked ML classifier draft precise, record-seeking queries** |
+| No AI reliably knows the right PIO or authority | **Issue + location → jurisdiction auto-resolved** |
+| Filing means hopping across fragmented govt portals | **One guided flow — draft, destination & next steps** |
+| Filing is easy; silence after it isn't | **SLA clock runs itself → penalty computed, appeal auto-drafted** |
+| Generic AI needs you to already know what to ask | **Starts from your problem, works out what's legally askable** |
 
 ---
 
@@ -70,56 +70,6 @@ No account. No email. No phone number. Just a 12-character Passkey that is the *
 | **Grievance & Consumer Notice Engine** | For non-RTI matters (deposits, refunds, deficiency of service, pension delays), the engine identifies the violated rights, the right forum (CPGRAMS, e-Daakhil, Rent Authority, etc.), and drafts a formal legal demand notice with an 18% p.a. statutory interest clause. |
 | **Court-Ready PDF Export** | Server-side PDF generation (ReportLab) renders the official **Form 'A'** RTI layout and the First Appeal document, with graceful plain-text fallback if the PDF library is unavailable. |
 | **Zero-Account Privacy** | No sign-up, no OTP, no email capture. A locally-generated Passkey (`CR-XXXX-XXXX`) is the sole key to a case — lose it, and the case is gone by design. |
-
----
-
-## System Architecture
-
-The platform is a monorepo: a **Next.js 15** frontend (App Router) driving the citizen-facing flow, and a **FastAPI** service handling all AI orchestration, jurisdiction resolution, and document generation — deployed together as a single Vercel project via serverless Python functions.
-
-```mermaid
-graph TD
-    A["🗣️ Voice / Text Problem Intake"] --> B{"🧭 AI Legal Triage Classifier"}
-    B -->|"RTI Route"| C["🔑 Passkey Generated<br/>(Supabase, no PII)"]
-    B -->|"Grievance Route"| C
-    B -->|"Out of Scope"| Z["📋 Guided Redirect + Advice"]
-
-    C --> D["👤 Applicant Intake<br/>(conversational or form)"]
-    D --> E["🏢 Jurisdiction Resolver<br/>(PIO / Public Authority)"]
-    E --> F["✍️ Statutory Draft Generation"]
-    F --> G["⚖️ Section 8/9 Risk Predictor"]
-    G --> H["✨ Auto-Improve Draft"]
-    H --> I["⬇️ Court-Ready PDF Export"]
-
-    I --> J{"⏱️ 30-Day SLA Tracker"}
-    J -->|"Reply Received"| K["🔍 PIO Response Analyzer"]
-    J -->|"Deemed Refusal"| L["📜 Section 20(1) Penalty Engine"]
-    K -->|"Denied / Evasive"| M["📄 Auto-Drafted First Appeal<br/>(Section 19(1))"]
-    L --> M
-
-    style A fill:#0F172A,stroke:#881337,color:#fff
-    style B fill:#881337,stroke:#0F172A,color:#fff
-    style C fill:#0F172A,stroke:#881337,color:#fff
-    style D fill:#0F172A,stroke:#881337,color:#fff
-    style E fill:#881337,stroke:#0F172A,color:#fff
-    style F fill:#0F172A,stroke:#881337,color:#fff
-    style G fill:#881337,stroke:#0F172A,color:#fff
-    style H fill:#0F172A,stroke:#881337,color:#fff
-    style I fill:#065F46,stroke:#0F172A,color:#fff
-    style J fill:#065F46,stroke:#0F172A,color:#fff
-    style K fill:#881337,stroke:#0F172A,color:#fff
-    style L fill:#881337,stroke:#0F172A,color:#fff
-    style M fill:#065F46,stroke:#0F172A,color:#fff
-```
-
-| Stage | What happens under the hood |
-| :--- | :--- |
-| **Triage Classifier** | `openai/gpt-oss-120b` (via Groq) with a deterministic keyword-scoring fallback so the pipeline degrades gracefully offline. |
-| **Passkey Generation** | `CaseManager` creates a `CR-XXXX-XXXX` ID, persisted in Supabase (or in-memory if Supabase isn't configured) — never linked to a name, phone, or email. |
-| **Jurisdiction Resolver** | Combines a hand-curated `JURISDICTION_KB` (roads, pensions, land records, EPFO, PDS, police, utilities…) with an LLM call constrained by strict anti-hallucination rules. |
-| **Draft Generation** | Purpose-built system prompts enforce RTI Act Section 2(f) compliance — every question is phrased as a request for a *record*, never a "why". |
-| **Risk Prediction** | Scores the draft against six real CIC/High Court rejection precedents and returns calibrated probabilities. |
-| **PDF Export** | ReportLab renders the official Form 'A' layout and the First Appeal document server-side. |
 
 ---
 
@@ -147,8 +97,55 @@ sequenceDiagram
     API-->>UI: Statutory draft + risk analysis
     UI-->>Citizen: Download PDF / track SLA
 ```
+---
 
-**Guarantee:** the backend never links a Passkey to a phone number, email address, or any persistent device identifier. Close the tab without saving the key, and the case is unrecoverable — that trade-off is the point.
+## System Architecture
+
+The platform is a monorepo: a **Next.js 15** frontend (App Router) driving the citizen-facing flow, and a **FastAPI** service handling all AI orchestration, jurisdiction resolution, and document generation — deployed together as a single Vercel project via serverless Python functions.
+
+```mermaid
+graph TD
+    A["🗣️ Voice / Text Problem Intake"] --> B{"🧭 AI Legal Triage Classifier"}
+    B -->|"RTI Route"| C["🔑 Passkey Generated<br/>(Supabase, no PII)"]
+    B -->|"Grievance Route"| C
+    B -->|"Out of Scope"| Z["📋 Guided Redirect + Advice"]
+
+    C --> D["👤 Applicant Intake<br/>(conversational or form)"]
+    D --> E["🏢 Jurisdiction Resolver<br/>(PIO / Public Authority)"]
+    E --> F["✍️ Statutory Draft Generation"]
+    F --> G["⚖️ Exemption Risk Check"]
+    G --> H["✨ Auto-Improve Draft"]
+    H --> I["⬇️ Filing-Ready PDF Export"]
+
+    I --> J{"⏱️ 30-Day SLA Tracker"}
+    J -->|"Reply Received"| K["🔍 PIO Response Analyzer"]
+    J -->|"Deemed Refusal"| L["📜 Penalty / Delay Calculator"]
+    K -->|"Denied / Evasive"| M["📄 Auto-Drafted First Appeal<br/>(Section 19(1))"]
+    L --> M
+
+    style A fill:#0F172A,stroke:#881337,color:#fff
+    style B fill:#881337,stroke:#0F172A,color:#fff
+    style C fill:#0F172A,stroke:#881337,color:#fff
+    style D fill:#0F172A,stroke:#881337,color:#fff
+    style E fill:#881337,stroke:#0F172A,color:#fff
+    style F fill:#0F172A,stroke:#881337,color:#fff
+    style G fill:#881337,stroke:#0F172A,color:#fff
+    style H fill:#0F172A,stroke:#881337,color:#fff
+    style I fill:#065F46,stroke:#0F172A,color:#fff
+    style J fill:#065F46,stroke:#0F172A,color:#fff
+    style K fill:#881337,stroke:#0F172A,color:#fff
+    style L fill:#881337,stroke:#0F172A,color:#fff
+    style M fill:#065F46,stroke:#0F172A,color:#fff
+```
+
+| Stage | What happens under the hood |
+| :--- | :--- |
+| **Triage Classifier** | `openai/gpt-oss-120b` (via Groq) with a deterministic keyword-scoring fallback so the pipeline degrades gracefully offline. |
+| **Passkey Generation** | `CaseManager` creates a `CR-XXXX-XXXX` ID, persisted in Supabase (or in-memory if Supabase isn't configured) — never linked to a name, phone, or email. |
+| **Jurisdiction Resolver** | Combines a hand-curated `JURISDICTION_KB` (roads, pensions, land records, EPFO, PDS, police, utilities…) with an LLM call constrained by strict anti-hallucination rules. |
+| **Draft Generation** | Purpose-built system prompts enforce RTI Act Section 2(f) compliance — every question is phrased as a request for a *record*, never a "why". |
+| **Risk Prediction** | Scores the draft against six real CIC/High Court rejection precedents and returns calibrated probabilities. |
+| **PDF Export** | ReportLab renders the official Form 'A' layout and the First Appeal document server-side. |
 
 ---
 
@@ -283,7 +280,7 @@ Prints per-case predictions, overall accuracy, a full `sklearn` classification r
 
 ---
 
-## Roadmap
+## Planned Future Implementations
 
 - [ ] Multi-language drafting beyond Hinglish (native Devanagari + regional languages)
 - [ ] Direct e-filing integration with `rtionline.gov.in` and state RTI portals
@@ -293,12 +290,12 @@ Prints per-case predictions, overall accuracy, a full `sklearn` classification r
 
 ---
 
-## ⚠️ Legal & Engineering Disclaimer
+## Important Disclaimer
 
 > **This is a legal drafting tool, not a law firm.** JanAdhikar generates documents using AI models against official statutory standards, but every citizen must:
-> - ✅ Verify all names, dates, amounts, and facts before submission
-> - ✅ Confirm the application is addressed to the correct PIO / office
-> - ✅ Consult a legal professional for complex or high-stakes disputes
+> - Verify all names, dates, amounts, and facts before submission
+> - Confirm the application is addressed to the correct PIO / office
+> - Consult a legal professional for complex or high-stakes disputes
 
 ---
 
