@@ -103,75 +103,10 @@ sequenceDiagram
 
 The platform is a monorepo: a **Next.js 15** frontend (App Router) driving the citizen-facing flow, and a **FastAPI** service handling all AI orchestration, jurisdiction resolution, and document generation — deployed together as a single Vercel project via serverless Python functions.
 
-```mermaid
-graph TD
-    A["🗣️ Voice / Text Problem Intake"] --> B{"🧭 AI Legal Triage Classifier"}
-    B -->|"RTI Route"| C["🔑 Passkey Generated<br/>(Supabase, no PII)"]
-    B -->|"Grievance Route"| C
-    B -->|"Out of Scope"| Z["📋 Guided Redirect + Advice"]
-
-    C --> D["👤 Applicant Intake<br/>(conversational or form)"]
-    D --> E["🏢 Jurisdiction Resolver<br/>(PIO / Public Authority)"]
-    E --> F["✍️ Statutory Draft Generation"]
-    F --> G["⚖️ Exemption Risk Check"]
-    G --> H["✨ Auto-Improve Draft"]
-    H --> I["⬇️ Filing-Ready PDF Export"]
-
-    I --> J{"⏱️ 30-Day SLA Tracker"}
-    J -->|"Reply Received"| K["🔍 PIO Response Analyzer"]
-    J -->|"Deemed Refusal"| L["📜 Penalty / Delay Calculator"]
-    K -->|"Denied / Evasive"| M["📄 Auto-Drafted First Appeal<br/>(Section 19(1))"]
-    L --> M
-
-    style A fill:#0F172A,stroke:#881337,color:#fff
-    style B fill:#881337,stroke:#0F172A,color:#fff
-    style C fill:#0F172A,stroke:#881337,color:#fff
-    style D fill:#0F172A,stroke:#881337,color:#fff
-    style E fill:#881337,stroke:#0F172A,color:#fff
-    style F fill:#0F172A,stroke:#881337,color:#fff
-    style G fill:#881337,stroke:#0F172A,color:#fff
-    style H fill:#0F172A,stroke:#881337,color:#fff
-    style I fill:#065F46,stroke:#0F172A,color:#fff
-    style J fill:#065F46,stroke:#0F172A,color:#fff
-    style K fill:#881337,stroke:#0F172A,color:#fff
-    style L fill:#881337,stroke:#0F172A,color:#fff
-    style M fill:#065F46,stroke:#0F172A,color:#fff
-```
-
-| Stage | What happens under the hood |
-| :--- | :--- |
-| **Triage Classifier** | `openai/gpt-oss-120b` (via Groq) with a deterministic keyword-scoring fallback so the pipeline degrades gracefully offline. |
-| **Passkey Generation** | `CaseManager` creates a `CR-XXXX-XXXX` ID, persisted in Supabase (or in-memory if Supabase isn't configured) — never linked to a name, phone, or email. |
-| **Jurisdiction Resolver** | Combines a hand-curated `JURISDICTION_KB` (roads, pensions, land records, EPFO, PDS, police, utilities…) with an LLM call constrained by strict anti-hallucination rules. |
-| **Draft Generation** | Purpose-built system prompts enforce RTI Act Section 2(f) compliance — every question is phrased as a request for a *record*, never a "why". |
-| **Risk Prediction** | Scores the draft against six real CIC/High Court rejection precedents and returns calibrated probabilities. |
-| **PDF Export** | ReportLab renders the official Form 'A' layout and the First Appeal document server-side. |
-
+![JanAdhikar System Architecture](./public/diagramJan.png)
 ---
 
 ## Tech Stack
-
-```mermaid
-graph LR
-    subgraph Frontend
-        A["Next.js 15 · App Router"] --> B["Tailwind CSS + Framer Motion"]
-        B --> C["Zustand (persisted case state)"]
-    end
-    subgraph Backend
-        D["FastAPI (Python, Vercel serverless)"] --> E["Groq · llama-3.3-70b / gpt-oss-120b / whisper-large-v3"]
-        D --> F["ReportLab · PDF Generation"]
-        D --> G["Supabase · Passkey-keyed Case Store"]
-    end
-    C <-->|"REST / JSON"| D
-
-    style A fill:#0F172A,stroke:#881337,color:#fff
-    style B fill:#0F172A,stroke:#881337,color:#fff
-    style C fill:#0F172A,stroke:#881337,color:#fff
-    style D fill:#881337,stroke:#0F172A,color:#fff
-    style E fill:#881337,stroke:#0F172A,color:#fff
-    style F fill:#881337,stroke:#0F172A,color:#fff
-    style G fill:#881337,stroke:#0F172A,color:#fff
-```
 
 | Layer | Technology | Purpose |
 | :--- | :--- | :--- |
