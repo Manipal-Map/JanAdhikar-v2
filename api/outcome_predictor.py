@@ -10,7 +10,7 @@ from .classifier import classifier
 
 class OutcomeEngine:
     def __init__(self):
-        self.model = "llama-3.1-8b-instant"
+        self.model = "openai/gpt-oss-120b"
 
     def _get_client(self) -> Groq:
         return classifier.client
