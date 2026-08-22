@@ -31,7 +31,7 @@ def extract_json_from_text(text: str) -> dict:
 class GrievanceResolver:
     def __init__(self):
         self.vision_model = "llama-3.2-11b-vision-preview" 
-        self.text_model = "openai/gpt-oss-120b"
+        self.text_model = "llama-3.3-70b-versatile"
 
     def _get_client(self):
         return classifier.client
