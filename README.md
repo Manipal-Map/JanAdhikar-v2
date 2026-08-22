@@ -4,7 +4,7 @@
 
 ### *जन अधिकार — The People's Right*
 
-**An AI-native legal engine that turns a citizen's plain-language civic complaint into a court-ready RTI application, a Section 19(1) First Appeal, or a formal consumer/grievance notice — with no account, no phone number, and no tracking.**
+**An AI-native legal engine that turns a citizen's plain-language civic complaint into a court-ready RTI application, a Section 19(1) First Appeal, or a formal consumer/grievance notice - all with 0 accounts**
 
 ![Status](https://img.shields.io/badge/Status-Active_Development-881337?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-0F172A?style=for-the-badge)
@@ -27,7 +27,7 @@
 
 <br/>
 
-## 🏛️ What is JanAdhikar?
+## What is JanAdhikar?
 
 Filing a Right to Information (RTI) request or a formal grievance in India today usually means one of three things: paying a "typist" outside a government office, copy-pasting a generic template off a random blog, or giving up because you don't know which department to even write to.
 
@@ -44,7 +44,7 @@ No account. No email. No phone number. Just a 12-character Passkey that is the *
 
 ---
 
-## 💡 Why It Matters
+## Why It Matters
 
 | The Old Way | JanAdhikar |
 | :--- | :--- |
@@ -56,24 +56,24 @@ No account. No email. No phone number. Just a 12-character Passkey that is the *
 
 ---
 
-## ✨ Core Features
+## Core Features
 
 | Feature | What it actually does |
 | :--- | :--- |
-| 🧠 **AI Legal Triage** | An LLM-based classifier routes every complaint into `RTI`, `Rights/Grievance`, or `Other` — with a rule-based fallback engine so the app never hard-fails if the model API is unreachable. Benchmarked against a hand-labeled 30-case test set (`ml/evaluate_classifier.py`) using scikit-learn's classification report & confusion matrix. |
-| 🎙️ **Voice Intake with Hinglish Support** | Citizens can dictate their problem. Audio is transcribed via Whisper (`whisper-large-v3`); non-English speech is transcribed and then translated into **Hinglish (Hindi written in the Latin alphabet)** so nothing gets lost to script conversion. |
-| 🏢 **Auto-Jurisdiction Resolution** | A curated jurisdiction knowledge base (roads, pensions, land records, PDS, police, utilities, EPFO, passports…) combined with an LLM resolver identifies the specific Public Information Officer or department — with strict anti-hallucination rules: no invented street addresses, PIN codes, or officer names. |
-| ⚖️ **RTI Risk Predictor** | Every drafted RTI is run against the six most common Central Information Commission (CIC) rejection grounds — Section 2(f) opinion-seeking, Section 8(1)(j) privacy, 8(1)(h) ongoing investigation, 8(1)(e) fiduciary relationship, 8(1)(a) sovereignty, and Section 6(3) transfer — and returns a `FULL / PARTIAL / REJECT` probability distribution plus concrete rewrite suggestions. |
-| ✍️ **Auto-Improve Draft** | One click rewrites the RTI to eliminate every detected risk: subjective questions become record requests, overbroad asks get narrowed to a timeline, and a "larger public interest" clause is inserted wherever Section 8(1)(j) is a risk. |
-| ⏱️ **Statutory SLA & Penalty Tracker** | Computes the Section 7(1) 30-day response deadline and the Section 19(1) 60-day appeal window from the filing date, flags deemed refusals automatically, and calculates the ₹250/day (capped at ₹25,000) personal penalty owed by a defaulting PIO under Section 20(1). |
-| 📜 **PIO Reply Analyzer & Auto-Appeal** | Paste in the PIO's actual reply (or flag "no response"); an LLM classifies it as full/partial disclosure, denial, or transfer, extracts the exemption clause cited, and cross-references a CIC precedent knowledge base to draft a fully reasoned **First Appeal under Section 19(1)** — grounds, precedents, and prayer clause included. |
-| ⚖️ **Grievance & Consumer Notice Engine** | For non-RTI matters (deposits, refunds, deficiency of service, pension delays), the engine identifies the violated rights, the right forum (CPGRAMS, e-Daakhil, Rent Authority, etc.), and drafts a formal legal demand notice with an 18% p.a. statutory interest clause. |
-| 📄 **Court-Ready PDF Export** | Server-side PDF generation (ReportLab) renders the official **Form 'A'** RTI layout and the First Appeal document, with graceful plain-text fallback if the PDF library is unavailable. |
-| 🔒 **Zero-Account Privacy** | No sign-up, no OTP, no email capture. A locally-generated Passkey (`CR-XXXX-XXXX`) is the sole key to a case — lose it, and the case is gone by design. |
+| **AI Legal Triage** | An LLM-based classifier routes every complaint into `RTI`, `Rights/Grievance`, or `Other` — with a rule-based fallback engine so the app never hard-fails if the model API is unreachable. Benchmarked against a hand-labeled 30-case test set (`ml/evaluate_classifier.py`) using scikit-learn's classification report & confusion matrix. |
+| **Voice Intake with Hinglish Support** | Citizens can dictate their problem. Audio is transcribed via Whisper (`whisper-large-v3`); non-English speech is transcribed and then translated into **Hinglish (Hindi written in the Latin alphabet)** so nothing gets lost to script conversion. |
+| **Auto-Jurisdiction Resolution** | A curated jurisdiction knowledge base (roads, pensions, land records, PDS, police, utilities, EPFO, passports…) combined with an LLM resolver identifies the specific Public Information Officer or department — with strict anti-hallucination rules: no invented street addresses, PIN codes, or officer names. |
+| **RTI Risk Predictor** | Every drafted RTI is run against the six most common Central Information Commission (CIC) rejection grounds — Section 2(f) opinion-seeking, Section 8(1)(j) privacy, 8(1)(h) ongoing investigation, 8(1)(e) fiduciary relationship, 8(1)(a) sovereignty, and Section 6(3) transfer — and returns a `FULL / PARTIAL / REJECT` probability distribution plus concrete rewrite suggestions. |
+| **Auto-Improve Draft** | One click rewrites the RTI to eliminate every detected risk: subjective questions become record requests, overbroad asks get narrowed to a timeline, and a "larger public interest" clause is inserted wherever Section 8(1)(j) is a risk. |
+| **Statutory SLA & Penalty Tracker** | Computes the Section 7(1) 30-day response deadline and the Section 19(1) 60-day appeal window from the filing date, flags deemed refusals automatically, and calculates the ₹250/day (capped at ₹25,000) personal penalty owed by a defaulting PIO under Section 20(1). |
+| **PIO Reply Analyzer & Auto-Appeal** | Paste in the PIO's actual reply (or flag "no response"); an LLM classifies it as full/partial disclosure, denial, or transfer, extracts the exemption clause cited, and cross-references a CIC precedent knowledge base to draft a fully reasoned **First Appeal under Section 19(1)** — grounds, precedents, and prayer clause included. |
+| **Grievance & Consumer Notice Engine** | For non-RTI matters (deposits, refunds, deficiency of service, pension delays), the engine identifies the violated rights, the right forum (CPGRAMS, e-Daakhil, Rent Authority, etc.), and drafts a formal legal demand notice with an 18% p.a. statutory interest clause. |
+| **Court-Ready PDF Export** | Server-side PDF generation (ReportLab) renders the official **Form 'A'** RTI layout and the First Appeal document, with graceful plain-text fallback if the PDF library is unavailable. |
+| **Zero-Account Privacy** | No sign-up, no OTP, no email capture. A locally-generated Passkey (`CR-XXXX-XXXX`) is the sole key to a case — lose it, and the case is gone by design. |
 
 ---
 
-## 🖇️ System Architecture
+## System Architecture
 
 The platform is a monorepo: a **Next.js 15** frontend (App Router) driving the citizen-facing flow, and a **FastAPI** service handling all AI orchestration, jurisdiction resolution, and document generation — deployed together as a single Vercel project via serverless Python functions.
 
@@ -123,7 +123,7 @@ graph TD
 
 ---
 
-## 🔑 The Passkey Privacy Model
+## The Passkey Privacy Model
 
 There are no user accounts anywhere in this system. The Passkey is the entire privacy model, and it's worth looking at on its own:
 
@@ -152,7 +152,7 @@ sequenceDiagram
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ```mermaid
 graph LR
@@ -190,7 +190,7 @@ graph LR
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 janadhikar/
@@ -226,7 +226,7 @@ janadhikar/
 
 ---
 
-## 🚀 Local Setup
+## Local Setup
 
 ### Prerequisites
 - Node.js 18+
@@ -283,7 +283,7 @@ Prints per-case predictions, overall accuracy, a full `sklearn` classification r
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 - [ ] Multi-language drafting beyond Hinglish (native Devanagari + regional languages)
 - [ ] Direct e-filing integration with `rtionline.gov.in` and state RTI portals
@@ -302,7 +302,7 @@ Prints per-case predictions, overall accuracy, a full `sklearn` classification r
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are especially welcome around:
 - Expanding the department/jurisdiction knowledge base
@@ -314,12 +314,12 @@ Please open an issue before submitting large PRs so the approach can be discusse
 
 ---
 
-## 📄 License
+## License
 
-MIT — see `LICENSE` for details.
+Code wants to be free too! MIT — see `LICENSE` for details.
 
 <div align="center">
 
-**Built for the Indian citizen. 🇮🇳**
+**The people's right, finally usable. 🇮🇳**
 
 </div>
