@@ -2,7 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, TrendingUp, AlertCircle, RefreshCw, ArrowRight, Loader2, Activity, ArrowLeft } from 'lucide-react';
+import {
+  Sparkles,
+  TrendingUp,
+  AlertCircle,
+  AlertTriangle,
+  RefreshCw,
+  ArrowRight,
+  Loader2,
+  Activity,
+  ArrowLeft,
+} from "lucide-react";
 import DraftViewer from '@/components/dashboard/DraftViewer';
 import { rtiPredict, rtiImprove } from '@/lib/api';
 import { useRouter, useSearchParams } from 'next/navigation';
