@@ -100,7 +100,7 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
       animate={{ opacity: 1, y: 0 }}
       className="bg-white/95 backdrop-blur-sm border border-slate-300 rounded-3xl overflow-hidden shadow-xl"
     >
-      <div className="flex flex-col sm:flex-row items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50 gap-3">
+      <div className="flex flex-col sm:flex-row items-center justify-between px-5 py-4 border-b border-slate-200 bg-[#FAF8F5] gap-3">
         <div className="flex items-center gap-2.5">
           <FileText size={16} className="text-[#FF9933]" />
           <h3 className="text-sm font-extrabold text-ashoka-navy tracking-tight font-sans">{title}</h3>
@@ -118,10 +118,12 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
           </button>
         </div>
       </div>
-      <div className="p-5 max-h-[500px] overflow-y-auto bg-transparent">
-        <pre className="text-sm text-slate-800 font-mono leading-relaxed whitespace-pre-wrap break-words">
-          {draft}
-        </pre>
+      <div className="p-5 sm:p-6">
+        <div className="bg-[#FAF8F5] border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-inner max-h-[500px] overflow-y-auto">
+          <pre className="text-sm text-ashoka-navy font-sans font-medium leading-relaxed whitespace-pre-wrap break-words">
+            {draft}
+          </pre>
+        </div>
       </div>
     </motion.div>
   )
