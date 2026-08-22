@@ -32,7 +32,6 @@ function TrackPageContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // PIO Response State
   const [pioInputText, setPioInputText] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
@@ -85,12 +84,14 @@ function TrackPageContent() {
   };
 
   return (
-    <div className="gradient-bg min-h-screen font-sans p-4 sm:p-6 lg:p-8 selection:bg-court-maroon selection:text-white pb-20">
-      <div className="max-w-6xl mx-auto space-y-8 pt-4">
+    <div 
+      className="min-h-screen font-sans p-4 sm:p-6 lg:p-8 selection:bg-court-maroon selection:text-white pb-20 bg-cover bg-center bg-no-repeat relative text-slate-200"
+      style={{ backgroundImage: "url('/bg.image.png')" }}
+    >
+      <div className="max-w-6xl mx-auto space-y-8 pt-4 relative z-10">
         
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-slate-300 pb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/20 pb-6">
           <div className="flex items-start sm:items-center gap-4">
-            {/* Redirects back to the landing page */}
             <button 
               onClick={() => router.push('/')}
               className="p-2.5 rounded-xl bg-white border border-slate-300 text-slate-600 hover:text-ashoka-navy hover:bg-slate-50 transition shadow-sm cursor-pointer shrink-0 mt-1 sm:mt-0"
@@ -99,11 +100,11 @@ function TrackPageContent() {
               <ArrowLeft size={18} />
             </button>
             <div>
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-ashoka-navy flex items-center gap-3">
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3 drop-shadow-md">
                 <span className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse hidden sm:block" />
                 SLA & Appellate Tracker
               </h1>
-              <p className="text-slate-500 text-sm mt-1 font-medium">
+              <p className="text-blue-100 text-sm mt-1 font-medium drop-shadow-sm">
                 Deterministic SLA enforcer & Section 20 penalty engine
               </p>
             </div>
@@ -115,12 +116,12 @@ function TrackPageContent() {
               placeholder="Enter Case ID (CR-...)"
               value={inputCaseId}
               onChange={(e) => setInputCaseId(e.target.value.toUpperCase())}
-              className="bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-ashoka-navy font-bold focus:outline-none focus:border-court-maroon focus:ring-1 focus:ring-court-maroon w-full sm:w-56 uppercase tracking-widest shadow-sm placeholder:text-slate-400 placeholder:font-medium placeholder:tracking-normal placeholder:normal-case"
+              className="bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-ashoka-navy font-bold focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] w-full sm:w-56 uppercase tracking-widest shadow-sm placeholder:text-slate-400 placeholder:font-medium placeholder:tracking-normal placeholder:normal-case"
             />
             <button
               type="submit"
               disabled={loading}
-              className="bg-ashoka-navy hover:bg-slate-800 text-white font-bold text-sm px-6 py-2.5 rounded-xl transition cursor-pointer disabled:opacity-50 shadow-sm shrink-0"
+              className="bg-[#A32A02] hover:bg-[#138808] transition-colors text-white font-bold text-sm px-6 py-2.5 rounded-xl cursor-pointer disabled:opacity-50 shadow-md shrink-0"
             >
               {loading ? '...' : 'Track'}
             </button>
@@ -128,50 +129,50 @@ function TrackPageContent() {
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl text-sm font-medium shadow-sm">
+          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl text-sm font-medium shadow-sm backdrop-blur-sm">
             ⚠️ {error}. Please verify the Case ID and try again.
           </div>
         )}
 
         {!caseData && !loading && !error && (
           <div className="mt-12 flex flex-col items-center justify-center text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="w-20 h-20 bg-white border border-slate-200 rounded-full flex items-center justify-center mb-6 shadow-sm">
+            <div className="w-20 h-20 bg-white/95 border border-slate-300 rounded-full flex items-center justify-center mb-6 shadow-md backdrop-blur-md">
               <Search className="w-10 h-10 text-slate-400" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-ashoka-navy mb-3 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-3 tracking-tight drop-shadow-md">
               Track Your Legal Petition
             </h2>
-            <p className="text-slate-500 max-w-lg mb-12 font-medium leading-relaxed text-sm sm:text-base">
+            <p className="text-slate-200 max-w-lg mb-12 font-medium leading-relaxed text-sm sm:text-base drop-shadow-sm">
               Enter your 12-character Case ID above to monitor your statutory RTI timeline, calculate Section 20 penalties, and automatically draft First Appeals.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl w-full text-left">
-              <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl shadow-sm">
-                <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mb-5 border border-amber-100">
+              <div className="bg-white/95 backdrop-blur-md border border-slate-300 p-6 sm:p-8 rounded-3xl shadow-xl">
+                <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mb-5 border border-amber-200">
                   <Clock className="w-6 h-6 text-amber-600" />
                 </div>
-                <h3 className="font-extrabold text-ashoka-navy mb-2 text-base">30-Day Statutory Limit</h3>
-                <p className="text-sm text-slate-500 leading-relaxed font-medium">
+                <h3 className="font-extrabold text-ashoka-navy mb-2 text-base tracking-tight">30-Day Statutory Limit</h3>
+                <p className="text-sm text-slate-600 leading-relaxed font-medium">
                   Under Section 7(1) of the RTI Act, 2005, the Public Information Officer (PIO) is legally bound to provide the requested information within 30 days of receipt.
                 </p>
               </div>
               
-              <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl shadow-sm">
-                <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center mb-5 border border-rose-100">
+              <div className="bg-white/95 backdrop-blur-md border border-slate-300 p-6 sm:p-8 rounded-3xl shadow-xl">
+                <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center mb-5 border border-rose-200">
                   <Scale className="w-6 h-6 text-court-maroon" />
                 </div>
-                <h3 className="font-extrabold text-ashoka-navy mb-2 text-base">Section 20 Penalties</h3>
-                <p className="text-sm text-slate-500 leading-relaxed font-medium">
+                <h3 className="font-extrabold text-ashoka-navy mb-2 text-base tracking-tight">Section 20 Penalties</h3>
+                <p className="text-sm text-slate-600 leading-relaxed font-medium">
                   Unjustified delays attract a personal penalty on the PIO of ₹250 per day, up to a maximum of ₹25,000. Our engine tracks this liability automatically.
                 </p>
               </div>
               
-              <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl shadow-sm">
-                <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mb-5 border border-emerald-100">
+              <div className="bg-white/95 backdrop-blur-md border border-slate-300 p-6 sm:p-8 rounded-3xl shadow-xl">
+                <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mb-5 border border-emerald-200">
                   <FileText className="w-6 h-6 text-emerald-600" />
                 </div>
-                <h3 className="font-extrabold text-ashoka-navy mb-2 text-base">First Appellate Route</h3>
-                <p className="text-sm text-slate-500 leading-relaxed font-medium">
+                <h3 className="font-extrabold text-ashoka-navy mb-2 text-base tracking-tight">First Appellate Route</h3>
+                <p className="text-sm text-slate-600 leading-relaxed font-medium">
                   If the PIO denies information or fails to reply entirely, you are entitled to file a First Appeal under Section 19(1). We generate this court-ready draft for you.
                 </p>
               </div>
@@ -183,11 +184,11 @@ function TrackPageContent() {
           <div className="animate-in fade-in zoom-in-95 duration-300 space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
-              <div className="bg-white border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-sm space-y-2">
-                <span className="text-xs font-bold uppercase text-slate-400 tracking-wider">
+              <div className="bg-white/95 backdrop-blur-md border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-xl space-y-2">
+                <span className="text-xs font-bold uppercase text-slate-500 tracking-wider">
                   Current Case Status
                 </span>
-                <div className="text-2xl font-black text-emerald-600">
+                <div className="text-2xl font-black text-emerald-600 tracking-tight">
                   {caseData.computed_status?.replace(/_/g, ' ') || 'Active'}
                 </div>
                 <p className="text-xs text-slate-500 font-medium">
@@ -195,11 +196,11 @@ function TrackPageContent() {
                 </p>
               </div>
 
-              <div className="bg-white border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-sm space-y-2">
-                <span className="text-xs font-bold uppercase text-slate-400 tracking-wider">
+              <div className="bg-white/95 backdrop-blur-md border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-xl space-y-2">
+                <span className="text-xs font-bold uppercase text-slate-500 tracking-wider">
                   30-Day SLA Deadline
                 </span>
-                <div className="text-2xl font-black text-ashoka-navy">
+                <div className="text-2xl font-black text-ashoka-navy tracking-tight">
                   {caseData.is_overdue ? (
                     <span className="text-court-maroon">Overdue by {caseData.days_overdue} Day(s)</span>
                   ) : (
@@ -212,23 +213,23 @@ function TrackPageContent() {
               </div>
 
               <div
-                className={`border rounded-3xl p-6 sm:p-8 space-y-2 shadow-sm transition-colors ${
+                className={`border rounded-3xl p-6 sm:p-8 space-y-2 shadow-xl transition-colors backdrop-blur-md ${
                   (caseData.section_20_penalty_inr || 0) > 0
-                    ? 'bg-rose-50 border-rose-200'
-                    : 'bg-white border-slate-300'
+                    ? 'bg-rose-50/95 border-rose-200'
+                    : 'bg-white/95 border-slate-300'
                 }`}
               >
                 <span className={`text-xs font-bold uppercase tracking-wider flex items-center justify-between ${
-                   (caseData.section_20_penalty_inr || 0) > 0 ? 'text-court-maroon' : 'text-slate-400'
+                   (caseData.section_20_penalty_inr || 0) > 0 ? 'text-court-maroon' : 'text-slate-500'
                 }`}>
                   Section 20 Penalty Accrued
                   {(caseData.section_20_penalty_inr || 0) > 0 && (
-                    <span className="text-[10px] bg-court-maroon text-white px-2.5 py-0.5 rounded-full shadow-sm">
+                    <span className="text-[10px] bg-court-maroon text-white px-2.5 py-0.5 rounded-full shadow-sm font-sans tracking-tight">
                       ₹250 / Day
                     </span>
                   )}
                 </span>
-                <div className={`text-3xl font-black ${(caseData.section_20_penalty_inr || 0) > 0 ? 'text-court-maroon' : 'text-ashoka-navy'}`}>
+                <div className={`text-3xl font-black tracking-tight ${(caseData.section_20_penalty_inr || 0) > 0 ? 'text-court-maroon' : 'text-ashoka-navy'}`}>
                   ₹{(caseData.section_20_penalty_inr || 0).toLocaleString('en-IN')}
                 </div>
                 <p className="text-xs text-slate-500 font-medium">
@@ -237,11 +238,11 @@ function TrackPageContent() {
               </div>
             </div>
 
-            <div className="bg-white border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="bg-white/95 backdrop-blur-md border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-200 pb-5">
                 <div>
                   <h2 className="text-xl font-extrabold text-ashoka-navy tracking-tight">Public Information Officer (PIO) Reply</h2>
-                  <p className="text-sm text-slate-500 font-medium mt-1">
+                  <p className="text-sm text-slate-600 font-medium mt-1">
                     Paste the government response text here, or flag a deemed refusal for zero-response cases.
                   </p>
                 </div>
@@ -251,7 +252,7 @@ function TrackPageContent() {
                     setPioInputText('');
                     handleAnalyzePIO('');
                   }}
-                  className="bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 font-bold text-xs px-4 py-2.5 rounded-xl transition self-start sm:self-auto cursor-pointer shadow-sm"
+                  className="bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 font-bold text-xs px-4 py-2.5 rounded-xl transition self-start sm:self-auto cursor-pointer shadow-sm font-sans tracking-tight"
                 >
                   ⚡ Mark Deemed Refusal (No Reply)
                 </button>
@@ -263,7 +264,7 @@ function TrackPageContent() {
                   value={pioInputText}
                   onChange={(e) => setPioInputText(e.target.value)}
                   placeholder="Paste response letter text or email received from the PIO here..."
-                  className="w-full bg-[#FAF8F5] border border-slate-300 rounded-2xl p-5 text-sm text-ashoka-navy font-medium focus:outline-none focus:border-court-maroon focus:ring-1 focus:ring-court-maroon resize-none leading-relaxed"
+                  className="w-full bg-[#FAF8F5] border border-slate-300 rounded-2xl p-5 text-sm text-ashoka-navy font-medium focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] resize-none leading-relaxed placeholder-slate-400"
                 />
 
                 <div className="flex justify-end">
@@ -271,7 +272,7 @@ function TrackPageContent() {
                     type="button"
                     onClick={() => handleAnalyzePIO()}
                     disabled={analyzing}
-                    className="btn-primary py-3.5 px-8 cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white flex items-center gap-2 shadow-md rounded-xl font-bold disabled:opacity-50"
+                    className="btn-primary py-3.5 px-8 cursor-pointer bg-[#A32A02] hover:bg-[#138808] transition-colors text-white flex items-center gap-2 shadow-md rounded-xl font-bold disabled:opacity-50 tracking-tight"
                   >
                     {analyzing ? 'Analyzing with AI...' : '🔍 Analyze PIO Reply'}
                   </button>
@@ -281,16 +282,16 @@ function TrackPageContent() {
               {analysisResult && (
                 <div className="mt-8 bg-[#FAF8F5] border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-5 shadow-inner">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
-                    <span className="text-xs uppercase text-slate-500 font-bold tracking-wider">
+                    <span className="text-xs uppercase text-slate-500 font-bold tracking-wider font-sans">
                       Extracted Exemption Clause
                     </span>
-                    <span className="bg-court-maroon/10 text-court-maroon border border-court-maroon/20 px-4 py-1.5 rounded-full text-xs font-bold shadow-sm self-start sm:self-auto">
+                    <span className="bg-court-maroon/10 text-court-maroon border border-court-maroon/20 px-4 py-1.5 rounded-full text-xs font-bold shadow-sm self-start sm:self-auto font-sans tracking-tight">
                       Section {analysisResult.exemption_cited}
                     </span>
                   </div>
 
                   <div>
-                    <h3 className="text-base font-extrabold text-ashoka-navy mb-2">
+                    <h3 className="text-base font-extrabold text-ashoka-navy mb-2 tracking-tight">
                       {analysisResult.precedent_title}
                     </h3>
                     <p className="text-sm text-slate-700 bg-white border border-slate-300 p-5 rounded-2xl leading-relaxed font-medium shadow-sm">
@@ -301,7 +302,7 @@ function TrackPageContent() {
                   <div className="pt-4 flex justify-end">
                     <Link
                       href={`/rti/appeal?case_id=${caseData.case_id}&mode=appeal`}
-                      className="bg-ashoka-navy hover:bg-slate-800 text-white font-bold text-sm px-8 py-3.5 rounded-xl transition shadow-md flex items-center gap-2"
+                      className="bg-ashoka-navy hover:bg-slate-800 border border-slate-700 text-white font-bold text-sm px-8 py-3.5 rounded-xl transition shadow-md flex items-center gap-2 tracking-tight"
                     >
                       📄 Generate First Appeal Document (Sec 19(1))
                     </Link>
@@ -320,8 +321,8 @@ export default function TrackPage() {
   return (
     <Suspense 
       fallback={
-        <div className="min-h-screen gradient-bg flex flex-col items-center justify-center p-6 text-sm font-bold text-ashoka-navy tracking-wide">
-          <div className="w-8 h-8 border-4 border-court-maroon border-t-transparent rounded-full animate-spin mb-4" />
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 text-sm font-bold text-white tracking-wide bg-cover bg-center" style={{ backgroundImage: "url('/bg.image.png')" }}>
+          <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mb-4" />
           Loading Tracker Environment...
         </div>
       }

@@ -2,25 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import {
-  FileSearch,
-  ArrowRight,
-  ArrowLeft,
-  AlertTriangle,
-  Loader2,
-  AlertCircle,
-  Activity
-} from 'lucide-react';
+import { Sparkles, TrendingUp, AlertCircle, RefreshCw, ArrowRight, Loader2, Activity, ArrowLeft } from 'lucide-react';
+import DraftViewer from '@/components/dashboard/DraftViewer';
+import { rtiPredict, rtiImprove } from '@/lib/api';
 import { useRouter, useSearchParams } from 'next/navigation';
 import useCaseStore from '@/store/caseStore';
-import { rtiPredict, rtiImprove } from '@/lib/api';
-import DraftViewer from '@/components/dashboard/DraftViewer';
 
-export default function RTIResultView() {
+interface RTIResultViewProps {
+  caseId?: string;
+  initialDraft?: string;
+  initialDepartment?: string;
+}
+
+export default function RTIResultView({ initialDepartment }: RTIResultViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Get store values and setters
   const {
     caseId: storeCaseId,
     rtiDraft,
@@ -28,16 +25,14 @@ export default function RTIResultView() {
     setStage,
   } = useCaseStore();
 
-  // Fallback to searchParams if store state is cleared on page refresh
   const caseId = storeCaseId || searchParams.get('case_id') || '';
 
-  const [subStep, setSubStep] = useState<1 | 2>(1); // Step 1: Risk Analysis | Step 2: Improved Draft
+  const [subStep, setSubStep] = useState<1 | 2>(1); 
   const [prediction, setPrediction] = useState<any>(null);
   const [loadingPred, setLoadingPred] = useState(false);
   const [loadingImprove, setLoadingImprove] = useState(false);
   const [improvedDraft, setImprovedDraft] = useState<string | null>(null);
 
-  // Fetch prediction on load if draft is available
   useEffect(() => {
     const fetchPred = async () => {
       if (!rtiDraft || !caseId) return;
@@ -45,8 +40,8 @@ export default function RTIResultView() {
       try {
         const res = await rtiPredict(caseId, rtiDraft);
         setPrediction(res);
-      } catch (e) {
-        console.error('Prediction error:', e);
+      } catch (err) {
+        console.error('Prediction failed:', err);
       } finally {
         setLoadingPred(false);
       }
@@ -55,44 +50,36 @@ export default function RTIResultView() {
     fetchPred();
   }, [caseId, rtiDraft]);
 
-  const handleGenerateImproved = async () => {
-    if (!caseId) {
-      alert('Case ID is missing.');
-      return;
-    }
+  const handleImprove = async () => {
+    if (!caseId) return;
     setLoadingImprove(true);
     try {
       const res = await rtiImprove(caseId);
-      const newDraft = res.improved_draft || res.draft || res;
-      setImprovedDraft(newDraft);
-      setRtiDraft(newDraft);
+      if (res?.improved_draft || res?.draft_text) {
+        setImprovedDraft(res.improved_draft || res.draft_text);
+        setRtiDraft(res.improved_draft || res.draft_text);
+      }
       setSubStep(2);
-    } catch (e) {
-      console.error('Improvement error:', e);
-      alert('Failed to improve RTI draft. Please try again.');
+    } catch (err) {
+      console.error('Improvement failed:', err);
     } finally {
       setLoadingImprove(false);
     }
   };
 
-  // Safe extractors for risks & suggestions
-  const detectedRisks = Array.isArray(prediction?.detected_risks)
-    ? prediction.detected_risks
-    : [];
-  const improvementSuggestions = Array.isArray(
-    prediction?.improvement_suggestions
-  )
-    ? prediction.improvement_suggestions
-    : [];
+  const detectedRisks = Array.isArray(prediction?.detected_risks) ? prediction.detected_risks : [];
+  const improvementSuggestions = Array.isArray(prediction?.improvement_suggestions) ? prediction.improvement_suggestions : [];
 
-  // Fallback view if no draft or case ID is available
   if (!rtiDraft && !loadingPred) {
     return (
-      <div className="gradient-bg min-h-screen flex flex-col items-center justify-center p-4">
-        <div className="bg-white border border-[#b8c2cc] rounded-3xl p-8 max-w-md text-center space-y-4 shadow-sm">
+      <div 
+        className="min-h-screen flex flex-col items-center justify-center p-4 bg-cover bg-center bg-no-repeat relative text-slate-200"
+        style={{ backgroundImage: "url('/bg.image.png')" }}
+      >
+        <div className="bg-white/95 backdrop-blur-sm border border-slate-300 rounded-3xl p-8 max-w-md text-center space-y-4 shadow-xl relative z-10">
           <AlertCircle size={36} className="text-amber-500 mx-auto" />
-          <h2 className="text-xl font-bold text-ashoka-navy">No Draft Found</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="text-xl font-extrabold text-ashoka-navy tracking-tight">No Draft Found</h2>
+          <p className="text-xs text-slate-600 font-medium">
             We couldn't locate an active RTI draft for analysis. Please start or select an existing case.
           </p>
           <button
@@ -100,7 +87,7 @@ export default function RTIResultView() {
               setStage('RTI_GATHERING');
               router.push('/dashboard/rti');
             }}
-            className="btn-primary text-xs py-2.5 px-6 mx-auto cursor-pointer"
+            className="btn-primary text-xs py-2.5 px-6 mx-auto cursor-pointer bg-[#A32A02] hover:bg-[#138808] transition-colors text-white font-bold font-sans tracking-tight"
           >
             Go to RTI Form
           </button>
@@ -110,29 +97,31 @@ export default function RTIResultView() {
   }
 
   return (
-    <div className="gradient-bg min-h-screen flex flex-col items-center justify-center p-4 py-12">
+    <div 
+      className="min-h-screen flex flex-col items-center justify-center p-4 py-12 bg-cover bg-center bg-no-repeat relative text-ashoka-navy font-sans"
+      style={{ backgroundImage: "url('/bg.image.png')" }}
+    >
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-3xl"
+        className="w-full max-w-4xl relative z-10"
       >
         {subStep === 1 ? (
-          /* --- PAGE 1: RTI RISK FACTORS & OUTCOME PREDICTION --- */
           <div>
             <div className="mb-3">
-              <span className="text-xs font-bold uppercase tracking-widest text-court-maroon bg-court-maroon/10 px-3 py-1 rounded-full border border-court-maroon/20">
+              <span className="text-xs font-bold uppercase font-sans tracking-tight text-court-maroon bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
                 STEP 3 · RTI Risk Analysis & Predictor
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-ashoka-navy mb-2 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md">
               RTI Rejection Risk Factors
             </h1>
-            <p className="text-slate-500 mb-8">
+            <p className="text-slate-200 mb-8 font-medium drop-shadow-sm">
               Our AI evaluates your RTI draft against Section 8/9 exemptions to predict approval likelihood and highlight potential risks.
             </p>
 
-            <div className="bg-white border border-[#b8c2cc] rounded-3xl p-8 shadow-sm space-y-6 text-left">
+            <div className="bg-white/95 backdrop-blur-sm border border-slate-300 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6 text-left">
               {loadingPred ? (
                 <div className="py-12 text-center space-y-3">
                   <Loader2 size={32} className="animate-spin text-court-maroon mx-auto" />
@@ -142,22 +131,22 @@ export default function RTIResultView() {
                 </div>
               ) : prediction ? (
                 <>
-                  <div className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                  <div className="flex items-center justify-between bg-[#FAF8F5] p-4 rounded-2xl border border-slate-200">
                     <div>
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider font-sans">
                         Predicted Success Outlook
                       </h4>
-                      <p className="text-lg font-black text-ashoka-navy mt-0.5">
+                      <p className="text-lg font-black text-ashoka-navy mt-0.5 tracking-tight">
                         {prediction.prediction || prediction.status || 'HIGH LIKELIHOOD'}
                       </p>
                     </div>
-                    <span className="px-3 py-1 bg-statutory-green/10 text-statutory-green font-bold text-xs rounded-full border border-statutory-green/20">
+                    <span className="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold text-xs rounded-full border border-emerald-200 font-sans tracking-tight">
                       Optimized
                     </span>
                   </div>
 
                   <div>
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
                       Detected Risks & Pitfalls
                     </h4>
                     {detectedRisks.length > 0 ? (
@@ -165,7 +154,7 @@ export default function RTIResultView() {
                         {detectedRisks.map((risk: any, idx: number) => (
                           <div
                             key={idx}
-                            className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 font-medium flex items-start gap-2"
+                            className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 font-medium flex items-start gap-2"
                           >
                             <AlertTriangle size={15} className="text-amber-600 flex-shrink-0 mt-0.5" />
                             <span>{typeof risk === 'string' ? risk : risk.description || risk.risk}</span>
@@ -180,7 +169,7 @@ export default function RTIResultView() {
                   </div>
 
                   <div>
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
+                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
                       AI Improvement Suggestions
                     </h4>
                     {improvementSuggestions.length > 0 ? (
@@ -202,20 +191,20 @@ export default function RTIResultView() {
                 <p className="text-sm text-slate-500">Draft ready for optimization.</p>
               )}
 
-              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-between pt-4 border-t border-slate-200">
                 <button
                   onClick={() => {
                     setStage('RTI_GATHERING');
                     router.push('/dashboard/rti');
                   }}
-                  className="btn-ghost text-sm cursor-pointer"
+                  className="btn-ghost text-sm cursor-pointer bg-white border-slate-300 text-slate-700 hover:bg-slate-50 font-sans tracking-tight font-bold"
                 >
                   <ArrowLeft size={16} /> Edit Applicant Form
                 </button>
                 <button
-                  onClick={handleGenerateImproved}
+                  onClick={handleImprove}
                   disabled={loadingImprove}
-                  className="btn-primary text-base py-3 px-8 cursor-pointer flex items-center gap-2"
+                  className="btn-primary text-base py-3.5 px-8 cursor-pointer flex items-center gap-2 bg-[#A32A02] hover:bg-[#138808] transition-colors text-white font-bold tracking-tight shadow-md rounded-xl"
                 >
                   {loadingImprove ? (
                     <>
@@ -231,21 +220,20 @@ export default function RTIResultView() {
             </div>
           </div>
         ) : (
-          /* --- PAGE 2: IMPROVED RTI DRAFT & PDF DOWNLOAD --- */
           <div>
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-widest text-court-maroon bg-court-maroon/10 px-3 py-1 rounded-full border border-court-maroon/20">
+              <span className="text-xs font-bold uppercase font-sans tracking-tight text-court-maroon bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
                 STEP 4 · Final RTI Application (Form A)
               </span>
-              <span className="text-xs font-mono font-bold text-slate-500">
-                Case ID: {caseId}
+              <span className="text-xs font-mono font-bold text-slate-600 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-xl border border-slate-300 shadow-xs">
+                Case ID: #{caseId}
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-ashoka-navy mb-2 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md">
               Statutory RTI Application Ready
             </h1>
-            <p className="text-slate-500 mb-8">
+            <p className="text-slate-200 mb-8 font-medium drop-shadow-sm">
               Your application has been polished to withstand statutory rejections. Download the official PDF or copy the text.
             </p>
 
@@ -256,13 +244,12 @@ export default function RTIResultView() {
                 caseId={caseId}
               />
 
-              {/* AI Disclaimer Notice Box */}
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 shadow-sm text-left">
                 <div className="mt-0.5 text-amber-600 flex-shrink-0">
                   <AlertCircle size={18} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-amber-900 uppercase tracking-wide mb-1">
+                  <h4 className="text-xs font-bold text-amber-900 uppercase tracking-wide mb-1 font-sans">
                     Important Disclaimer
                   </h4>
                   <p className="text-xs text-amber-800 leading-relaxed font-medium">
@@ -271,16 +258,16 @@ export default function RTIResultView() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-slate-200 mt-6 gap-3">
+              <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-slate-300 mt-6 gap-3">
                 <button
                   onClick={() => setSubStep(1)}
-                  className="btn-ghost text-sm cursor-pointer w-full sm:w-auto justify-center"
+                  className="btn-ghost text-sm cursor-pointer w-full sm:w-auto justify-center bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 font-sans tracking-tight font-bold"
                 >
                   <ArrowLeft size={16} /> Back to Risk Analysis
                 </button>
                 <button
                   onClick={() => router.push(`/track?case_id=${caseId}`)}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-ashoka-navy hover:bg-[#1E293B] text-white font-bold text-sm transition-all shadow-md cursor-pointer w-full sm:w-auto"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-ashoka-navy hover:bg-[#1E293B] text-white font-bold text-sm transition-all shadow-md cursor-pointer w-full sm:w-auto tracking-tight font-sans"
                 >
                   <Activity size={16} className="text-emerald-400" />
                   <span>Track SLA & Appeals</span>

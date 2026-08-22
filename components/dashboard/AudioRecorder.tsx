@@ -29,7 +29,6 @@ export default function AudioRecorder({ onTranscription, language = "English" }:
       };
 
       mediaRecorder.onstop = async () => {
-        // UPDATED: Dynamically fetch the browser's audio mimeType
         const mimeType = mediaRecorderRef.current?.mimeType || 'audio/webm';
         const audioBlob = new Blob(chunksRef.current, { type: mimeType });
         chunksRef.current = [];
@@ -86,8 +85,8 @@ export default function AudioRecorder({ onTranscription, language = "English" }:
       onClick={isRecording ? stopRecording : startRecording}
       className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-all cursor-pointer ${
         isRecording 
-          ? 'bg-red-50 border-red-200 text-red-600 animate-pulse' 
-          : 'bg-[#FAF8F5] border-[#E2E8F0] text-slate-800 hover:bg-slate-100'
+          ? 'bg-rose-50 border-rose-200 text-court-maroon animate-pulse' 
+          : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-50 hover:text-ashoka-navy shadow-sm'
       }`}
       title={isRecording ? "Stop Dictation" : "Start Voice Input"}
     >

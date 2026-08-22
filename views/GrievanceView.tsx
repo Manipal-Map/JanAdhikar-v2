@@ -20,7 +20,6 @@ import { grievanceGenerate } from '@/lib/api';
 
 export default function GrievanceFormView() {
   const router = useRouter();
-  // FIXED: Changed `setDraft` to `setGrievanceResult` which actually exists in the store
   const { caseId, userProblem, formData, setFormData, classifyResult, setGrievanceResult, language, setStage } = useCaseStore();
   
   const [loading, setLoading] = useState(false);
@@ -48,12 +47,8 @@ export default function GrievanceFormView() {
         }
       };
 
-      // Call the API
       const result = await grievanceGenerate(payload);
-      
-      // FIXED: Save the entire generated package using the correct Zustand store function
       setGrievanceResult(result);
-      
       setStage('GRIEVANCE_COMPLETED');
       router.push('/dashboard/grievance/result');
       
@@ -66,11 +61,13 @@ export default function GrievanceFormView() {
   };
 
   return (
-    <div className="gradient-bg min-h-screen bg-[#FAF8F5] p-4 sm:p-6 lg:p-8 font-sans selection:bg-[#881337] selection:text-white flex items-center justify-center">
-      <div className="w-full max-w-3xl space-y-6">
+    <div 
+      className="min-h-screen p-4 sm:p-6 lg:p-8 font-sans flex items-center justify-center bg-cover bg-center bg-no-repeat relative"
+      style={{ backgroundImage: "url('/bg.image.png')" }}
+    >
+      <div className="w-full max-w-3xl space-y-6 relative z-10">
         
-        {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 bg-white/95 backdrop-blur-sm p-4 rounded-2xl border border-slate-300 shadow-sm">
           <div className="flex items-center gap-3">
             <button 
               onClick={() => router.push('/dashboard')}
@@ -81,17 +78,17 @@ export default function GrievanceFormView() {
             <div>
               <div className="flex items-center gap-2">
                 <Scale className="w-5 h-5 text-court-maroon" />
-                <h1 className="text-xl sm:text-2xl font-extrabold text-ashoka-navy tracking-tight">
+                <h1 className="text-xl sm:text-2xl font-extrabold text-ashoka-navy tracking-tight drop-shadow-sm">
                   Grievance & Relief Setup
                 </h1>
               </div>
-              <p className="text-sm text-slate-500 mt-1 font-medium">
+              <p className="text-sm text-slate-600 mt-1 font-medium">
                 Review your details before generating the legal notice.
               </p>
             </div>
           </div>
           {caseId && (
-            <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-xl shadow-sm text-xs font-bold text-ashoka-navy uppercase tracking-wider">
+            <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl shadow-sm text-xs font-bold text-slate-600 uppercase tracking-wider">
               ID: {caseId}
             </div>
           )}
@@ -103,39 +100,38 @@ export default function GrievanceFormView() {
           onSubmit={handleGenerate} 
           className="space-y-6"
         >
-          {/* Section 1: Complainant Details */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#b8c2cc] shadow-sm">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2">
+          <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-slate-300 shadow-xl">
+            <h2 className="text-sm font-bold font-sans tracking-tight uppercase text-court-maroon mb-6 flex items-center gap-2">
               <User size={16} className="text-court-maroon" />
               1. Complainant Details
             </h2>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div className="space-y-2 text-left">
-                <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Full Name</label>
+                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Full Name</label>
                 <input 
                   type="text"
                   required
                   value={formData.applicant_name || ''}
                   onChange={e => setFormData({ ...formData, applicant_name: e.target.value })}
                   placeholder="e.g. Rahul Sharma"
-                  className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-sm text-ashoka-navy font-medium placeholder:text-slate-400 focus:outline-none focus:border-court-maroon focus:ring-1 focus:ring-court-maroon transition-all"
+                  className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-sm text-ashoka-navy font-medium placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] transition-all"
                 />
               </div>
               
               <div className="space-y-2 text-left">
-                <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Contact Details</label>
+                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Contact Details</label>
                 <input 
                   type="text"
                   value={formData.applicant_contact || ''}
                   onChange={e => setFormData({ ...formData, applicant_contact: e.target.value })}
                   placeholder="Phone or Email"
-                  className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-sm text-ashoka-navy font-medium placeholder:text-slate-400 focus:outline-none focus:border-court-maroon focus:ring-1 focus:ring-court-maroon transition-all"
+                  className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-sm text-ashoka-navy font-medium placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] transition-all"
                 />
               </div>
               
               <div className="space-y-2 sm:col-span-2 text-left">
-                <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">City / District</label>
+                <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">City / District</label>
                 <div className="relative">
                   <MapPin size={16} className="absolute left-3.5 top-3.5 text-slate-400" />
                   <input 
@@ -144,29 +140,28 @@ export default function GrievanceFormView() {
                     value={formData.applicant_city || ''}
                     onChange={e => setFormData({ ...formData, applicant_city: e.target.value })}
                     placeholder="e.g. Jaipur, Rajasthan"
-                    className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 pl-10 text-sm text-ashoka-navy font-medium placeholder:text-slate-400 focus:outline-none focus:border-court-maroon focus:ring-1 focus:ring-court-maroon transition-all"
+                    className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 pl-10 text-sm text-ashoka-navy font-medium placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] transition-all"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Section 2: Respondent / Target Authority */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#b8c2cc] shadow-sm">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2">
+          <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-slate-300 shadow-xl">
+            <h2 className="text-sm font-bold font-sans tracking-tight uppercase text-court-maroon mb-6 flex items-center gap-2">
               <Building2 size={16} className="text-court-maroon" />
               2. Respondent Details
             </h2>
             
             <div className="space-y-2 text-left">
-              <label className="text-xs font-bold text-ashoka-navy uppercase tracking-wide">Target Department / Company</label>
+              <label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Target Department / Company</label>
               <input 
                 type="text"
                 required
                 value={formData.target_department || classifyResult?.sub_category || ''}
                 onChange={e => setFormData({ ...formData, target_department: e.target.value })}
                 placeholder="e.g. Municipal Corporation / E-Commerce Platform"
-                className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-sm text-ashoka-navy font-medium placeholder:text-slate-400 focus:outline-none focus:border-court-maroon focus:ring-1 focus:ring-court-maroon transition-all"
+                className="w-full bg-[#FAF8F5] border border-slate-300 rounded-xl p-3.5 text-sm text-ashoka-navy font-bold placeholder-slate-400 focus:outline-none focus:border-[#FF9933] focus:ring-1 focus:ring-[#FF9933] transition-all tracking-tight"
               />
               <p className="text-xs text-slate-500 mt-1.5 font-medium">
                 The AI will use this to direct your legal notice to the correct authority.
@@ -174,14 +169,13 @@ export default function GrievanceFormView() {
             </div>
           </div>
 
-          {/* Section 3: Evidence & Documents */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#b8c2cc] shadow-sm">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2">
+          <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-slate-300 shadow-xl">
+            <h2 className="text-sm font-bold font-sans tracking-tight uppercase text-court-maroon mb-6 flex items-center gap-2">
               <FileText size={16} className="text-court-maroon" />
               3. Evidence & Proofs (Optional)
             </h2>
             
-            <label className="border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 transition-colors rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer group text-center">
+            <label className="border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 transition-colors rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer group text-center shadow-inner">
               <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 mb-3 group-hover:scale-110 transition-transform">
                 <Upload size={20} className="text-ashoka-navy" />
               </div>
@@ -199,7 +193,7 @@ export default function GrievanceFormView() {
               <div className="mt-4 space-y-2 text-left">
                 <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Attached Files:</h4>
                 {files.map((file, idx) => (
-                  <div key={idx} className="flex items-center gap-2 text-sm text-slate-700 font-medium bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  <div key={idx} className="flex items-center gap-2 text-sm text-slate-700 font-medium bg-[#FAF8F5] p-3 rounded-xl border border-slate-200 shadow-sm">
                     <CheckCircle size={16} className="text-emerald-600 shrink-0" />
                     <span className="truncate">{file.name}</span>
                   </div>
@@ -208,7 +202,6 @@ export default function GrievanceFormView() {
             )}
           </div>
 
-          {/* Error Message */}
           {error && (
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
@@ -220,12 +213,11 @@ export default function GrievanceFormView() {
             </motion.div>
           )}
 
-          {/* Submit Action */}
           <div className="pt-2">
             <button 
               type="submit" 
               disabled={loading}
-              className="btn-primary w-full justify-center text-lg py-4 cursor-pointer bg-court-maroon hover:bg-[#701A75] text-white disabled:opacity-70 shadow-md rounded-2xl flex items-center gap-2 transition-all font-bold"
+              className="btn-primary w-full justify-center text-lg py-4 cursor-pointer bg-[#A32A02] hover:bg-[#138808] transition-colors text-white disabled:opacity-70 shadow-md rounded-2xl flex items-center gap-2 font-bold tracking-tight"
             >
               {loading ? (
                 <>

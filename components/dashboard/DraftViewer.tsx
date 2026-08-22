@@ -20,8 +20,6 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
   const handleDownloadPdf = async () => {
     setDownloading(true)
     try {
-      // Priority 1: Fetch structured backend RTI PDF if caseId exists
-      // Priority 2: Fallback to generic PDF generation using title + draft
       let blob;
       if (caseId) {
         blob = await downloadRtiPdf(caseId)
@@ -29,9 +27,6 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
         blob = await downloadGenericPdf(title, draft)
       }
       
-      // BYPASS TRICK: Changing 'application/pdf' to 'application/octet-stream'
-      // forces a silent background download. Chrome won't try to open it in a 
-      // PDF viewer, meaning it NEVER asks for the "Apps on device" permission.
       const fileBlob = new Blob([blob], { type: 'application/octet-stream' })
       const url = URL.createObjectURL(fileBlob)
       
@@ -41,8 +36,6 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
       document.body.appendChild(link)
       link.click()
       
-      // DELAY FIX: Waiting 5 seconds before deleting the file from memory
-      // gives mobile browsers time to save the file, preventing the "Network error".
       setTimeout(() => {
         if (link.parentNode) link.parentNode.removeChild(link)
         URL.revokeObjectURL(url)
@@ -56,7 +49,6 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
     }
   }
 
-  // Uses an invisible Iframe to print, entirely bypassing browser Pop-Up Blockers
   const handlePrint = () => {
     const iframe = document.createElement('iframe')
     iframe.style.position = 'fixed'
@@ -106,30 +98,32 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-card overflow-hidden"
+      className="bg-white/95 backdrop-blur-sm border border-slate-300 rounded-3xl overflow-hidden shadow-xl"
     >
-      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50">
+      <div className="flex flex-col sm:flex-row items-center justify-between px-5 py-4 border-b border-slate-200 bg-[#FAF8F5] gap-3">
         <div className="flex items-center gap-2.5">
-          <FileText size={16} className="text-blue-600" />
-          <h3 className="text-sm font-bold text-slate-900">{title}</h3>
+          <FileText size={16} className="text-[#FF9933]" />
+          <h3 className="text-sm font-extrabold text-ashoka-navy tracking-tight font-sans">{title}</h3>
           {caseId && <span className="text-xs font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">#{caseId}</span>}
         </div>
-        <div className="flex items-center gap-1.5">
-          <button onClick={handleCopy} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
-            {copied ? <><CheckCheck size={13} className="text-emerald-600" /> Copied!</> : <><Copy size={13} /> Copy</>}
+        <div className="flex items-center gap-1.5 w-full sm:w-auto">
+          <button onClick={handleCopy} className="btn-ghost flex-1 sm:flex-none text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200 text-slate-600 hover:text-ashoka-navy hover:bg-slate-50">
+            {copied ? <><CheckCheck size={13} className="text-emerald-500" /> Copied!</> : <><Copy size={13} /> Copy</>}
           </button>
-          <button onClick={handleDownloadPdf} disabled={downloading} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
-            {downloading ? <><Loader2 size={13} className="animate-spin" /> Generating...</> : <><Download size={13} /> Download (PDF)</>}
+          <button onClick={handleDownloadPdf} disabled={downloading} className="btn-ghost flex-1 sm:flex-none text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200 text-slate-600 hover:text-ashoka-navy hover:bg-slate-50">
+            {downloading ? <><Loader2 size={13} className="animate-spin" /> Gen...</> : <><Download size={13} /> PDF</>}
           </button>
-          <button onClick={handlePrint} className="btn-ghost text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200">
+          <button onClick={handlePrint} className="btn-ghost flex-1 sm:flex-none text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200 text-slate-600 hover:text-ashoka-navy hover:bg-slate-50">
             <Printer size={13} /> Print
           </button>
         </div>
       </div>
-      <div className="p-5 max-h-[500px] overflow-y-auto bg-white">
-        <pre className="text-sm text-slate-800 font-mono leading-relaxed whitespace-pre-wrap break-words">
-          {draft}
-        </pre>
+      <div className="p-5 sm:p-6">
+        <div className="bg-[#FAF8F5] border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-inner max-h-[500px] overflow-y-auto">
+          <pre className="text-sm text-ashoka-navy font-sans font-medium leading-relaxed whitespace-pre-wrap break-words">
+            {draft}
+          </pre>
+        </div>
       </div>
     </motion.div>
   )

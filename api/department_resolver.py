@@ -5,7 +5,7 @@ from .classifier import classifier
 
 class SmartDepartmentResolver:
     def __init__(self):
-        self.model = "openai/gpt-oss-120b"
+        self.model = "llama-3.3-70b-versatile"
 
     def _get_client(self):
         return classifier.client
