@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://janadhikar.in";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://jan-adhikar.vercel.app";
 
 export const viewport: Viewport = {
   themeColor: "#881337",
@@ -12,25 +12,24 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "JanAdhikar — File RTI & Legal Grievance Online in India",
-    template: "%s | JanAdhikar",
+    default: "Jan Adhikar | RTI Filing & Legal Grievances Online",
+    template: "%s | Jan Adhikar",
   },
   description:
-    "Autonomous legal assistant for Indian citizens. Draft high-success Section 6(1) RTI applications, consumer dispute notices, and CPGRAMS grievances with zero bureaucracy.",
+    "Jan Adhikar is an autonomous legal assistant for Indian citizens. Simplify Jan Adhikar RTI filing, draft consumer dispute notices, and resolve legal grievances instantly.",
   keywords: [
-    "RTI application online",
-    "File RTI India",
+    "Jan adhikar",
+    "Jan adhikar rti filing",
+    "Jan adhikar Legal",
+    "File RTI India Jan Adhikar",
+    "Jan Adhikar consumer court draft",
     "Right to Information Act 2005",
-    "Consumer court complaint draft",
-    "CPGRAMS grievance notice",
-    "Section 6 1 RTI format",
-    "Tenant security deposit legal notice",
     "Indian legal drafting AI",
     "Civic rights India",
   ],
-  authors: [{ name: "JanAdhikar Civic Tech" }],
-  creator: "JanAdhikar",
-  publisher: "JanAdhikar",
+  authors: [{ name: "Jan Adhikar Civic Tech" }],
+  creator: "Jan Adhikar",
+  publisher: "Jan Adhikar",
   robots: {
     index: true,
     follow: true,
@@ -49,28 +48,27 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_IN",
     url: siteUrl,
-    title: "JanAdhikar — Claim Your Civic Rights. Zero Bureaucracy.",
+    title: "Jan Adhikar | RTI Filing & Legal Grievances Online",
     description:
-      "Transform plain civic issues into legally binding RTI petitions, consumer notices, and statutory appeals instantly.",
-    siteName: "JanAdhikar",
+      "Transform civic issues into legally binding Jan Adhikar RTI applications, consumer notices, and statutory appeals instantly.",
+    siteName: "Jan Adhikar",
     images: [
       {
         url: "/janadhikar-logo-v2.png",
         width: 1200,
         height: 630,
-        alt: "JanAdhikar Legal Engine",
+        alt: "Jan Adhikar Legal Engine",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "JanAdhikar — Indian Civic & Legal Drafting Engine",
+    title: "Jan Adhikar | Indian Civic & Legal Drafting Engine",
     description:
-      "Draft court-ready RTI applications and legal grievance notices in minutes.",
+      "Draft court-ready RTI applications and legal grievance notices in minutes with Jan Adhikar.",
     images: ["/janadhikar-logo-v2.png"],
   },
   verification: {
-    // Paste your Google Search Console Verification String here (or via environment variable)
     google: process.env.NEXT_PUBLIC_GSC_VERIFICATION || "YOUR_GOOGLE_VERIFICATION_CODE_HERE",
   },
   icons: {
@@ -86,13 +84,14 @@ export default function RootLayout({
 }) {
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "JanAdhikar",
+    "@type": ["WebApplication", "LegalService"],
+    name: "Jan Adhikar",
+    alternateName: ["Janadhikar", "Jan Adhikar Legal", "Jan Adhikar RTI"],
     url: siteUrl,
     applicationCategory: "LegalApplication",
     operatingSystem: "All",
     description:
-      "An autonomous legal engine translating civic complaints into structured RTI applications and consumer notices under Indian law.",
+      "Jan Adhikar is an autonomous legal engine translating civic complaints into structured RTI applications and consumer notices under Indian law.",
     offers: {
       "@type": "Offer",
       price: "0",
@@ -102,6 +101,9 @@ export default function RootLayout({
       "@type": "Country",
       name: "India",
     },
+    sameAs: [
+      "https://jan-adhikar.vercel.app",
+    ]
   };
 
   return (
