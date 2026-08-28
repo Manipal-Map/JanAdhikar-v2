@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { Copy, Download, CheckCheck, FileText, Printer, Loader2, Globe } from 'lucide-react'
 import { downloadGenericPdf, downloadRtiPdf, translateDocument } from '@/lib/api'
 
-export default function DraftViewer({ title = 'Generated Document', draft, caseId }) {
+export default function DraftViewer({ title = 'Generated Document', draft, caseId }: any) {
   const [copied, setCopied] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [displayDraft, setDisplayDraft] = useState(draft)
@@ -102,7 +102,7 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
     }
   }
 
-  const handleTranslate = async (e) => {
+  const handleTranslate = async (e: any) => {
     const lang = e.target.value;
     setSelectedLang(lang);
     if (lang === 'English') {
@@ -133,7 +133,7 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
     >
       <div className="flex flex-col md:flex-row items-center justify-between px-5 py-4 border-b border-slate-200 bg-[#FAF8F5] gap-3">
         <div className="flex items-center gap-2.5">
-          <FileText className="text-[#FF9933] shrink-0" size="{16}"/>
+          <FileText size={16} className="text-[#FF9933] shrink-0" />
           <h3 className="text-sm font-extrabold text-ashoka-navy tracking-tight font-sans truncate max-w-[200px] sm:max-w-none">{title}</h3>
           {caseId && <span className="hidden sm:inline-block text-xs font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">#{caseId}</span>}
         </div>
@@ -141,7 +141,7 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           {/* Translation Dropdown */}
           <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-sm">
-            <Globe className="text-slate-500" size="{13}"/>
+            <Globe size={13} className="text-slate-500" />
             <select
               value={selectedLang}
               onChange={handleTranslate}
@@ -160,7 +160,7 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
 
           <div className="flex items-center gap-1.5">
             <button onClick={handleCopy} className="btn-ghost flex-1 sm:flex-none text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200 text-slate-600 hover:text-ashoka-navy hover:bg-slate-50">
-              {copied ? <><CheckCheck className="text-emerald-500" size="{13}"/> Copied!</> : <><Copy size="{13}"/> Copy</>}
+              {copied ? <><CheckCheck size={13} className="text-emerald-500" /> Copied!</> : <><Copy size={13} /> Copy</>}
             </button>
             <button 
               onClick={handleDownloadPdf} 
@@ -168,10 +168,10 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
               title={!isEnglish ? "PDF export is only supported in English. Please Print or Copy text directly." : ""}
               className="btn-ghost flex-1 sm:flex-none text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200 text-slate-600 hover:text-ashoka-navy hover:bg-slate-50 disabled:opacity-50"
             >
-              {downloading ? <><Loader2 className="animate-spin" size="{13}"/> Gen...</> : <><Download size="{13}"/> PDF</>}
+              {downloading ? <><Loader2 size={13} className="animate-spin" /> Gen...</> : <><Download size={13} /> PDF</>}
             </button>
             <button onClick={handlePrint} className="btn-ghost flex-1 sm:flex-none text-xs py-1.5 px-3 gap-1.5 bg-white border border-slate-200 text-slate-600 hover:text-ashoka-navy hover:bg-slate-50">
-              <Printer size="{13}"/> Print
+              <Printer size={13} /> Print
             </button>
           </div>
         </div>
@@ -182,7 +182,7 @@ export default function DraftViewer({ title = 'Generated Document', draft, caseI
           {translating && (
             <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-2xl">
               <div className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-full shadow border border-slate-200">
-                <Loader2 className="animate-spin text-[#FF9933]" size="{16}"/>
+                <Loader2 size={16} className="animate-spin text-[#FF9933]" />
                 <span className="text-xs font-bold text-slate-600">Translating Document...</span>
               </div>
             </div>
