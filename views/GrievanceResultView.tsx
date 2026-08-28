@@ -8,7 +8,7 @@ import DraftViewer from '@/components/dashboard/DraftViewer'
 
 export default function GrievanceResultView() {
   const router = useRouter()
-  const { caseId, userProblem, formData, grievanceResult, setGrievanceResult, setStage } = useCaseStore()
+  const { caseId, userProblem, formData, grievanceResult, setGrievanceResult, setStage, reset } = useCaseStore()
   const [subStep, setSubStep] = useState(1)
 
   const defaultProblem = userProblem || "Unlawful withholding of security deposit / consumer deficiency of service"
@@ -111,7 +111,7 @@ ${applicantName}
             </div>
 
             <div className="bg-white/95 backdrop-blur-sm border border-slate-300 rounded-2xl p-4 sm:p-5 text-left flex items-start gap-3 shadow-sm">
-              <BookOpen className="w-5 h-5 text-court-maroon mt-0.5 shrink-0" />
+              <BookOpen className="w-5 h-5 text-court-maroon mt-0.5 shrink-0"/>
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Citizen Matter on Record:</span>
                 <p className="text-sm font-semibold text-ashoka-navy mt-0.5">{defaultProblem}</p>
@@ -122,7 +122,7 @@ ${applicantName}
               
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <ShieldAlert className="w-4 h-4 text-court-maroon" />
+                  <ShieldAlert className="w-4 h-4 text-court-maroon"/>
                   <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Applicable Acts & Violated Legal Provisions</h3>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -141,7 +141,7 @@ ${applicantName}
 
               <div className="border-t border-slate-200 pt-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <Scale className="w-4 h-4 text-statutory-green" />
+                  <Scale className="w-4 h-4 text-statutory-green"/>
                   <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Legal Analysis & Fiduciary Rights</h3>
                 </div>
                 <div className="bg-[#FAF8F5] p-5 sm:p-6 rounded-2xl border border-slate-200 text-sm text-ashoka-navy leading-relaxed font-medium shadow-inner">
@@ -151,7 +151,7 @@ ${applicantName}
 
               <div className="border-t border-slate-200 pt-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <FileText className="w-4 h-4 text-blue-600" />
+                  <FileText className="w-4 h-4 text-blue-600"/>
                   <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Evidentiary Audit & Key Proofs Required</h3>
                 </div>
                 <div className="bg-[#FAF8F5] p-5 sm:p-6 rounded-2xl border border-slate-200 text-sm text-ashoka-navy leading-relaxed whitespace-pre-line font-medium shadow-inner">
@@ -201,7 +201,7 @@ ${applicantName}
                         rel="noreferrer"
                         className="btn-ghost text-xs py-2 px-4 gap-1.5 bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 shrink-0 self-start sm:self-auto font-bold tracking-tight shadow-sm"
                       >
-                        <Globe size={14} /> Open Portal <ExternalLink size={12} />
+                        <Globe size={14}/> Open Portal <ExternalLink size={12}/>
                       </a>
                     )}
                   </div>
@@ -213,13 +213,13 @@ ${applicantName}
                   onClick={() => router.push('/dashboard/grievance')}
                   className="btn-ghost text-sm py-3 px-5 border border-slate-300 cursor-pointer w-full sm:w-auto justify-center bg-white text-slate-700 hover:bg-slate-50 font-bold tracking-tight"
                 >
-                  <ArrowLeft size={16} /> Edit Applicant Details
+                  <ArrowLeft size={16}/> Edit Applicant Details
                 </button>
                 <button
                   onClick={() => setSubStep(2)}
                   className="btn-primary text-base py-3.5 px-8 cursor-pointer w-full sm:w-auto justify-center shadow-md bg-[#A32A02] hover:bg-[#138808] transition-colors text-white font-bold"
                 >
-                  View Ready-to-File Notice <ArrowRight size={18} />
+                  View Ready-to-File Notice <ArrowRight size={18}/>
                 </button>
               </div>
             </div>
@@ -247,15 +247,11 @@ ${applicantName}
             </p>
 
             <div className="space-y-6 text-left">
-              <DraftViewer
-                title="Statutory Legal Demand Notice"
-                draft={demand_notice_draft}
-                caseId={caseId}
-              />
+              <DraftViewer caseId={caseId} draft={demand_notice_draft} title="Statutory Legal Demand Notice"/>
 
               <div className="bg-white/95 backdrop-blur-sm border border-slate-300 rounded-2xl p-5 text-left space-y-2 shadow-xs">
                 <h4 className="text-xs font-bold text-ashoka-navy uppercase tracking-wider flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-court-maroon" /> Recommended Service Instructions
+                  <Clock className="w-4 h-4 text-court-maroon"/> Recommended Service Instructions
                 </h4>
                 <ul className="text-xs text-slate-600 space-y-1.5 pl-4 list-disc leading-relaxed font-medium">
                   <li>Send this notice via <strong>Speed Post with Acknowledgment Due (AD)</strong> or by Registered Email to retain proof of delivery.</li>
@@ -265,7 +261,7 @@ ${applicantName}
               </div>
 
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-left shadow-sm">
-                <AlertCircle size={18} className="text-amber-600 mt-0.5 shrink-0" />
+                <AlertCircle className="text-amber-600 mt-0.5 shrink-0" size={18}/>
                 <p className="text-xs text-amber-900 leading-relaxed font-medium">
                   <strong>Statutory Notice Disclaimer:</strong> This legal notice has been generated by JanAdhikar's institutional AI engine. Please verify all party names, addresses, and transaction amounts before service.
                 </p>
@@ -276,10 +272,14 @@ ${applicantName}
                   onClick={() => setSubStep(1)}
                   className="btn-ghost text-sm py-3 px-5 border border-slate-300 cursor-pointer w-full sm:w-auto justify-center bg-white text-slate-700 hover:bg-slate-50 font-bold tracking-tight"
                 >
-                  <ArrowLeft size={16} /> Back to Rights Analysis
+                  <ArrowLeft size={16}/> Back to Rights Analysis
                 </button>
                 <button
-                  onClick={() => { setStage('IDLE'); router.push('/'); }}
+                  onClick={() => { 
+                    reset(); 
+                    sessionStorage.removeItem('janadhikar_problem');
+                    router.push('/'); 
+                  }}
                   className="btn-primary text-sm py-3 px-6 cursor-pointer w-full sm:w-auto justify-center bg-[#A32A02] hover:bg-[#138808] transition-colors text-white font-bold shadow-md"
                 >
                   Start Another Case
