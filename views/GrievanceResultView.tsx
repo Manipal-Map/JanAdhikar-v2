@@ -32,7 +32,7 @@ export default function GrievanceResultView() {
     const city = applicantCity || 'my city';
     const issue = defaultProblem.length > 100 ? defaultProblem.substring(0, 100) + '...' : defaultProblem;
     const tweet = `🚨 ${handles} Urgent civic issue in ${city}: ${issue}\n\nNeeds immediate resolution! #CitizenRights #Grievance @CPGRAMS`;
-    const url = `[https://twitter.com/intent/tweet?text=$](https://twitter.com/intent/tweet?text=$){encodeURIComponent(tweet)}`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweet)}`;
     window.open(url, '_blank');
   };
 
@@ -47,7 +47,7 @@ export default function GrievanceResultView() {
         ],
         legal_explanation: `Under Indian tenancy law and the Indian Contract Act, 1872, a refundable security deposit is held in fiduciary trust by the property owner/service provider. Upon peaceful handover and clearance of electricity/maintenance dues, the owner is statutorily obligated to refund the principal amount within 30 days. Unilateral retention without producing certified inspection logs, photographic proof of damage, and actual repair receipts constitutes an actionable breach of contract and criminal breach of trust. Under Section 73 of the Indian Contract Act and Consumer Protection jurisprudence, the complainant is entitled to 100% refund along with 18% per annum statutory penal interest from the date of handover.`,
         target_portal_name: "State Rent Authority / e-Daakhil National Consumer Commission",
-        target_portal_url: "[https://edaakhil.nic.in](https://edaakhil.nic.in)",
+        target_portal_url: "https://edaakhil.nic.in",
         evidence_analysis: `1. Tenancy Agreement & Security Deposit Receipts: Conclusive proof of financial consideration and terms of refund.\n2. Key Handover Acknowledgment / Move-out Communication: Establishes timely surrender of peaceful possession.\n3. Bank Statements & Transaction Proofs: Confirms complete clearance of all legitimate dues and proves unilateral retention.`,
         demand_notice_draft: `FORMAL LEGAL DEMAND NOTICE
 (Under Section 80 CPC read with Consumer Protection Act, 2019 & Indian Contract Act, 1872)
@@ -132,7 +132,7 @@ ${applicantName}
             </div>
 
             <div className="bg-white/95 backdrop-blur-sm border border-slate-300 rounded-2xl p-4 sm:p-5 text-left flex items-start gap-3 shadow-sm">
-              <BookOpen className="w-5 h-5 text-court-maroon mt-0.5 shrink-0"/>
+              <BookOpen className="w-5 h-5 text-court-maroon mt-0.5 shrink-0" />
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Citizen Matter on Record:</span>
                 <p className="text-sm font-semibold text-ashoka-navy mt-0.5">{defaultProblem}</p>
@@ -143,11 +143,11 @@ ${applicantName}
               
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <ShieldAlert className="w-4 h-4 text-court-maroon"/>
+                  <ShieldAlert className="w-4 h-4 text-court-maroon" />
                   <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Applicable Acts & Violated Legal Provisions</h3>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {violated_rights.map((right, idx) => (
+                  {violated_rights.map((right: string, idx: number) => (
                     <div key={idx} className="p-4 bg-rose-50/70 border border-rose-200/80 rounded-2xl flex items-start gap-3 shadow-sm">
                       <span className="w-6 h-6 rounded-full bg-court-maroon text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
                         {idx + 1}
@@ -162,7 +162,7 @@ ${applicantName}
 
               <div className="border-t border-slate-200 pt-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <Scale className="w-4 h-4 text-statutory-green"/>
+                  <Scale className="w-4 h-4 text-statutory-green" />
                   <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Legal Analysis & Fiduciary Rights</h3>
                 </div>
                 <div className="bg-[#FAF8F5] p-5 sm:p-6 rounded-2xl border border-slate-200 text-sm text-ashoka-navy leading-relaxed font-medium shadow-inner">
@@ -172,7 +172,7 @@ ${applicantName}
 
               <div className="border-t border-slate-200 pt-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <FileText className="w-4 h-4 text-blue-600"/>
+                  <FileText className="w-4 h-4 text-blue-600" />
                   <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Evidentiary Audit & Key Proofs Required</h3>
                 </div>
                 <div className="bg-[#FAF8F5] p-5 sm:p-6 rounded-2xl border border-slate-200 text-sm text-ashoka-navy leading-relaxed whitespace-pre-line font-medium shadow-inner">
@@ -222,7 +222,7 @@ ${applicantName}
                         rel="noreferrer"
                         className="btn-ghost text-xs py-2 px-4 gap-1.5 bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 shrink-0 self-start sm:self-auto font-bold tracking-tight shadow-sm"
                       >
-                        <Globe size="{14}"/> Open Portal <ExternalLink size="{12}"/>
+                        <Globe size={14} /> Open Portal <ExternalLink size={12} />
                       </a>
                     )}
                   </div>
@@ -234,13 +234,13 @@ ${applicantName}
                   onClick={() => router.push('/dashboard/grievance')}
                   className="btn-ghost text-sm py-3 px-5 border border-slate-300 cursor-pointer w-full sm:w-auto justify-center bg-white text-slate-700 hover:bg-slate-50 font-bold tracking-tight"
                 >
-                  <ArrowLeft size="{16}"/> Edit Applicant Details
+                  <ArrowLeft size={16} /> Edit Applicant Details
                 </button>
                 <button
                   onClick={() => setSubStep(2)}
                   className="btn-primary text-base py-3.5 px-8 cursor-pointer w-full sm:w-auto justify-center shadow-md bg-[#A32A02] hover:bg-[#138808] transition-colors text-white font-bold"
                 >
-                  View Ready-to-File Notice <ArrowRight size="{18}"/>
+                  View Ready-to-File Notice <ArrowRight size={18} />
                 </button>
               </div>
             </div>
@@ -268,13 +268,13 @@ ${applicantName}
             </p>
 
             <div className="space-y-6 text-left">
-              <DraftViewer caseId="{caseId}" draft="{demand_notice_draft}" title="Statutory Legal Demand Notice"/>
+              <DraftViewer caseId={caseId} draft={demand_notice_draft} title="Statutory Legal Demand Notice" />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-white/95 backdrop-blur-sm border border-slate-300 rounded-2xl p-5 text-left shadow-xs flex flex-col justify-between h-full">
                   <div>
                     <h4 className="text-xs font-bold text-ashoka-navy uppercase tracking-wider flex items-center gap-1.5 mb-2">
-                      <Clock className="w-4 h-4 text-court-maroon"/> Recommended Service Instructions
+                      <Clock className="w-4 h-4 text-court-maroon" /> Recommended Service Instructions
                     </h4>
                     <ul className="text-xs text-slate-600 space-y-1.5 pl-4 list-disc leading-relaxed font-medium">
                       <li>Send this notice via <strong>Speed Post with Acknowledgment Due (AD)</strong> or Registered Email.</li>
@@ -288,7 +288,7 @@ ${applicantName}
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <div className="p-1.5 bg-sky-100 rounded-full">
-                        <Globe className="text-sky-600" size="{16}"/>
+                        <Globe className="text-sky-600" size={16} />
                       </div>
                       <h4 className="text-xs font-bold text-sky-900 uppercase tracking-wide">Social Media Escalation</h4>
                     </div>
@@ -307,7 +307,7 @@ ${applicantName}
               </div>
 
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-left shadow-sm">
-                <AlertCircle className="text-amber-600 mt-0.5 shrink-0" size="{18}"/>
+                <AlertCircle className="text-amber-600 mt-0.5 shrink-0" size={18} />
                 <p className="text-xs text-amber-900 leading-relaxed font-medium">
                   <strong>Statutory Notice Disclaimer:</strong> This legal notice has been generated by JanAdhikar's institutional AI engine. Please verify all party names, addresses, and transaction amounts before service.
                 </p>
@@ -318,7 +318,7 @@ ${applicantName}
                   onClick={() => setSubStep(1)}
                   className="btn-ghost text-sm py-3 px-5 border border-slate-300 cursor-pointer w-full sm:w-auto justify-center bg-white text-slate-700 hover:bg-slate-50 font-bold tracking-tight"
                 >
-                  <ArrowLeft size="{16}"/> Back to Rights Analysis
+                  <ArrowLeft size={16} /> Back to Rights Analysis
                 </button>
                 <button
                   onClick={() => { 
